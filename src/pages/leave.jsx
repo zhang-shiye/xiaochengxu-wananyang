@@ -1,0 +1,225 @@
+// @ts-ignore;
+import React, { useState, useEffect } from 'react';
+// @ts-ignore;
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Button, Card, Textarea, useToast } from '@/components/ui';
+
+import { useForm } from 'react-hook-form';
+import TabBar from '@/components/TabBar';
+export default function Leave(props) {
+  const {
+    toast
+  } = useToast();
+  const [leaveRequests, setLeaveRequests] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const form = useForm();
+  useEffect(() => {
+    // 模拟获取历史请假记录
+    setLeaveRequests([{
+      id: 1,
+      reason: '家庭聚餐',
+      startDate: '2026-04-10',
+      endDate: '2026-04-10',
+      status: 'approved',
+      submitTime: '2026-04-08 14:30',
+      approvalTime: '2026-04-08 16:45'
+    }, {
+      id: 2,
+      reason: '医院检查',
+      startDate: '2026-04-15',
+      endDate: '2026-04-15',
+      status: 'pending',
+      submitTime: '2026-04-05 10:20',
+      approvalTime: null
+    }]);
+  }, []);
+  const onSubmit = async data => {
+    setIsSubmitting(true);
+    try {
+      // 模拟提交请假申请
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const newRequest = {
+        id: Date.now(),
+        reason: data.reason,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        status: 'pending',
+        submitTime: new Date().toLocaleString('zh-CN'),
+        approvalTime: null
+      };
+      setLeaveRequests([newRequest, ...leaveRequests]);
+      toast({
+        title: '提交成功',
+        description: '请假申请已提交，请等待院长审批'
+      });
+      form.reset();
+    } catch (error) {
+      toast({
+        title: '提交失败',
+        description: '请检查网络连接后重试',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  const getStatusInfo = status => {
+    const statusMap = {
+      pending: {
+        text: '待审批',
+        color: 'bg-yellow-100 text-yellow-800',
+        icon: '⏳'
+      },
+      approved: {
+        text: '已通过',
+        color: 'bg-green-100 text-green-800',
+        icon: '✅'
+      },
+      rejected: {
+        text: '已拒绝',
+        color: 'bg-red-100 text-red-800',
+        icon: '❌'
+      }
+    };
+    return statusMap[status] || statusMap.pending;
+  };
+  return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
+      {/* 头部 */}
+      <div className="bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <h1 className="text-xl font-bold text-amber-900 text-center" style={{
+          fontFamily: 'Playfair Display, serif'
+        }}>
+            请假申请
+          </h1>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-6">
+        {/* 请假申请表单 */}
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl mb-6">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              发起请假申请
+            </h2>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField control={form.control} name="reason" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className="text-gray-700" style={{
+                  fontFamily: 'Nunito Sans, sans-serif'
+                }}>
+                        请假事由
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="请详细说明请假原因..." {...field} className="border-amber-200 focus:border-amber-400 rounded-xl resize-none" rows={3} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="startDate" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel className="text-gray-700" style={{
+                    fontFamily: 'Nunito Sans, sans-serif'
+                  }}>
+                          预计离院时间
+                        </FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} className="border-amber-200 focus:border-amber-400 rounded-xl" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>} />
+
+                  <FormField control={form.control} name="endDate" render={({
+                  field
+                }) => <FormItem>
+                        <FormLabel className="text-gray-700" style={{
+                    fontFamily: 'Nunito Sans, sans-serif'
+                  }}>
+                          预计返院时间
+                        </FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} className="border-amber-200 focus:border-amber-400 rounded-xl" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>} />
+                </div>
+
+                <Button type="submit" disabled={isSubmitting} className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-full py-3 font-medium" style={{
+                fontFamily: 'Nunito Sans, sans-serif'
+              }}>
+                  {isSubmitting ? '提交中...' : '提交申请'}
+                </Button>
+              </form>
+            </Form>
+          </div>
+        </Card>
+
+        {/* 审批进度 */}
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              申请记录
+            </h2>
+            
+            {leaveRequests.length === 0 ? <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-2xl">📝</span>
+                </div>
+                <p className="text-gray-600">暂无请假记录</p>
+              </div> : <div className="space-y-4">
+                {leaveRequests.map(request => {
+              const statusInfo = getStatusInfo(request.status);
+              return <div key={request.id} className="border border-gray-200 rounded-xl p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-800 mb-1">
+                            {request.reason}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {request.startDate} 至 {request.endDate}
+                          </p>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
+                          <span className="mr-1">{statusInfo.icon}</span>
+                          {statusInfo.text}
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-500 space-y-1">
+                        <p>提交时间：{request.submitTime}</p>
+                        {request.approvalTime && <p>审批时间：{request.approvalTime}</p>}
+                      </div>
+
+                      {/* 审批流程 */}
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center">
+                            <div className={`w-3 h-3 rounded-full ${request.status !== 'pending' ? 'bg-green-400' : 'bg-gray-300'}`}></div>
+                            <span className="text-sm text-gray-600 ml-2">家属申请</span>
+                          </div>
+                          <div className="flex-1 h-0.5 bg-gray-200 rounded"></div>
+                          <div className="flex items-center">
+                            <div className={`w-3 h-3 rounded-full ${request.status === 'approved' ? 'bg-green-400' : request.status === 'rejected' ? 'bg-red-400' : 'bg-gray-300'}`}></div>
+                            <span className="text-sm text-gray-600 ml-2">院长审批</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>;
+            })}
+              </div>}
+          </div>
+        </Card>
+      </div>
+
+      {/* 底部导航 */}
+      <TabBar currentPage="leave" />
+    </div>;
+}
