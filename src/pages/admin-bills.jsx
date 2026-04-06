@@ -8,8 +8,8 @@ import { Plus, Search, Edit, Trash2, Upload, Download, Filter, DollarSign, Calen
 import { useForm } from 'react-hook-form';
 export default function AdminBills(props) {
   const {
-    toast
-  } = useToast();
+    toast } =
+  useToast();
   const [bills, setBills] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [monthFilter, setMonthFilter] = useState('2026-04');
@@ -23,9 +23,9 @@ export default function AdminBills(props) {
       careFee: '',
       mealFee: '',
       otherFee: '',
-      dueDate: ''
-    }
-  });
+      dueDate: '' } });
+
+
 
   // 模拟账单数据
   useEffect(() => {
@@ -39,25 +39,25 @@ export default function AdminBills(props) {
       items: [{
         name: '基础床位费',
         amount: 1800,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '护理费（二级）',
         amount: 1200,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '餐费',
         amount: 800,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '代办买药费',
         amount: 350,
-        unit: '次'
-      }, {
+        unit: '次' },
+      {
         name: '洗衣费',
         amount: 50,
-        unit: '月'
-      }]
-    }, {
+        unit: '月' }] },
+
+    {
       id: 2,
       elderName: '李爷爷',
       month: '2026-04',
@@ -68,21 +68,21 @@ export default function AdminBills(props) {
       items: [{
         name: '基础床位费',
         amount: 1800,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '护理费（一级）',
         amount: 1000,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '餐费',
         amount: 800,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '特殊护理费',
         amount: 250,
-        unit: '月'
-      }]
-    }, {
+        unit: '月' }] },
+
+    {
       id: 3,
       elderName: '陈奶奶',
       month: '2026-04',
@@ -92,53 +92,53 @@ export default function AdminBills(props) {
       items: [{
         name: '基础床位费',
         amount: 1800,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '护理费（三级）',
         amount: 1400,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '餐费',
         amount: 800,
-        unit: '月'
-      }, {
+        unit: '月' },
+      {
         name: '康复理疗费',
         amount: 350,
-        unit: '月'
-      }]
-    }]);
+        unit: '月' }] }]);
+
+
   }, []);
-  const filteredBills = bills.filter(bill => bill.elderName.toLowerCase().includes(searchTerm.toLowerCase()) && bill.month.includes(monthFilter));
-  const onSubmit = data => {
+  const filteredBills = bills.filter((bill) => bill.elderName.toLowerCase().includes(searchTerm.toLowerCase()) && bill.month.includes(monthFilter));
+  const onSubmit = (data) => {
     const totalAmount = parseInt(data.bedFee || 0) + parseInt(data.careFee || 0) + parseInt(data.mealFee || 0) + parseInt(data.otherFee || 0);
     if (editingBill) {
       // 编辑账单
-      setBills(bills.map(bill => bill.id === editingBill.id ? {
+      setBills(bills.map((bill) => bill.id === editingBill.id ? {
         ...bill,
         ...data,
         totalAmount,
         items: [{
           name: '基础床位费',
           amount: parseInt(data.bedFee || 0),
-          unit: '月'
-        }, {
+          unit: '月' },
+        {
           name: '护理费',
           amount: parseInt(data.careFee || 0),
-          unit: '月'
-        }, {
+          unit: '月' },
+        {
           name: '餐费',
           amount: parseInt(data.mealFee || 0),
-          unit: '月'
-        }, {
+          unit: '月' },
+        {
           name: '其他费用',
           amount: parseInt(data.otherFee || 0),
-          unit: '月'
-        }]
-      } : bill));
+          unit: '月' }] } :
+
+      bill));
       toast({
         title: '更新成功',
-        description: `已更新${data.elderName}的账单`
-      });
+        description: `已更新${data.elderName}的账单` });
+
     } else {
       // 添加账单
       const newBill = {
@@ -149,26 +149,26 @@ export default function AdminBills(props) {
         items: [{
           name: '基础床位费',
           amount: parseInt(data.bedFee || 0),
-          unit: '月'
-        }, {
+          unit: '月' },
+        {
           name: '护理费',
           amount: parseInt(data.careFee || 0),
-          unit: '月'
-        }, {
+          unit: '月' },
+        {
           name: '餐费',
           amount: parseInt(data.mealFee || 0),
-          unit: '月'
-        }, {
+          unit: '月' },
+        {
           name: '其他费用',
           amount: parseInt(data.otherFee || 0),
-          unit: '月'
-        }]
-      };
+          unit: '月' }] };
+
+
       setBills([...bills, newBill]);
       toast({
         title: '添加成功',
-        description: `已为${data.elderName}生成账单`
-      });
+        description: `已为${data.elderName}生成账单` });
+
     }
     setIsDialogOpen(false);
     form.reset({
@@ -178,58 +178,58 @@ export default function AdminBills(props) {
       careFee: '',
       mealFee: '',
       otherFee: '',
-      dueDate: ''
-    });
+      dueDate: '' });
+
     setEditingBill(null);
   };
-  const handleEdit = bill => {
+  const handleEdit = (bill) => {
     setEditingBill(bill);
     form.reset({
       elderName: bill.elderName,
       month: bill.month,
-      bedFee: bill.items.find(item => item.name.includes('床位'))?.amount.toString() || '',
-      careFee: bill.items.find(item => item.name.includes('护理'))?.amount.toString() || '',
-      mealFee: bill.items.find(item => item.name.includes('餐费'))?.amount.toString() || '',
-      otherFee: bill.items.find(item => item.name.includes('其他'))?.amount.toString() || '',
-      dueDate: bill.dueDate
-    });
+      bedFee: bill.items.find((item) => item.name.includes('床位'))?.amount.toString() || '',
+      careFee: bill.items.find((item) => item.name.includes('护理'))?.amount.toString() || '',
+      mealFee: bill.items.find((item) => item.name.includes('餐费'))?.amount.toString() || '',
+      otherFee: bill.items.find((item) => item.name.includes('其他'))?.amount.toString() || '',
+      dueDate: bill.dueDate });
+
     setIsDialogOpen(true);
   };
-  const handleDelete = bill => {
-    setBills(bills.filter(b => b.id !== bill.id));
+  const handleDelete = (bill) => {
+    setBills(bills.filter((b) => b.id !== bill.id));
     toast({
       title: '删除成功',
-      description: `已删除${bill.elderName}的账单`
-    });
+      description: `已删除${bill.elderName}的账单` });
+
   };
   const handleBatchGenerate = () => {
     toast({
       title: '批量生成',
-      description: '请使用数据导入功能批量生成账单'
-    });
+      description: '请使用数据导入功能批量生成账单' });
+
   };
-  const handleMarkAsPaid = bill => {
-    setBills(bills.map(b => b.id === bill.id ? {
+  const handleMarkAsPaid = (bill) => {
+    setBills(bills.map((b) => b.id === bill.id ? {
       ...b,
       status: 'paid',
-      paymentDate: new Date().toISOString().split('T')[0]
-    } : b));
+      paymentDate: new Date().toISOString().split('T')[0] } :
+    b));
     toast({
       title: '标记成功',
-      description: `已将${bill.elderName}的账单标记为已缴费`
-    });
+      description: `已将${bill.elderName}的账单标记为已缴费` });
+
   };
-  const getStatusBadge = status => {
+  const getStatusBadge = (status) => {
     const variants = {
       unpaid: {
         label: '未缴费',
-        color: 'bg-red-100 text-red-800'
-      },
+        color: 'bg-red-100 text-red-800' },
+
       paid: {
         label: '已缴费',
-        color: 'bg-green-100 text-green-800'
-      }
-    };
+        color: 'bg-green-100 text-green-800' } };
+
+
     return variants[status] || variants.unpaid;
   };
   return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
@@ -237,13 +237,13 @@ export default function AdminBills(props) {
         {/* 页面标题 */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-blue-900 mb-2" style={{
-          fontFamily: 'Space Mono, monospace'
-        }}>
+          fontFamily: 'Space Mono, monospace' }}>
+
             账单管理
           </h1>
           <p className="text-blue-600 text-lg" style={{
-          fontFamily: 'IBM Plex Sans, sans-serif'
-        }}>
+          fontFamily: 'IBM Plex Sans, sans-serif' }}>
+
             管理老人月度缴费账单
           </p>
         </div>
@@ -254,12 +254,12 @@ export default function AdminBills(props) {
             <div className="flex items-center space-x-4 w-full md:w-auto">
               <div className="relative flex-1 md:flex-none">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input placeholder="搜索老人姓名..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 w-full md:w-64" />
+                <Input placeholder="搜索老人姓名..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 w-full md:w-64" />
               </div>
               
               <div className="relative flex-1 md:flex-none">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input type="month" value={monthFilter} onChange={e => setMonthFilter(e.target.value)} className="pl-10 w-full md:w-48" />
+                <Input type="month" value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} className="pl-10 w-full md:w-48" />
               </div>
               
               <Button variant="outline" className="hidden md:flex">
@@ -294,8 +294,8 @@ export default function AdminBills(props) {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={form.control} name="elderName" render={({
-                        field
-                      }) => <FormItem>
+                        field }) =>
+                      <FormItem>
                               <FormLabel>老人姓名</FormLabel>
                               <FormControl>
                                 <Input placeholder="请输入老人姓名" {...field} />
@@ -304,8 +304,8 @@ export default function AdminBills(props) {
                             </FormItem>} />
                         
                         <FormField control={form.control} name="month" render={({
-                        field
-                      }) => <FormItem>
+                        field }) =>
+                      <FormItem>
                               <FormLabel>账单月份</FormLabel>
                               <FormControl>
                                 <Input type="month" {...field} />
@@ -316,8 +316,8 @@ export default function AdminBills(props) {
                       
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={form.control} name="bedFee" render={({
-                        field
-                      }) => <FormItem>
+                        field }) =>
+                      <FormItem>
                               <FormLabel>床位费</FormLabel>
                               <FormControl>
                                 <Input type="number" placeholder="金额" {...field} />
@@ -326,8 +326,8 @@ export default function AdminBills(props) {
                             </FormItem>} />
                         
                         <FormField control={form.control} name="careFee" render={({
-                        field
-                      }) => <FormItem>
+                        field }) =>
+                      <FormItem>
                               <FormLabel>护理费</FormLabel>
                               <FormControl>
                                 <Input type="number" placeholder="金额" {...field} />
@@ -338,8 +338,8 @@ export default function AdminBills(props) {
                       
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={form.control} name="mealFee" render={({
-                        field
-                      }) => <FormItem>
+                        field }) =>
+                      <FormItem>
                               <FormLabel>餐费</FormLabel>
                               <FormControl>
                                 <Input type="number" placeholder="金额" {...field} />
@@ -348,8 +348,8 @@ export default function AdminBills(props) {
                             </FormItem>} />
                         
                         <FormField control={form.control} name="otherFee" render={({
-                        field
-                      }) => <FormItem>
+                        field }) =>
+                      <FormItem>
                               <FormLabel>其他费用</FormLabel>
                               <FormControl>
                                 <Input type="number" placeholder="金额" {...field} />
@@ -359,8 +359,8 @@ export default function AdminBills(props) {
                       </div>
                       
                       <FormField control={form.control} name="dueDate" render={({
-                      field
-                    }) => <FormItem>
+                      field }) =>
+                    <FormItem>
                             <FormLabel>缴费截止日期</FormLabel>
                             <FormControl>
                               <Input type="date" {...field} />
@@ -399,7 +399,7 @@ export default function AdminBills(props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredBills.map(bill => <TableRow key={bill.id}>
+              {filteredBills.map((bill) => <TableRow key={bill.id}>
                   <TableCell className="font-medium">{bill.elderName}</TableCell>
                   <TableCell>{bill.month}</TableCell>
                   <TableCell>
@@ -411,7 +411,7 @@ export default function AdminBills(props) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
-                      <DollarSign className="w-4 h-4 text-green-600" />
+                      
                       <span className="font-bold text-lg">¥{bill.totalAmount}</span>
                     </div>
                   </TableCell>
