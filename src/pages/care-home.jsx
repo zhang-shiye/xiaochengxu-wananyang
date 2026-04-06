@@ -1,9 +1,9 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Card, Avatar, AvatarImage, Button, Badge, useToast } from '@/components/ui';
+import { Card, Avatar, AvatarImage, Button, Badge, useToast, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 // @ts-ignore;
-import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign } from 'lucide-react';
+import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign, CalendarDays } from 'lucide-react';
 
 import TabBar from '@/components/TabBar';
 export default function CareHome(props) {
@@ -182,13 +182,28 @@ export default function CareHome(props) {
           </div>
         </Card>
 
-        {/* 最新信息区域 */}
+        {/* 日期选择区域 */}
         <div className="space-y-4 mb-6">
-          <h3 className="text-xl font-bold text-gray-800" style={{
-          fontFamily: 'Playfair Display, serif'
-        }}>
-            最新动态
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-gray-800" style={{
+            fontFamily: 'Playfair Display, serif'
+          }}>
+              护理记录
+            </h3>
+            <div className="flex items-center space-x-2">
+              <CalendarDays className="w-5 h-5 text-amber-600" />
+              <Select value={selectedDate} onValueChange={handleDateChange}>
+                <SelectTrigger className="w-32 border-amber-200 focus:border-amber-400">
+                  <SelectValue placeholder="选择日期" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dateOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           {/* 今日护理日报 */}
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">

@@ -5,6 +5,7 @@ import BILL from '../pages/bill.jsx';
 import BIND_SENIOR from '../pages/bind-senior.jsx';
 import WECHAT_LOGIN from '../pages/wechat-login.jsx';
 import CARE_HOME from '../pages/care-home.jsx';
+import DAILY_REPORT from '../pages/daily-report.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -26,4 +27,7 @@ export const routers = [{
 }, {
   id: "care-home",
   component: CARE_HOME
+}, {
+  id: "daily-report",
+  component: DAILY_REPORT
 }]
