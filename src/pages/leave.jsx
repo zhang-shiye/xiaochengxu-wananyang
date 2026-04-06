@@ -1,7 +1,7 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Button, Card, Textarea, useToast } from '@/components/ui';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Button, Card, Textarea, useToast, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 
 import { useForm } from 'react-hook-form';
 import TabBar from '@/components/TabBar';
@@ -11,13 +11,37 @@ export default function Leave(props) {
   } = useToast();
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // 常用请假事由选项
+  const reasonOptions = [{
+    value: 'family_visit',
+    label: '探亲访友'
+  }, {
+    value: 'medical_treatment',
+    label: '外出就医'
+  }, {
+    value: 'personal_affairs',
+    label: '处理个人事务'
+  }, {
+    value: 'holiday_travel',
+    label: '节假日外出'
+  }, {
+    value: 'family_emergency',
+    label: '家庭紧急情况'
+  }, {
+    value: 'other',
+    label: '其他事由'
+  }];
   const form = useForm({
     defaultValues: {
       reason: '',
       startDate: '',
-      endDate: ''
+      endDate: '',
+      customReason: ''
     }
   });
+
+  // 监听请假事由选择变化
+  const selectedReason = form.watch('reason');
   useEffect(() => {
     // 模拟获取历史请假记录
     setLeaveRequests([{
@@ -123,11 +147,7 @@ export default function Leave(props) {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField control={form.control} name="reason" rules={{
-                required: '请填写请假事由',
-                minLength: {
-                  value: 5,
-                  message: '请假事由至少需要5个字符'
-                }
+                required: '请选择请假事由'
               }} render={({
                 field
               }) => <FormItem>
@@ -137,10 +157,40 @@ export default function Leave(props) {
                         请假事由 *
                       </FormLabel>
                       <FormControl>
-                        <Textarea placeholder="请详细说明请假原因..." {...field} className="border-amber-200 focus:border-amber-400 rounded-xl resize-none" rows={3} />
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger className="border-amber-200 focus:border-amber-400 rounded-xl">
+                            <SelectValue placeholder="请选择请假事由" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {reasonOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>)}
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
+
+                {/* 自定义事由输入框 - 仅在选择"其他事由"时显示 */}
+                {selectedReason === 'other' && <FormField control={form.control} name="customReason" rules={{
+                required: '请填写具体事由',
+                minLength: {
+                  value: 5,
+                  message: '具体事由至少需要5个字符'
+                }
+              }} render={({
+                field
+              }) => <FormItem>
+                          <FormLabel className="text-gray-700" style={{
+                  fontFamily: 'Nunito Sans, sans-serif'
+                }}>
+                            具体事由说明 *
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="请详细说明具体请假原因..." {...field} className="border-amber-200 focus:border-amber-400 rounded-xl resize-none" rows={3} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>} />}
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField control={form.control} name="startDate" rules={{
