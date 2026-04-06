@@ -1,226 +1,267 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Users, UserCheck, DollarSign, TrendingUp, Calendar, Bell, Search, Menu, X, ChevronRight, Activity, Heart, Clock } from 'lucide-react';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge, Progress, useToast } from '@/components/ui';
 // @ts-ignore;
-import { Card, Button, Input, Badge, useToast } from '@/components/ui';
+import { Users, Calendar, DollarSign, Activity, Clock, CheckCircle, AlertTriangle, Menu, LogOut, User } from 'lucide-react';
 
-import AdminSidebar from '@/components/AdminSidebar';
 export default function AdminDashboard(props) {
-  const {
-    $w
-  } = props;
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [stats, setStats] = useState({
-    totalResidents: 156,
-    activeResidents: 142,
-    totalRevenue: 284500,
-    monthlyGrowth: 12.5,
-    pendingLeaves: 8,
-    todayTasks: 24
-  });
+  const [role, setRole] = useState('caregiver');
+  const [activeTab, setActiveTab] = useState('overview');
   const {
     toast
   } = useToast();
-  const recentActivities = [{
-    id: 1,
-    type: '入住',
-    message: '李奶奶入住 3楼301房',
-    time: '2小时前',
-    status: 'success'
-  }, {
-    id: 2,
-    type: '请假',
-    message: '王爷爷请假申请待审批',
-    time: '3小时前',
-    status: 'warning'
-  }, {
-    id: 3,
-    type: '缴费',
-    message: '张奶奶本月费用已缴清',
-    time: '5小时前',
-    status: 'info'
-  }, {
-    id: 4,
-    type: '护理',
-    message: '刘爷爷护理等级调整为二级',
-    time: '1天前',
-    status: 'success'
-  }];
-  const quickActions = [{
-    id: 1,
-    title: '住户管理',
-    icon: Users,
-    color: 'bg-blue-500',
-    pageId: 'admin-residents'
-  }, {
-    id: 2,
-    title: '员工管理',
-    icon: UserCheck,
-    color: 'bg-green-500',
-    pageId: 'admin-staff'
-  }, {
-    id: 3,
-    title: '护理记录',
-    icon: Heart,
-    color: 'bg-red-500',
-    pageId: 'admin-care-records'
-  }, {
-    id: 4,
-    title: '财务管理',
-    icon: DollarSign,
-    color: 'bg-amber-500',
-    pageId: 'admin-finance'
-  }];
-  const handleQuickAction = pageId => {
-    $w.utils.navigateTo({
-      pageId,
+  useEffect(() => {
+    const userRole = props.$w.page.dataset.params.role || 'caregiver';
+    setRole(userRole);
+  }, [props.$w.page.dataset.params.role]);
+
+  // 模拟数据
+  const dashboardData = {
+    overview: {
+      totalSeniors: 42,
+      activeCaregivers: 8,
+      todayTasks: 15,
+      completedTasks: 9,
+      pendingApprovals: 3,
+      monthlyRevenue: 125600
+    },
+    tasks: [{
+      id: 1,
+      senior: '张爷爷',
+      task: '晨间护理',
+      time: '08:00',
+      status: 'completed'
+    }, {
+      id: 2,
+      senior: '李奶奶',
+      task: '服药提醒',
+      time: '09:30',
+      status: 'pending'
+    }, {
+      id: 3,
+      senior: '王爷爷',
+      task: '康复训练',
+      time: '10:00',
+      status: 'in-progress'
+    }, {
+      id: 4,
+      senior: '赵奶奶',
+      task: '午餐照料',
+      time: '12:00',
+      status: 'pending'
+    }],
+    alerts: [{
+      id: 1,
+      type: 'warning',
+      message: '张爷爷血压偏高',
+      time: '10分钟前'
+    }, {
+      id: 2,
+      type: 'info',
+      message: '李奶奶药物即将用完',
+      time: '1小时前'
+    }, {
+      id: 3,
+      type: 'success',
+      message: '王爷爷康复训练完成',
+      time: '2小时前'
+    }]
+  };
+  const handleLogout = () => {
+    props.$w.utils.redirectTo({
+      pageId: 'admin-login',
       params: {}
     });
+    toast({
+      title: '已退出登录',
+      description: '欢迎再次使用皖安养管理系统'
+    });
   };
-  return <div className="min-h-screen bg-gray-50 flex">
-      {/* 侧边栏 */}
-      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentPage="dashboard" $w={$w} />
+  const renderOverview = () => <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-blue-600">在院老人</p>
+              <p className="text-3xl font-bold text-blue-900">{dashboardData.overview.totalSeniors}</p>
+            </div>
+            <Users className="w-8 h-8 text-blue-500" />
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* 主内容区 */}
-      <div className="flex-1 flex flex-col">
-        {/* 顶部导航栏 */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="flex items-center justify-between px-6 py-4">
+      <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-green-600">今日任务</p>
+              <p className="text-3xl font-bold text-green-900">{dashboardData.overview.todayTasks}</p>
+              <Progress value={dashboardData.overview.completedTasks / dashboardData.overview.todayTasks * 100} className="mt-2" />
+            </div>
+            <Activity className="w-8 h-8 text-green-500" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-amber-600">活跃护工</p>
+              <p className="text-3xl font-bold text-amber-900">{dashboardData.overview.activeCaregivers}</p>
+            </div>
+            <Users className="w-8 h-8 text-amber-500" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {role === 'admin' && <>
+          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-red-600">待审批</p>
+                  <p className="text-3xl font-bold text-red-900">{dashboardData.overview.pendingApprovals}</p>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-600">月收入</p>
+                  <p className="text-3xl font-bold text-purple-900">¥{dashboardData.overview.monthlyRevenue.toLocaleString()}</p>
+                </div>
+                <DollarSign className="w-8 h-8 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </>}
+    </div>;
+  const renderTasks = () => <div className="space-y-4">
+      {dashboardData.tasks.map(task => <Card key={task.id} className="border-l-4 border-l-blue-500">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Clock className="w-5 h-5 text-gray-400" />
+                <div>
+                  <p className="font-medium text-gray-900">{task.senior} - {task.task}</p>
+                  <p className="text-sm text-gray-500">{task.time}</p>
+                </div>
+              </div>
+              <Badge variant={task.status === 'completed' ? 'default' : task.status === 'in-progress' ? 'secondary' : 'outline'}>
+                {task.status === 'completed' ? '已完成' : task.status === 'in-progress' ? '进行中' : '待处理'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>)}
+    </div>;
+  const renderAlerts = () => <div className="space-y-4">
+      {dashboardData.alerts.map(alert => <Card key={alert.id} className={alert.type === 'warning' ? 'border-l-4 border-l-red-500' : alert.type === 'info' ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-green-500'}>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3">
+              {alert.type === 'warning' && <AlertTriangle className="w-5 h-5 text-red-500" />}
+              {alert.type === 'info' && <Activity className="w-5 h-5 text-blue-500" />}
+              {alert.type === 'success' && <CheckCircle className="w-5 h-5 text-green-500" />}
+              <div className="flex-1">
+                <p className="font-medium text-gray-900">{alert.message}</p>
+                <p className="text-sm text-gray-500">{alert.time}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>)}
+    </div>;
+  return <div className="min-h-screen bg-gray-50">
+      {/* 头部导航 */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="lg:hidden">
-                <Menu className="w-5 h-5" />
-              </Button>
-              <h1 className="text-2xl font-bold text-gray-800" style={{
-              fontFamily: 'Space Mono, monospace'
-            }}>
-                管理仪表板
-              </h1>
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">皖</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900" style={{
+                fontFamily: 'Noto Sans SC, sans-serif'
+              }}>
+                  皖安养管理系统
+                </h1>
+                <p className="text-sm text-gray-500">{role === 'admin' ? '院长' : '护工'}工作台</p>
+              </div>
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input type="text" placeholder="搜索住户、员工..." className="pl-10 pr-4 py-2 w-64 border-gray-300 focus:border-amber-500 focus:ring-amber-500" />
-              </div>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-5 h-5" />
-                <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs">3</Badge>
+              <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
+                <LogOut className="w-4 h-4" />
+                <span>退出</span>
               </Button>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* 主要内容 */}
-        <main className="flex-1 p-6">
-          {/* 统计卡片 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-white p-6 border-0 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">总住户数</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.totalResidents}</p>
-                </div>
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Users className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-green-600">
-                <TrendingUp className="w-4 h-4 mr-1" />
-                <span>较上月增长 5.2%</span>
-              </div>
-            </Card>
+      {/* 内容区域 */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 功能导航 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200" onClick={() => setActiveTab('overview')}>
+            <CardContent className="p-6 text-center">
+              <Activity className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+              <h3 className="font-semibold text-blue-900">数据概览</h3>
+              <p className="text-sm text-blue-600 mt-1">实时监控关键指标</p>
+            </CardContent>
+          </Card>
 
-            <Card className="bg-white p-6 border-0 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">活跃住户</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.activeResidents}</p>
-                </div>
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <UserCheck className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-green-600">
-                <TrendingUp className="w-4 h-4 mr-1" />
-                <span>入住率 91.0%</span>
-              </div>
-            </Card>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-green-100 border-green-200" onClick={() => props.$w.utils.redirectTo({
+          pageId: 'caregiver-tasks',
+          params: {}
+        })}>
+            <CardContent className="p-6 text-center">
+              <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+              <h3 className="font-semibold text-green-900">任务管理</h3>
+              <p className="text-sm text-green-600 mt-1">护理任务分配跟踪</p>
+            </CardContent>
+          </Card>
 
-            <Card className="bg-white p-6 border-0 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">本月收入</p>
-                  <p className="text-3xl font-bold text-gray-900">¥{stats.totalRevenue.toLocaleString()}</p>
-                </div>
-                <div className="bg-amber-100 p-3 rounded-lg">
-                  <DollarSign className="w-6 h-6 text-amber-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-green-600">
-                <TrendingUp className="w-4 h-4 mr-1" />
-                <span>较上月增长 {stats.monthlyGrowth}%</span>
-              </div>
-            </Card>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200" onClick={() => props.$w.utils.redirectTo({
+          pageId: 'senior-management',
+          params: {}
+        })}>
+            <CardContent className="p-6 text-center">
+              <User className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+              <h3 className="font-semibold text-purple-900">老人管理</h3>
+              <p className="text-sm text-purple-600 mt-1">老人信息健康档案</p>
+            </CardContent>
+          </Card>
 
-            <Card className="bg-white p-6 border-0 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">待处理</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.pendingLeaves}</p>
-                </div>
-                <div className="bg-red-100 p-3 rounded-lg">
-                  <Clock className="w-6 h-6 text-red-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-gray-600">
-                <span>请假申请待审批</span>
-              </div>
-            </Card>
-          </div>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200" onClick={() => setActiveTab('alerts')}>
+            <CardContent className="p-6 text-center">
+              <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+              <h3 className="font-semibold text-amber-900">提醒通知</h3>
+              <p className="text-sm text-amber-600 mt-1">重要提醒实时推送</p>
+            </CardContent>
+          </Card>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 快捷操作 */}
-            <div className="lg:col-span-2">
-              <Card className="bg-white p-6 border-0 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">快捷操作</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {quickActions.map(action => {
-                  const IconComponent = action.icon;
-                  return <Button key={action.id} variant="outline" className="h-20 border-gray-200 hover:border-amber-300 hover:bg-amber-50 transition-all group" onClick={() => handleQuickAction(action.pageId)}>
-                        <div className="flex items-center space-x-3">
-                          <div className={`${action.color} p-2 rounded-lg group-hover:scale-110 transition-transform`}>
-                            <IconComponent className="w-5 h-5 text-white" />
-                          </div>
-                          <span className="font-medium text-gray-700">{action.title}</span>
-                          <ChevronRight className="w-4 h-4 text-gray-400 ml-auto" />
-                        </div>
-                      </Button>;
-                })}
-                </div>
-              </Card>
-            </div>
-
-            {/* 最近活动 */}
-            <div>
-              <Card className="bg-white p-6 border-0 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">最近活动</h3>
-                  <Activity className="w-5 h-5 text-gray-400" />
-                </div>
-                <div className="space-y-4">
-                  {recentActivities.map(activity => <div key={activity.id} className="flex items-start space-x-3">
-                      <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === 'success' ? 'bg-green-500' : activity.status === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{activity.message}</p>
-                        <p className="text-xs text-gray-500">{activity.time}</p>
-                      </div>
-                    </div>)}
-                </div>
-              </Card>
-            </div>
-          </div>
-        </main>
-      </div>
+        {/* 内容展示 */}
+        <div className="space-y-6">
+          {activeTab === 'overview' && renderOverview()}
+          {activeTab === 'tasks' && renderTasks()}
+          {activeTab === 'alerts' && renderAlerts()}
+          {activeTab === 'reports' && role === 'admin' && <Card>
+              <CardHeader>
+                <CardTitle>统计报表</CardTitle>
+                <CardDescription>院长专属功能 - 数据分析与报表生成</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">财务报表、护理质量分析、人员绩效统计等功能开发中...</p>
+              </CardContent>
+            </Card>}
+        </div>
+      </main>
     </div>;
 }
