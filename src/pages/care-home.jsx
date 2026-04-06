@@ -39,14 +39,14 @@ export default function CareHome(props) {
     if (!elderInfo) return;
     toast({
       title: '正在拨号',
-      description: `正在联系 ${elderInfo.primaryNurse}`
+      description: `正在联系 ${elderInfo?.primaryNurse || '护工'}`
     });
   };
   const handleEmergencyCall = () => {
     if (!elderInfo) return;
     toast({
       title: '紧急联系',
-      description: `正在联系 ${elderInfo.emergencyContact}`
+      description: `正在联系 ${elderInfo?.emergencyContact || '紧急联系人'}`
     });
   };
 
@@ -214,7 +214,7 @@ export default function CareHome(props) {
   // 计算入院天数
   const getAdmissionDays = () => {
     if (!elderInfo) return 0;
-    const admission = new Date(elderInfo.admissionDate);
+    const admission = new Date(elderInfo?.admissionDate || new Date());
     const today = new Date();
     const diffTime = Math.abs(today - admission);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -316,18 +316,18 @@ export default function CareHome(props) {
                 fontFamily: 'Playfair Display, serif'
               }}>
 
-                  {elderInfo.name}
+                  {elderInfo?.name || '老人'}
                 </h2>
                 <p className="text-gray-600" style={{
                 fontFamily: 'Nunito Sans, sans-serif'
               }}>
 
-                  {elderInfo.age}岁 · {elderInfo.careLevel}
+                  {elderInfo?.age || '未知'}岁 · {elderInfo?.careLevel || '普通'}
                 </p>
               </div>
               <Badge className="bg-green-100 text-green-800">
                 <Heart className="w-4 h-4 mr-1" />
-                {elderInfo.healthStatus}
+                {elderInfo?.healthStatus || '良好'}
               </Badge>
             </div>
 
@@ -336,7 +336,7 @@ export default function CareHome(props) {
                 <Calendar className="w-5 h-5 text-amber-600 mr-2" />
                 <div>
                   <p className="text-sm text-gray-500">入院时间</p>
-                  <p className="font-medium">{elderInfo.admissionDate}</p>
+                  <p className="font-medium">{elderInfo?.admissionDate || '未知'}</p>
                   <p className="text-xs text-gray-400">已入住 {getAdmissionDays()} 天</p>
                 </div>
               </div>
@@ -344,7 +344,7 @@ export default function CareHome(props) {
                 <MapPin className="w-5 h-5 text-amber-600 mr-2" />
                 <div>
                   <p className="text-sm text-gray-500">房间号</p>
-                  <p className="font-medium">{elderInfo.roomNumber}</p>
+                  <p className="font-medium">{elderInfo?.roomNumber || '未知'}</p>
                 </div>
               </div>
             </div>
@@ -360,8 +360,8 @@ export default function CareHome(props) {
                   联系
                 </Button>
               </div>
-              <p className="text-lg font-medium text-gray-800">{elderInfo.primaryNurse}</p>
-              <p className="text-sm text-gray-500">{elderInfo.nursePhone}</p>
+              <p className="text-lg font-medium text-gray-800">{elderInfo?.primaryNurse || '未分配'}</p>
+              <p className="text-sm text-gray-500">{elderInfo?.nursePhone || '未知'}</p>
             </div>
 
             <div className="border-t pt-4 mt-4">
@@ -375,14 +375,14 @@ export default function CareHome(props) {
                   拨打
                 </Button>
               </div>
-              <p className="font-medium text-gray-800 text-[1.125rem]">{elderInfo.emergencyContact}</p>
-              <p className="text-sm text-gray-500">{elderInfo.emergencyPhone}</p>
+              <p className="font-medium text-gray-800 text-[1.125rem]">{elderInfo?.emergencyContact || '未设置'}</p>
+              <p className="text-sm text-gray-500">{elderInfo?.emergencyPhone || '未知'}</p>
             </div>
 
             <div className="border-t pt-4 mt-4 flex items-center justify-between">
               <div className="flex items-center">
                 <Clock className="w-5 h-5 text-gray-500 mr-2" />
-                <span className="text-sm text-gray-500">最后更新: {elderInfo.lastUpdate}</span>
+                <span className="text-sm text-gray-500">最后更新: {elderInfo?.lastUpdate || '未知'}</span>
               </div>
             </div>
           </div>
