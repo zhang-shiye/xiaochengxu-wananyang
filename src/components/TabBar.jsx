@@ -6,8 +6,7 @@ import { Button } from '@/components/ui';
 import { Home, BookOpen, FileText, DollarSign } from 'lucide-react';
 
 export default function TabBar({
-  currentPage,
-  onTabChange
+  currentPage
 }) {
   const tabs = [{
     id: 'care-home',
@@ -27,10 +26,11 @@ export default function TabBar({
     icon: DollarSign
   }];
   const handleTabClick = pageId => {
-    // 调用父组件传递的导航函数
-    if (onTabChange) {
-      onTabChange(pageId);
-    }
+    // 使用应用内导航
+    window.$w?.utils?.navigateTo({
+      pageId: pageId,
+      params: {}
+    }) || (window.location.href = `/${pageId}`);
   };
   return <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-amber-200">
       <div className="container mx-auto px-4">

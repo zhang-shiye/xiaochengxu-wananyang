@@ -11,7 +11,13 @@ export default function Leave(props) {
   } = useToast();
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const form = useForm();
+  const form = useForm({
+    defaultValues: {
+      reason: '',
+      startDate: '',
+      endDate: ''
+    }
+  });
   useEffect(() => {
     // 模拟获取历史请假记录
     setLeaveRequests([{
@@ -33,6 +39,16 @@ export default function Leave(props) {
     }]);
   }, []);
   const onSubmit = async data => {
+    // 表单验证
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast({
+        title: '表单验证失败',
+        description: '请检查并完善表单信息',
+        variant: 'destructive'
+      });
+      return;
+    }
     setIsSubmitting(true);
     try {
       // 模拟提交请假申请
@@ -106,13 +122,19 @@ export default function Leave(props) {
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField control={form.control} name="reason" render={({
+                <FormField control={form.control} name="reason" rules={{
+                required: '请填写请假事由',
+                minLength: {
+                  value: 5,
+                  message: '请假事由至少需要5个字符'
+                }
+              }} render={({
                 field
               }) => <FormItem>
                       <FormLabel className="text-gray-700" style={{
                   fontFamily: 'Nunito Sans, sans-serif'
                 }}>
-                        请假事由
+                        请假事由 *
                       </FormLabel>
                       <FormControl>
                         <Textarea placeholder="请详细说明请假原因..." {...field} className="border-amber-200 focus:border-amber-400 rounded-xl resize-none" rows={3} />
@@ -121,30 +143,55 @@ export default function Leave(props) {
                     </FormItem>} />
 
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField control={form.control} name="startDate" render={({
+                  <FormField control={form.control} name="startDate" rules={{
+                  required: '请选择预计离院时间',
+                  validate: value => {
+                    if (value) {
+                      const selectedDate = new Date(value);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      if (selectedDate < today) {
+                        return '离院时间不能早于今天';
+                      }
+                    }
+                    return true;
+                  }
+                }} render={({
                   field
                 }) => <FormItem>
                         <FormLabel className="text-gray-700" style={{
                     fontFamily: 'Nunito Sans, sans-serif'
                   }}>
-                          预计离院时间
+                          预计离院时间 *
                         </FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} className="border-amber-200 focus:border-amber-400 rounded-xl" />
+                          <Input type="date" {...field} className="border-amber-200 focus:border-amber-400 rounded-xl" min={new Date().toISOString().split('T')[0]} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
 
-                  <FormField control={form.control} name="endDate" render={({
+                  <FormField control={form.control} name="endDate" rules={{
+                  required: '请选择预计返院时间',
+                  validate: (value, formValues) => {
+                    if (value && formValues.startDate) {
+                      const startDate = new Date(formValues.startDate);
+                      const endDate = new Date(value);
+                      if (endDate < startDate) {
+                        return '返院时间不能早于离院时间';
+                      }
+                    }
+                    return true;
+                  }
+                }} render={({
                   field
                 }) => <FormItem>
                         <FormLabel className="text-gray-700" style={{
                     fontFamily: 'Nunito Sans, sans-serif'
                   }}>
-                          预计返院时间
+                          预计返院时间 *
                         </FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} className="border-amber-200 focus:border-amber-400 rounded-xl" />
+                          <Input type="date" {...field} className="border-amber-200 focus:border-amber-400 rounded-xl" min={form.watch('startDate') || new Date().toISOString().split('T')[0]} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>} />
@@ -220,9 +267,6 @@ export default function Leave(props) {
       </div>
 
       {/* 底部导航 */}
-      <TabBar currentPage="leave" onTabChange={pageId => props.$w.utils.navigateTo({
-      pageId,
-      params: {}
-    })} />
+      <TabBar currentPage="leave" />
     </div>;
 }
