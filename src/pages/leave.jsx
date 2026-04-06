@@ -13,7 +13,7 @@ export default function Leave(props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentElder, setCurrentElder] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // 常用请假事由选项
   const reasonOptions = [{
     value: 'family_visit',
@@ -34,7 +34,6 @@ export default function Leave(props) {
     value: 'other',
     label: '其他事由'
   }];
-  
   const form = useForm({
     defaultValues: {
       reason: '',
@@ -46,7 +45,7 @@ export default function Leave(props) {
 
   // 监听请假事由选择变化
   const selectedReason = form.watch('reason');
-  
+
   // 获取老人信息和请假记录
   const fetchElderInfoAndRequests = async () => {
     try {
@@ -58,16 +57,17 @@ export default function Leave(props) {
           dataSourceName: 'elders',
           methodName: 'query',
           params: {
-            filter: { status: 'active' },
+            filter: {
+              status: 'active'
+            },
             limit: 1
           }
         }
       });
-      
       if (elderResult.result && elderResult.result.data && elderResult.result.data.length > 0) {
         const elder = elderResult.result.data[0];
         setCurrentElder(elder);
-        
+
         // 获取请假记录
         await fetchLeaveRequests(elder._id);
       }
@@ -83,7 +83,7 @@ export default function Leave(props) {
   };
 
   // 获取请假记录
-  const fetchLeaveRequests = async (elderId) => {
+  const fetchLeaveRequests = async elderId => {
     try {
       const result = await props.$w.cloud.callFunction({
         name: 'callDataSource',
@@ -91,13 +91,16 @@ export default function Leave(props) {
           dataSourceName: 'leave_requests',
           methodName: 'query',
           params: {
-            filter: { elderId: elderId },
-            sort: { submitTime: -1 },
+            filter: {
+              elderId: elderId
+            },
+            sort: {
+              submitTime: -1
+            },
             limit: 10
           }
         }
       });
-      
       if (result.result && result.result.data) {
         const requests = result.result.data.map(request => ({
           id: request._id,
@@ -114,7 +117,6 @@ export default function Leave(props) {
       console.error('获取请假记录失败:', error);
     }
   };
-
   useEffect(() => {
     fetchElderInfoAndRequests();
   }, []);
@@ -138,12 +140,10 @@ export default function Leave(props) {
       const selectedOption = reasonOptions.find(option => option.value === data.reason);
       reasonText = selectedOption ? selectedOption.label : data.reason;
     }
-    
     setIsSubmitting(true);
     try {
       // 提交请假申请到数据库
       if (!currentElder) return;
-      
       const submitResult = await props.$w.cloud.callFunction({
         name: 'callDataSource',
         data: {
@@ -161,15 +161,14 @@ export default function Leave(props) {
           }
         }
       });
-      
       if (submitResult.result && submitResult.result.success) {
         // 重新获取请假记录
         await fetchLeaveRequests(currentElder._id);
-        
         toast({
           title: '提交成功',
           description: '请假申请已提交，请等待院长审批'
         });
+      }
     } catch (error) {
       toast({
         title: '提交失败',
