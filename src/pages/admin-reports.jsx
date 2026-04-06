@@ -375,6 +375,5 @@ export default function AdminReports(props) {
             </div>}
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
