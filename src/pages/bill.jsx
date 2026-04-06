@@ -66,11 +66,15 @@ export default function Bill(props) {
     }]);
   }, []);
   const currentBill = bills.find(bill => bill.month === currentMonth);
+  const paymentMethodsRef = React.useRef(null);
   const handlePayment = () => {
-    toast({
-      title: '支付信息',
-      description: '请使用下方收款码或银行账户进行转账'
-    });
+    // 滚动到缴费方式部分
+    if (paymentMethodsRef.current) {
+      paymentMethodsRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   };
   const getStatusInfo = status => {
     const statusMap = {
@@ -174,7 +178,7 @@ export default function Bill(props) {
             </Card>
 
             {/* 缴费方式 */}
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
+            <Card ref={paymentMethodsRef} className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4" style={{
               fontFamily: 'Nunito Sans, sans-serif'
