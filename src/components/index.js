@@ -7,3 +7,5 @@ export * from './ErrorBoundary.jsx';
 export * from './DataGuard.jsx';
 export * from './AppErrorHandler.jsx';
 export * from './DataLoadingWrapper.jsx';
+export * from './AdminNavBar.jsx';
+export * from './AdminPageLayout.jsx';

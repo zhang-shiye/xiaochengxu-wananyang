@@ -6,6 +6,8 @@ import { Card, Button, useToast, Input, Table, TableHeader, TableBody, TableRow,
 import { Plus, Search, Edit, Trash2, Upload, Download, Filter } from 'lucide-react';
 
 import { useForm } from 'react-hook-form';
+import AdminPageLayout from '@/components/AdminPageLayout';
+import AdminNavBar from '@/components/AdminNavBar';
 export default function AdminElders(props) {
   const {
     toast
@@ -303,5 +305,6 @@ export default function AdminElders(props) {
             </div>}
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 }

@@ -5,6 +5,7 @@ import { Card, Button, useToast, Input, Textarea, Select, SelectTrigger, SelectV
 // @ts-ignore;
 import { Upload, Download, Users, FileText, Calendar, Settings, Plus, Search, Filter } from 'lucide-react';
 
+import AdminNavBar from '@/components/AdminNavBar';
 export default function AdminDashboard(props) {
   const {
     toast
@@ -47,6 +48,16 @@ export default function AdminDashboard(props) {
     color: 'bg-orange-500',
     page: 'admin-leaves'
   }];
+
+  // 处理快速操作跳转
+  const handleQuickAction = pageId => {
+    if (props.$w && props.$w.utils) {
+      props.$w.utils.redirectTo({
+        pageId: pageId,
+        params: {}
+      });
+    }
+  };
   const handleUpload = () => {
     if (!uploadData.trim()) {
       toast({
@@ -65,6 +76,9 @@ export default function AdminDashboard(props) {
     setUploadData('');
   };
   return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
+      {/* 管理端导航栏 */}
+      <AdminNavBar $w={props.$w} currentPage="dashboard" />
+      
       <div className="container mx-auto px-4 py-6">
         {/* 页面标题 */}
         <div className="text-center mb-8">
@@ -139,7 +153,7 @@ export default function AdminDashboard(props) {
             快速操作
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {quickActions.map(action => <Button key={action.id} className={`${action.color} hover:${action.color.replace('500', '600')} text-white h-16`} onClick={() => handleQuickAction(action.id)}>
+            {quickActions.map(action => <Button key={action.id} className={`${action.color} hover:${action.color.replace('500', '600')} text-white h-16`} onClick={() => handleQuickAction(action.page)}>
                 <action.icon className="w-5 h-5 mr-2" />
                 {action.label}
               </Button>)}
