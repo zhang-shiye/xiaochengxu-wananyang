@@ -28,15 +28,15 @@ class ErrorBoundary extends React.Component {
     // 可以在这里添加错误上报逻辑
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
-  handleReload = () => {
+  handleReload() {
     this.setState({
       hasError: false,
       error: null,
       errorInfo: null
     });
     window.location.reload();
-  };
-  handleGoHome = () => {
+  }
+  handleGoHome() {
     this.setState({
       hasError: false,
       error: null,
@@ -48,7 +48,7 @@ class ErrorBoundary extends React.Component {
         params: {}
       });
     }
-  };
+  }
   render() {
     if (this.state.hasError) {
       return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
