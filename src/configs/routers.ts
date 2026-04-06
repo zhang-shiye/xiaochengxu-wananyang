@@ -5,10 +5,11 @@ import BILL from '../pages/bill.jsx';
 import BIND_SENIOR from '../pages/bind-senior.jsx';
 import WECHAT_LOGIN from '../pages/wechat-login.jsx';
 import CARE_HOME from '../pages/care-home.jsx';
-import ADMIN_LOGIN from '../pages/admin-login.jsx';
 import ADMIN_DASHBOARD from '../pages/admin-dashboard.jsx';
-import CAREGIVER_TASKS from '../pages/caregiver-tasks.jsx';
-import SENIOR_MANAGEMENT from '../pages/senior-management.jsx';
+import ADMIN_ELDERS from '../pages/admin-elders.jsx';
+import ADMIN_REPORTS from '../pages/admin-reports.jsx';
+import ADMIN_LEAVES from '../pages/admin-leaves.jsx';
+import ADMIN_BILLS from '../pages/admin-bills.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -31,15 +32,18 @@ export const routers = [{
   id: "care-home",
   component: CARE_HOME
 }, {
-  id: "admin-login",
-  component: ADMIN_LOGIN
-}, {
   id: "admin-dashboard",
   component: ADMIN_DASHBOARD
 }, {
-  id: "caregiver-tasks",
-  component: CAREGIVER_TASKS
+  id: "admin-elders",
+  component: ADMIN_ELDERS
 }, {
-  id: "senior-management",
-  component: SENIOR_MANAGEMENT
+  id: "admin-reports",
+  component: ADMIN_REPORTS
+}, {
+  id: "admin-leaves",
+  component: ADMIN_LEAVES
+}, {
+  id: "admin-bills",
+  component: ADMIN_BILLS
 }]
