@@ -232,6 +232,9 @@ export default function Home(props) {
       </div>
 
       {/* 底部导航 */}
-      <TabBar currentPage="home" />
+      <TabBar currentPage="home" onTabChange={pageId => props.$w.utils.navigateTo({
+      pageId,
+      params: {}
+    })} />
     </div>;
 }

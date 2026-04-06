@@ -220,6 +220,9 @@ export default function Leave(props) {
       </div>
 
       {/* 底部导航 */}
-      <TabBar currentPage="leave" />
+      <TabBar currentPage="leave" onTabChange={pageId => props.$w.utils.navigateTo({
+      pageId,
+      params: {}
+    })} />
     </div>;
 }

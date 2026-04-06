@@ -252,6 +252,9 @@ export default function CareHome(props) {
       </div>
       
       {/* 底部导航 */}
-      <TabBar currentPage="care-home" />
+      <TabBar currentPage="care-home" onTabChange={pageId => props.$w.utils.navigateTo({
+      pageId,
+      params: {}
+    })} />
     </div>;
 }

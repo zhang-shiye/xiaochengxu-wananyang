@@ -226,6 +226,9 @@ export default function Bill(props) {
       </div>
 
       {/* 底部导航 */}
-      <TabBar currentPage="bill" />
+      <TabBar currentPage="bill" onTabChange={pageId => props.$w.utils.navigateTo({
+      pageId,
+      params: {}
+    })} />
     </div>;
 }
