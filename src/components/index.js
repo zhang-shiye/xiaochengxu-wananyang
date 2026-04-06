@@ -10,4 +10,6 @@ export * from './DataLoadingWrapper.jsx';
 export * from './AdminNavBar.jsx';
 export * from './AdminPageLayout.jsx';
 export * from './AdminBreadcrumb.jsx';
-export * from './QuickActionsMenu.jsx';
+export * from './AdminQuickActions.jsx';
+export * from './EnhancedAdminNavBar.jsx';
+export * from './EnhancedAdminPageLayout.jsx';

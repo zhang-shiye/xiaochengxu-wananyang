@@ -1,11 +1,11 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Card, Button, useToast, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from '@/components/ui';
+import { Card, Button, useToast, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge, AdminNavBar } from '@/components/ui';
 // @ts-ignore;
 import { Upload, Download, Users, FileText, Calendar, Settings, Plus, Search, Filter } from 'lucide-react';
 
-import AdminNavBar from '@/components/AdminNavBar';
+import EnhancedAdminPageLayout from '@/components/EnhancedAdminPageLayout';
 export default function AdminDashboard(props) {
   const {
     toast
