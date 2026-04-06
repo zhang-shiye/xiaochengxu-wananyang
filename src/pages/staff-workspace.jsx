@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Textarea, useToast, Avatar, AvatarImage, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 
 import { useForm } from 'react-hook-form';
-import TabBar from '@/@/components/TabBar';
+import TabBar from '@/components/TabBar';
 export default function StaffWorkspace(props) {
   const {
     toast
