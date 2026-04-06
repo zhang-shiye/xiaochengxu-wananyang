@@ -15,10 +15,6 @@ export default function BindSenior(props) {
     try {
       // 模拟绑定验证
       await new Promise(resolve => setTimeout(resolve, 1500));
-      toast({
-        title: '绑定成功',
-        description: '已成功绑定长者信息'
-      });
 
       // 跳转到关爱首页
       props.$w.utils.navigateTo({

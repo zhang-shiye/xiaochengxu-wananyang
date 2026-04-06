@@ -11,11 +11,6 @@ export default function Login(props) {
   // 3秒后自动跳转到微信登录页
   useEffect(() => {
     const timer = setTimeout(() => {
-      toast({
-        title: '正在跳转',
-        description: '即将跳转到微信登录页面...'
-      });
-
       // 跳转到微信登录页面
       props.$w.utils.navigateTo({
         pageId: 'wechat-login',
@@ -28,10 +23,6 @@ export default function Login(props) {
   }, []);
   const handleSkipLogin = () => {
     // 开发模式下允许跳过登录
-    toast({
-      title: '开发模式',
-      description: '已跳过登录流程'
-    });
     props.$w.utils.navigateTo({
       pageId: 'home',
       params: {}

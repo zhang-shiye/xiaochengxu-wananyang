@@ -10,18 +10,10 @@ export default function WechatLogin(props) {
   const [isLoading, setIsLoading] = useState(false);
   const handleWeChatLogin = () => {
     setIsLoading(true);
-    toast({
-      title: '微信登录',
-      description: '正在跳转到微信授权页面...'
-    });
 
     // 模拟微信登录过程
     setTimeout(() => {
       setIsLoading(false);
-      toast({
-        title: '登录成功',
-        description: '微信授权已完成'
-      });
 
       // 跳转到绑定长者页面
       props.$w.utils.navigateTo({

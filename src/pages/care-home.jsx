@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Card, Avatar, AvatarImage, Button, Badge, useToast } from '@/components/ui';
 // @ts-ignore;
-import { Heart, Calendar, User, Phone, MapPin, Clock, Bell, FileText, DollarSign } from 'lucide-react';
+import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign } from 'lucide-react';
 
 import TabBar from '@/components/TabBar';
 export default function CareHome(props) {
@@ -45,6 +45,24 @@ export default function CareHome(props) {
       dueDate: '2024-04-10'
     }
   });
+  const handleNavigateToDaily = () => {
+    props.$w.utils.navigateTo({
+      pageId: 'home',
+      params: {}
+    });
+  };
+  const handleNavigateToLeave = () => {
+    props.$w.utils.navigateTo({
+      pageId: 'leave',
+      params: {}
+    });
+  };
+  const handleNavigateToBill = () => {
+    props.$w.utils.navigateTo({
+      pageId: 'bill',
+      params: {}
+    });
+  };
   const handleCallNurse = () => {
     toast({
       title: '正在拨号',
@@ -183,7 +201,11 @@ export default function CareHome(props) {
                 <Badge className="bg-green-100 text-green-800">最新</Badge>
               </div>
               <p className="text-gray-600 mb-2">{latestInfo.dailyReport.meal}</p>
-              <p className="text-sm text-gray-500">心情: {latestInfo.dailyReport.mood} · {latestInfo.dailyReport.time}</p>
+              <p className="text-sm text-gray-500 mb-3">心情: {latestInfo.dailyReport.mood} · {latestInfo.dailyReport.time}</p>
+              <Button size="sm" onClick={handleNavigateToDaily} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full">
+                查看详细日报
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
             </div>
           </Card>
 
@@ -198,7 +220,11 @@ export default function CareHome(props) {
                 <Badge className="bg-yellow-100 text-yellow-800">{latestInfo.leaveRequest.status}</Badge>
               </div>
               <p className="text-gray-600 mb-1">{latestInfo.leaveRequest.type}</p>
-              <p className="text-sm text-gray-500">{latestInfo.leaveRequest.date} {latestInfo.leaveRequest.time}</p>
+              <p className="text-sm text-gray-500 mb-3">{latestInfo.leaveRequest.date} {latestInfo.leaveRequest.time}</p>
+              <Button size="sm" onClick={handleNavigateToLeave} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full">
+                查看申请进度
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
             </div>
           </Card>
 
@@ -213,14 +239,16 @@ export default function CareHome(props) {
                 <Badge className="bg-orange-100 text-orange-800">{latestInfo.bill.status}</Badge>
               </div>
               <p className="text-gray-600 mb-1">{latestInfo.bill.month}</p>
-              <p className="text-lg font-bold text-orange-600 mb-1">{latestInfo.bill.amount}</p>
-              <p className="text-sm text-gray-500">截止日期: {latestInfo.bill.dueDate}</p>
+              <p className="text-lg font-bold text-orange-600 mb-3">{latestInfo.bill.amount}</p>
+              <p className="text-sm text-gray-500 mb-3">截止日期: {latestInfo.bill.dueDate}</p>
+              <Button size="sm" onClick={handleNavigateToBill} className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full">
+                查看账单详情
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
             </div>
           </Card>
         </div>
 
-        {/* 页面底部留白 */}
-        <div className="h-8"></div>
       </div>
       
       {/* 底部导航 */}
