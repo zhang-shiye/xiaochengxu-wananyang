@@ -223,6 +223,69 @@ export default function CareHome(props) {
   useEffect(() => {
     fetchElderInfo();
   }, []);
+
+  // 加载状态
+  if (loading) {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold text-amber-900 mb-2" style={{
+            fontFamily: 'Playfair Display, serif'
+          }}>
+              皖安养
+            </h1>
+            <p className="text-amber-700" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              用心陪伴，安心养老
+            </p>
+          </div>
+          
+          {/* 骨架屏加载 */}
+          <div className="space-y-6">
+            <div className="bg-white/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl p-6 animate-pulse">
+              <div className="flex items-center space-x-4">
+                <div className="w-20 h-20 bg-gray-300 rounded-full"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-6 bg-gray-300 rounded w-1/3"></div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map(i => <div key={i} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl p-4 animate-pulse">
+                  <div className="w-12 h-12 bg-gray-300 rounded-full mx-auto mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-1"></div>
+                  <div className="h-3 bg-gray-200 rounded w-2/3 mx-auto"></div>
+                  <div className="h-8 bg-gray-300 rounded mt-2"></div>
+                </div>)}
+            </div>
+          </div>
+        </div>
+      </div>;
+  }
+
+  // 空数据状态
+  if (!elderInfo) {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-amber-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">未找到老人信息</h3>
+          <p className="text-gray-600 mb-4">请检查网络连接或联系管理员</p>
+          <Button onClick={fetchElderInfo} className="bg-amber-500 hover:bg-amber-600">
+            重新加载
+          </Button>
+        </div>
+      </div>;
+  }
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
       <div className="container mx-auto px-4 py-6">
         {/* 头部标题 */}
@@ -246,7 +309,7 @@ export default function CareHome(props) {
           <div className="p-6">
             <div className="flex items-center mb-4">
               <Avatar className="w-16 h-16 mr-4">
-                <AvatarImage src={elderInfo.avatar} alt={elderInfo.name} />
+                <AvatarImage src={elderInfo?.avatar || '/default-avatar.png'} alt={elderInfo?.name || '老人'} />
               </Avatar>
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-gray-800" style={{

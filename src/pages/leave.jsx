@@ -43,6 +43,29 @@ export default function Leave(props) {
     }
   });
 
+  // 表单验证规则
+  const validationRules = {
+    reason: [value => !value && '请选择请假事由'],
+    startDate: [value => !value && '请选择开始日期', value => {
+      if (!value) return;
+      const selectedDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) return '开始日期不能早于今天';
+    }],
+    endDate: [value => !value && '请选择结束日期', value => {
+      if (!value || !form.watch('startDate')) return;
+      const startDate = new Date(form.watch('startDate'));
+      const endDate = new Date(value);
+      if (endDate < startDate) return '结束日期不能早于开始日期';
+    }],
+    customReason: [value => {
+      if (form.watch('reason') === 'other' && !value) {
+        return '请输入具体事由';
+      }
+    }]
+  };
+
   // 监听请假事由选择变化
   const selectedReason = form.watch('reason');
 
@@ -124,9 +147,44 @@ export default function Leave(props) {
     // 表单验证
     const isValid = await form.trigger();
     if (!isValid) {
+      // 高亮显示错误字段
+      const errors = form.formState.errors;
+      const firstError = Object.keys(errors)[0];
+      if (firstError) {
+        const errorElement = document.querySelector(`[name="${firstError}"]`);
+        if (errorElement) {
+          errorElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+          errorElement.focus();
+        }
+      }
       toast({
         title: '表单验证失败',
         description: '请检查并完善表单信息',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // 日期验证
+    const startDate = new Date(data.startDate);
+    const endDate = new Date(data.endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (startDate < today) {
+      toast({
+        title: '日期错误',
+        description: '开始日期不能早于今天',
+        variant: 'destructive'
+      });
+      return;
+    }
+    if (endDate < startDate) {
+      toast({
+        title: '日期错误',
+        description: '结束日期不能早于开始日期',
         variant: 'destructive'
       });
       return;
