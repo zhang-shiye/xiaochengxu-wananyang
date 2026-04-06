@@ -9,3 +9,5 @@ export * from './AppErrorHandler.jsx';
 export * from './DataLoadingWrapper.jsx';
 export * from './AdminNavBar.jsx';
 export * from './AdminPageLayout.jsx';
+export * from './AdminBreadcrumb.jsx';
+export * from './QuickActionsMenu.jsx';
