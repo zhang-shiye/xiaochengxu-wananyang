@@ -1,9 +1,9 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Card, Avatar, AvatarImage, Button, Badge, useToast, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
+import { Card, Avatar, AvatarImage, Button, Badge, useToast } from '@/components/ui';
 // @ts-ignore;
-import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign, CalendarDays } from 'lucide-react';
+import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign } from 'lucide-react';
 
 import TabBar from '@/components/TabBar';
 export default function CareHome(props) {
@@ -73,42 +73,6 @@ export default function CareHome(props) {
     toast({
       title: '紧急联系',
       description: `正在联系 ${elderInfo.emergencyContact}`
-    });
-  };
-
-  // 生成30天内的日期选项
-  const generateDateOptions = () => {
-    const options = [];
-    const today = new Date('2026-04-06'); // 当前时间
-
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      const displayStr = date.toLocaleDateString('zh-CN', {
-        month: '2-digit',
-        day: '2-digit',
-        weekday: 'short'
-      });
-      options.push({
-        value: dateStr,
-        label: displayStr
-      });
-    }
-    return options;
-  };
-  const dateOptions = generateDateOptions();
-  const [selectedDate, setSelectedDate] = useState(dateOptions[0].value);
-
-  // 处理日期选择变化
-  const handleDateChange = dateValue => {
-    setSelectedDate(dateValue);
-    // 跳转到对应日期的护理记录页面
-    props.$w.utils.navigateTo({
-      pageId: 'daily-report',
-      params: {
-        date: dateValue
-      }
     });
   };
 
@@ -183,7 +147,7 @@ export default function CareHome(props) {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   <User className="w-5 h-5 text-amber-600 mr-2" />
-                  <span className="text-gray-700">责任护士</span>
+                  <span className="text-gray-700">责任护工</span>
                 </div>
                 <Button size="sm" variant="outline" onClick={handleCallNurse} className="border-amber-200 text-amber-700 hover:bg-amber-50">
                   <Phone className="w-4 h-4 mr-1" />
@@ -218,28 +182,13 @@ export default function CareHome(props) {
           </div>
         </Card>
 
-        {/* 日期选择区域 */}
+        {/* 最新信息区域 */}
         <div className="space-y-4 mb-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-gray-800" style={{
-            fontFamily: 'Playfair Display, serif'
-          }}>
-              护理记录
-            </h3>
-            <div className="flex items-center space-x-2">
-              <CalendarDays className="w-5 h-5 text-amber-600" />
-              <Select value={selectedDate} onValueChange={handleDateChange}>
-                <SelectTrigger className="w-32 border-amber-200 focus:border-amber-400">
-                  <SelectValue placeholder="选择日期" />
-                </SelectTrigger>
-                <SelectContent>
-                  {dateOptions.map(option => <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <h3 className="text-xl font-bold text-gray-800" style={{
+          fontFamily: 'Playfair Display, serif'
+        }}>
+            最新动态
+          </h3>
 
           {/* 今日护理日报 */}
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
