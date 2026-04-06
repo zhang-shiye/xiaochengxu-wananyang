@@ -305,6 +305,5 @@ export default function AdminElders(props) {
             </div>}
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
