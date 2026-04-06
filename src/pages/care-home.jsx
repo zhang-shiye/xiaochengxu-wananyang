@@ -19,8 +19,8 @@ export default function CareHome(props) {
     careLevel: '二级护理',
     primaryNurse: '张护士',
     nursePhone: '138-0000-1234',
-    emergencyContact: '王先生（儿子）',
-    emergencyPhone: '139-0000-5678',
+    emergencyContact: '张院长',
+    emergencyPhone: '0551-8888-6666',
     healthStatus: '良好',
     moodStatus: '愉快',
     lastUpdate: '2024-04-05 14:30'
