@@ -200,7 +200,7 @@ export default function Home(props) {
                     </span>
                   </div>
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                    健康：{report.health}
+                    健康：{report.health.temperature} {report.health.bloodPressure} {report.health.heartRate}
                   </div>
                 </div>
 
