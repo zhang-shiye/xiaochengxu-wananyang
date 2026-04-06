@@ -1,7 +1,7 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Card, Avatar, AvatarImage, Button, useToast } from '@/components/ui';
+import { Card, Avatar, AvatarImage, Button, useToast, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 
 import TabBar from '@/components/TabBar';
 export default function Home(props) {
@@ -10,6 +10,27 @@ export default function Home(props) {
   } = useToast();
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // 生成最近7天的日期选项
+  const generateDateOptions = () => {
+    const options = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const displayStr = date.toLocaleDateString('zh-CN', {
+        month: 'short',
+        day: 'numeric'
+      });
+      options.push({
+        value: dateStr,
+        label: displayStr
+      });
+    }
+    return options;
+  };
+  const dateOptions = generateDateOptions();
   useEffect(() => {
     // 模拟获取当前用户和日报数据
     setCurrentUser({
@@ -118,14 +139,25 @@ export default function Home(props) {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-amber-600">
-                {new Date().getDate()}
-              </p>
-              <p className="text-sm text-amber-700">
-                {new Date().toLocaleDateString('zh-CN', {
-                month: 'short'
-              })}
-              </p>
+              <Select value={selectedDate} onValueChange={value => {
+              setSelectedDate(value);
+              // 跳转到护理日报页面，传递日期参数
+              props.$w.utils.navigateTo({
+                pageId: 'care-home',
+                params: {
+                  date: value
+                }
+              });
+            }}>
+                <SelectTrigger className="w-32 border-amber-200 focus:border-amber-400">
+                  <SelectValue placeholder="选择日期" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dateOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
