@@ -1,0 +1,107 @@
+[
+  {
+    "_id": "bill_001",
+    "elderId": "elder_001",
+    "elderName": "王奶奶",
+    "month": "2026-04",
+    "totalAmount": 4200,
+    "status": "unpaid",
+    "dueDate": "2026-04-15",
+    "items": [
+      {
+        "name": "基础床位费",
+        "amount": 1800,
+        "unit": "月"
+      },
+      {
+        "name": "护理费（二级）",
+        "amount": 1200,
+        "unit": "月"
+      },
+      {
+        "name": "餐费",
+        "amount": 800,
+        "unit": "月"
+      },
+      {
+        "name": "代办买药费",
+        "amount": 350,
+        "unit": "次"
+      },
+      {
+        "name": "洗衣费",
+        "amount": 50,
+        "unit": "月"
+      }
+    ],
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "bill_002",
+    "elderId": "elder_002",
+    "elderName": "李爷爷",
+    "month": "2026-04",
+    "totalAmount": 3850,
+    "status": "paid",
+    "dueDate": "2026-04-15",
+    "paymentDate": "2026-04-10",
+    "items": [
+      {
+        "name": "基础床位费",
+        "amount": 1800,
+        "unit": "月"
+      },
+      {
+        "name": "护理费（一级）",
+        "amount": 1000,
+        "unit": "月"
+      },
+      {
+        "name": "餐费",
+        "amount": 800,
+        "unit": "月"
+      },
+      {
+        "name": "特殊护理费",
+        "amount": 250,
+        "unit": "月"
+      }
+    ],
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "bill_003",
+    "elderId": "elder_003",
+    "elderName": "陈奶奶",
+    "month": "2026-04",
+    "totalAmount": 3950,
+    "status": "unpaid",
+    "dueDate": "2026-04-15",
+    "items": [
+      {
+        "name": "基础床位费",
+        "amount": 1800,
+        "unit": "月"
+      },
+      {
+        "name": "护理费（三级）",
+        "amount": 1400,
+        "unit": "月"
+      },
+      {
+        "name": "餐费",
+        "amount": 800,
+        "unit": "月"
+      },
+      {
+        "name": "特殊护理费",
+        "amount": 250,
+        "unit": "月"
+      }
+    ],
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  }
+]

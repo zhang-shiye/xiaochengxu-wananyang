@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "leave_001",
+    "elderId": "elder_001",
+    "elderName": "王奶奶",
+    "reason": "家庭聚餐",
+    "startDate": "2026-04-10",
+    "endDate": "2026-04-10",
+    "status": "approved",
+    "submitTime": "2026-04-08 14:30",
+    "approvalTime": "2026-04-08 16:45",
+    "contactPerson": "王先生",
+    "contactPhone": "138-0000-1234",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "leave_002",
+    "elderId": "elder_001",
+    "elderName": "王奶奶",
+    "reason": "医院检查",
+    "startDate": "2026-04-15",
+    "endDate": "2026-04-15",
+    "status": "pending",
+    "submitTime": "2026-04-05 10:20",
+    "contactPerson": "王先生",
+    "contactPhone": "138-0000-1234",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "leave_003",
+    "elderId": "elder_002",
+    "elderName": "李爷爷",
+    "reason": "外出就医",
+    "startDate": "2026-04-12",
+    "endDate": "2026-04-12",
+    "status": "approved",
+    "submitTime": "2026-04-09 10:20",
+    "approvalTime": "2026-04-09 11:30",
+    "contactPerson": "李女士",
+    "contactPhone": "139-0000-5678",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "leave_004",
+    "elderId": "elder_003",
+    "elderName": "陈奶奶",
+    "reason": "探亲访友",
+    "startDate": "2026-04-15",
+    "endDate": "2026-04-16",
+    "status": "rejected",
+    "submitTime": "2026-04-10 09:15",
+    "approvalTime": "2026-04-10 10:45",
+    "rejectReason": "近期身体状况不稳定，建议暂缓外出",
+    "contactPerson": "陈先生",
+    "contactPhone": "136-0000-9876",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  }
+]

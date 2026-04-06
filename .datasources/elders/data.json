@@ -1,0 +1,47 @@
+[
+  {
+    "_id": "elder_001",
+    "name": "王奶奶",
+    "age": 78,
+    "roomNumber": "A栋 301室",
+    "careLevel": "二级护理",
+    "primaryNurse": "张护士",
+    "emergencyContact": "张院长",
+    "emergencyPhone": "0551-8888-6666",
+    "admissionDate": "2023-03-15",
+    "healthStatus": "良好",
+    "status": "active",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "elder_002",
+    "name": "李爷爷",
+    "age": 82,
+    "roomNumber": "B栋 205室",
+    "careLevel": "一级护理",
+    "primaryNurse": "王护士",
+    "emergencyContact": "李女士",
+    "emergencyPhone": "138-0000-1234",
+    "admissionDate": "2022-08-20",
+    "healthStatus": "良好",
+    "status": "active",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "elder_003",
+    "name": "陈奶奶",
+    "age": 75,
+    "roomNumber": "C栋 102室",
+    "careLevel": "三级护理",
+    "primaryNurse": "刘护士",
+    "emergencyContact": "陈先生",
+    "emergencyPhone": "139-0000-5678",
+    "admissionDate": "2023-11-10",
+    "healthStatus": "一般",
+    "status": "inactive",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "name": "nurses",
+  "title": "护工信息",
+  "schemas": [
+    {
+      "name": "name",
+      "title": "姓名",
+      "type": "String"
+    },
+    {
+      "name": "phone",
+      "title": "联系电话",
+      "type": "String"
+    },
+    {
+      "name": "position",
+      "title": "职位",
+      "type": "String"
+    },
+    {
+      "name": "assignedElders",
+      "title": "负责老人",
+      "type": "Array",
+      "items": {
+        "type": "String"
+      }
+    },
+    {
+      "name": "status",
+      "title": "状态",
+      "type": "String"
+    }
+  ]
+}

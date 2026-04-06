@@ -1,0 +1,57 @@
+{
+  "name": "elders",
+  "title": "老人信息",
+  "schemas": [
+    {
+      "name": "name",
+      "title": "姓名",
+      "type": "String"
+    },
+    {
+      "name": "age",
+      "title": "年龄",
+      "type": "Number"
+    },
+    {
+      "name": "roomNumber",
+      "title": "房间号",
+      "type": "String"
+    },
+    {
+      "name": "careLevel",
+      "title": "护理等级",
+      "type": "String"
+    },
+    {
+      "name": "primaryNurse",
+      "title": "主管护工",
+      "type": "String"
+    },
+    {
+      "name": "emergencyContact",
+      "title": "紧急联系人",
+      "type": "String"
+    },
+    {
+      "name": "emergencyPhone",
+      "title": "紧急联系电话",
+      "type": "String"
+    },
+    {
+      "name": "admissionDate",
+      "title": "入院日期",
+      "type": "Date",
+      "format": "date"
+    },
+    {
+      "name": "healthStatus",
+      "title": "健康状况",
+      "type": "String"
+    },
+    {
+      "name": "status",
+      "title": "状态",
+      "type": "String"
+    }
+  ]
+}

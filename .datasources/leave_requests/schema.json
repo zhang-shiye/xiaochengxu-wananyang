@@ -1,0 +1,65 @@
+{
+  "name": "leave_requests",
+  "title": "请假记录",
+  "schemas": [
+    {
+      "name": "elderId",
+      "title": "老人ID",
+      "type": "String"
+    },
+    {
+      "name": "elderName",
+      "title": "老人姓名",
+      "type": "String"
+    },
+    {
+      "name": "reason",
+      "title": "请假事由",
+      "type": "String"
+    },
+    {
+      "name": "startDate",
+      "title": "开始日期",
+      "type": "Date",
+      "format": "date"
+    },
+    {
+      "name": "endDate",
+      "title": "结束日期",
+      "type": "Date",
+      "format": "date"
+    },
+    {
+      "name": "status",
+      "title": "审批状态",
+      "type": "String"
+    },
+    {
+      "name": "submitTime",
+      "title": "提交时间",
+      "type": "DateTime",
+      "format": "timestamp-ms"
+    },
+    {
+      "name": "approvalTime",
+      "title": "审批时间",
+      "type": "DateTime",
+      "format": "timestamp-ms"
+    },
+    {
+      "name": "rejectReason",
+      "title": "拒绝原因",
+      "type": "String"
+    },
+    {
+      "name": "contactPerson",
+      "title": "联系人",
+      "type": "String"
+    },
+    {
+      "name": "contactPhone",
+      "title": "联系电话",
+      "type": "String"
+    }
+  ]
+}

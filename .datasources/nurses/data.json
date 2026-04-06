@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "nurse_001",
+    "name": "张护士",
+    "phone": "138-0000-1234",
+    "position": "主管护师",
+    "assignedElders": ["elder_001"],
+    "status": "active",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "nurse_002",
+    "name": "王护士",
+    "phone": "139-0000-5678",
+    "position": "护师",
+    "assignedElders": ["elder_002"],
+    "status": "active",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "nurse_003",
+    "name": "刘护士",
+    "phone": "136-0000-9876",
+    "position": "护师",
+    "assignedElders": ["elder_003"],
+    "status": "active",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  }
+]

@@ -10,81 +10,110 @@ export default function Home(props) {
   } = useToast();
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  useEffect(() => {
-    // 模拟获取当前用户和日报数据
-    setCurrentUser({
-      name: '张爷爷',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-    });
+  const [loading, setLoading] = useState(true);
 
-    // 模拟日报数据
-    setDailyReports([{
-      id: 1,
-      date: '2026-04-05',
-      dayOfWeek: '周日',
-      meals: [{
-        time: '早餐',
-        food: '小米粥、鸡蛋、青菜',
-        image: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=300&h=200&fit=crop'
-      }, {
-        time: '午餐',
-        food: '红烧鱼、米饭、冬瓜汤',
-        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=200&fit=crop'
-      }, {
-        time: '晚餐',
-        food: '面条、青菜、豆腐',
-        image: 'https://images.unsplash.com/photo-1551782450-a2132b4ba42d?w=300&h=200&fit=crop'
-      }],
-      medications: [{
-        name: '降压药',
-        time: '8:00',
-        status: '已服用'
-      }, {
-        name: '维生素',
-        time: '12:00',
-        status: '已服用'
-      }],
-      activities: [{
-        name: '晨练太极',
-        time: '7:00',
-        image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=200&fit=crop'
-      }, {
-        name: '书法练习',
-        time: '14:00',
-        image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop'
-      }],
-      mood: '愉快',
-      health: '良好'
-    }, {
-      id: 2,
-      date: '2026-04-04',
-      dayOfWeek: '周六',
-      meals: [{
-        time: '早餐',
-        food: '豆浆、包子、咸菜',
-        image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=300&h=200&fit=crop'
-      }, {
-        time: '午餐',
-        food: '鸡肉、米饭、紫菜汤',
-        image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&h=200&fit=crop'
-      }, {
-        time: '晚餐',
-        food: '粥、馒头、青菜',
-        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop'
-      }],
-      medications: [{
-        name: '降压药',
-        time: '8:00',
-        status: '已服用'
-      }],
-      activities: [{
-        name: '园艺活动',
-        time: '10:00',
-        image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=200&fit=crop'
-      }],
-      mood: '平静',
-      health: '良好'
-    }]);
+  // 获取老人信息
+  const fetchElderInfo = async () => {
+    try {
+      const result = await props.$w.cloud.callFunction({
+        name: 'callDataSource',
+        data: {
+          dataSourceName: 'elders',
+          methodName: 'query',
+          params: {
+            filter: {
+              status: 'active'
+            },
+            limit: 1
+          }
+        }
+      });
+      if (result.result && result.result.data && result.result.data.length > 0) {
+        const elder = result.result.data[0];
+        setCurrentUser({
+          name: elder.name,
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+        });
+
+        // 获取护理日报数据
+        await fetchDailyReports(elder._id);
+      }
+    } catch (error) {
+      toast({
+        title: '获取数据失败',
+        description: '请检查网络连接后重试',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 获取护理日报数据
+  const fetchDailyReports = async elderId => {
+    try {
+      const result = await props.$w.cloud.callFunction({
+        name: 'callDataSource',
+        data: {
+          dataSourceName: 'daily_reports',
+          methodName: 'query',
+          params: {
+            filter: {
+              elderId: elderId
+            },
+            sort: {
+              date: -1
+            },
+            limit: 7
+          }
+        }
+      });
+      if (result.result && result.result.data) {
+        const reports = result.result.data.map(report => ({
+          id: report._id,
+          date: report.date,
+          dayOfWeek: getDayOfWeek(report.date),
+          meals: [{
+            time: '早餐',
+            food: report.breakfast || '未记录',
+            image: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=300&h=200&fit=crop'
+          }, {
+            time: '午餐',
+            food: report.lunch || '未记录',
+            image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=200&fit=crop'
+          }, {
+            time: '晚餐',
+            food: report.dinner || '未记录',
+            image: 'https://images.unsplash.com/photo-1551782450-a2132b4ba42d?w=300&h=200&fit=crop'
+          }],
+          medications: report.medications ? [{
+            name: '用药记录',
+            time: '全天',
+            status: report.medications
+          }] : [],
+          activities: report.activities ? [{
+            name: '活动记录',
+            time: '全天',
+            image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=200&fit=crop'
+          }] : [],
+          mood: report.mood || '良好',
+          health: report.healthStatus || '良好'
+        }));
+        setDailyReports(reports);
+      }
+    } catch (error) {
+      console.error('获取护理日报失败:', error);
+    }
+  };
+
+  // 获取星期几
+  const getDayOfWeek = dateString => {
+    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const date = new Date(dateString);
+    return days[date.getDay()];
+  };
+  useEffect(() => {
+    fetchElderInfo();
   }, []);
   const getMoodEmoji = mood => {
     const moodMap = {

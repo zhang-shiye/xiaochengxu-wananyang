@@ -26,22 +26,26 @@ export default function AdminDashboard(props) {
     id: 'upload',
     label: '数据导入',
     icon: Upload,
-    color: 'bg-blue-500'
+    color: 'bg-blue-500',
+    page: 'admin-upload'
   }, {
     id: 'add_elder',
     label: '添加老人',
     icon: Plus,
-    color: 'bg-green-500'
+    color: 'bg-green-500',
+    page: 'admin-elders'
   }, {
     id: 'generate_bill',
     label: '生成账单',
     icon: FileText,
-    color: 'bg-purple-500'
+    color: 'bg-purple-500',
+    page: 'admin-bills'
   }, {
     id: 'batch_approve',
     label: '批量审批',
     icon: Calendar,
-    color: 'bg-orange-500'
+    color: 'bg-orange-500',
+    page: 'admin-leaves'
   }];
   const handleUpload = () => {
     if (!uploadData.trim()) {
@@ -135,7 +139,7 @@ export default function AdminDashboard(props) {
             快速操作
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {quickActions.map(action => <Button key={action.id} className={`${action.color} hover:${action.color.replace('500', '600')} text-white h-16`} onClick={() => setActiveTab(action.id)}>
+            {quickActions.map(action => <Button key={action.id} className={`${action.color} hover:${action.color.replace('500', '600')} text-white h-16`} onClick={() => handleQuickAction(action.id)}>
                 <action.icon className="w-5 h-5 mr-2" />
                 {action.label}
               </Button>)}

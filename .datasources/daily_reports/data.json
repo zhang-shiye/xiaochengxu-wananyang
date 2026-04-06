@@ -1,0 +1,53 @@
+[
+  {
+    "_id": "report_001",
+    "elderId": "elder_001",
+    "elderName": "王奶奶",
+    "date": "2026-04-05",
+    "breakfast": "小米粥、鸡蛋、青菜",
+    "lunch": "红烧鱼、米饭、冬瓜汤",
+    "dinner": "面条、青菜、豆腐",
+    "medications": "降压药(8:00)、维生素(12:00)",
+    "activities": "晨练太极、午休、看电视",
+    "mood": "愉快",
+    "healthStatus": "良好",
+    "notes": "食欲良好，精神状态不错",
+    "status": "completed",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "report_002",
+    "elderId": "elder_002",
+    "elderName": "李爷爷",
+    "date": "2026-04-05",
+    "breakfast": "豆浆、油条、小菜",
+    "lunch": "红烧肉、米饭、青菜",
+    "dinner": "粥、包子、咸菜",
+    "medications": "降糖药(7:00)、降压药(19:00)",
+    "activities": "散步、下棋、听音乐",
+    "mood": "平静",
+    "healthStatus": "良好",
+    "notes": "血糖稳定，按时服药",
+    "status": "completed",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  },
+  {
+    "_id": "report_003",
+    "elderId": "elder_003",
+    "elderName": "陈奶奶",
+    "date": "2026-04-05",
+    "breakfast": "",
+    "lunch": "",
+    "dinner": "",
+    "medications": "",
+    "activities": "",
+    "mood": "",
+    "healthStatus": "",
+    "notes": "",
+    "status": "pending",
+    "createdAt": 1712390400000,
+    "updatedAt": 1712390400000
+  }
+]

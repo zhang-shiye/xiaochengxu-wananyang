@@ -10,6 +10,7 @@ import ADMIN_ELDERS from '../pages/admin-elders.jsx';
 import ADMIN_REPORTS from '../pages/admin-reports.jsx';
 import ADMIN_LEAVES from '../pages/admin-leaves.jsx';
 import ADMIN_BILLS from '../pages/admin-bills.jsx';
+import ADMIN_UPLOAD from '../pages/admin-upload.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -46,4 +47,7 @@ export const routers = [{
 }, {
   id: "admin-bills",
   component: ADMIN_BILLS
+}, {
+  id: "admin-upload",
+  component: ADMIN_UPLOAD
 }]

@@ -1,0 +1,51 @@
+{
+  "name": "bills",
+  "title": "账单记录",
+  "schemas": [
+    {
+      "name": "elderId",
+      "title": "老人ID",
+      "type": "String"
+    },
+    {
+      "name": "elderName",
+      "title": "老人姓名",
+      "type": "String"
+    },
+    {
+      "name": "month",
+      "title": "账单月份",
+      "type": "String"
+    },
+    {
+      "name": "totalAmount",
+      "title": "总金额",
+      "type": "Number"
+    },
+    {
+      "name": "status",
+      "title": "缴费状态",
+      "type": "String"
+    },
+    {
+      "name": "dueDate",
+      "title": "缴费截止日期",
+      "type": "Date",
+      "format": "date"
+    },
+    {
+      "name": "paymentDate",
+      "title": "缴费日期",
+      "type": "Date",
+      "format": "date"
+    },
+    {
+      "name": "items",
+      "title": "费用明细",
+      "type": "Array",
+      "items": {
+        "type": "Object"
+      }
+    }
+  ]
+}
