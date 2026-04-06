@@ -1,0 +1,84 @@
+{
+  "name": "daily_report",
+  "description": "护理日报数据模型",
+  "fields": [
+    {
+      "name": "_id",
+      "type": "string",
+      "description": "日报ID"
+    },
+    {
+      "name": "reporterRole",
+      "type": "string",
+      "description": "报告人角色：护工/院长",
+      "required": true
+    },
+    {
+      "name": "reporterId",
+      "type": "string",
+      "description": "报告人ID",
+      "required": true
+    },
+    {
+      "name": "reporterName",
+      "type": "string",
+      "description": "报告人姓名",
+      "required": true
+    },
+    {
+      "name": "date",
+      "type": "string",
+      "description": "日报日期",
+      "required": true
+    },
+    {
+      "name": "content",
+      "type": "string",
+      "description": "日报内容",
+      "required": true
+    },
+    {
+      "name": "aiGenerated",
+      "type": "boolean",
+      "description": "是否AI生成",
+      "default": false
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "description": "状态：待审核/已审核",
+      "default": "待审核"
+    },
+    {
+      "name": "priority",
+      "type": "string",
+      "description": "优先级：正常/紧急",
+      "default": "正常"
+    },
+    {
+      "name": "auditBy",
+      "type": "string",
+      "description": "审核人ID"
+    },
+    {
+      "name": "auditAt",
+      "type": "string",
+      "description": "审核时间"
+    },
+    {
+      "name": "auditNote",
+      "type": "string",
+      "description": "审核备注"
+    },
+    {
+      "name": "createdAt",
+      "type": "string",
+      "description": "创建时间"
+    },
+    {
+      "name": "updatedAt",
+      "type": "string",
+      "description": "更新时间"
+    }
+  ]
+}
