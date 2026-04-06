@@ -10,7 +10,7 @@ export default function TabBar({
 }) {
   const tabs = [{
     id: 'care-home',
-    name: '关爱首页',
+    name: '皖安养',
     icon: Home
   }, {
     id: 'home',

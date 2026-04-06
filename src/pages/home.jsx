@@ -108,7 +108,7 @@ export default function Home(props) {
                 <h1 className="text-xl font-bold text-amber-900" style={{
                 fontFamily: 'Playfair Display, serif'
               }}>
-                  张爷爷的护理日报
+                  护理日报
                 </h1>
                 <p className="text-sm text-amber-700" style={{
                 fontFamily: 'Nunito Sans, sans-serif'
