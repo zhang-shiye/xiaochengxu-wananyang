@@ -1,15 +1,18 @@
 // @ts-ignore;
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 // @ts-ignore;
 import { Card, Avatar, AvatarImage, Button, useToast } from '@/components/ui';
 
 import TabBar from '@/components/TabBar';
+import DateSelector from '@/components/DateSelector';
 export default function Home(props) {
   const {
     toast
   } = useToast();
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const reportRefs = useRef({});
   useEffect(() => {
     // 模拟获取当前用户和日报数据
     setCurrentUser({
@@ -18,10 +21,10 @@ export default function Home(props) {
     });
 
     // 模拟日报数据
-    setDailyReports([{
+    const reports = [{
       id: 1,
-      date: '2026-04-05',
-      dayOfWeek: '周日',
+      date: '2026-04-06',
+      dayOfWeek: '周一',
       meals: [{
         time: '早餐',
         food: '小米粥、鸡蛋、青菜',
@@ -50,42 +53,67 @@ export default function Home(props) {
         image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=200&fit=crop'
       }, {
         name: '书法练习',
-        time: '14:00',
+        time: '15:00',
         image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop'
       }],
-      mood: '愉快',
-      health: '良好'
+      health: {
+        temperature: '36.5°C',
+        bloodPressure: '120/80',
+        heartRate: '72次/分'
+      }
     }, {
       id: 2,
-      date: '2026-04-04',
-      dayOfWeek: '周六',
+      date: '2026-04-05',
+      dayOfWeek: '周日',
       meals: [{
         time: '早餐',
         food: '豆浆、包子、咸菜',
-        image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=300&h=200&fit=crop'
+        image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=300&h=200&fit=crop'
       }, {
         time: '午餐',
-        food: '鸡肉、米饭、紫菜汤',
+        food: '红烧肉、米饭、紫菜汤',
         image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&h=200&fit=crop'
       }, {
         time: '晚餐',
-        food: '粥、馒头、青菜',
-        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop'
+        food: '粥、馒头、小菜',
+        image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=300&h=200&fit=crop'
       }],
       medications: [{
         name: '降压药',
         time: '8:00',
         status: '已服用'
+      }, {
+        name: '维生素',
+        time: '12:00',
+        status: '已服用'
       }],
       activities: [{
-        name: '园艺活动',
-        time: '10:00',
-        image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=200&fit=crop'
+        name: '散步',
+        time: '16:00',
+        image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=300&h=200&fit=crop'
       }],
-      mood: '平静',
-      health: '良好'
-    }]);
+      health: {
+        temperature: '36.3°C',
+        bloodPressure: '118/78',
+        heartRate: '68次/分'
+      }
+    }];
+    setDailyReports(reports);
+    setSelectedDate(reports[0].date); // 默认选择最新日期
   }, []);
+  // 处理日期选择
+  const handleDateChange = date => {
+    setSelectedDate(date);
+
+    // 滚动到对应的日报位置
+    const reportElement = reportRefs.current[date];
+    if (reportElement) {
+      reportElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
   const getMoodEmoji = mood => {
     const moodMap = {
       '愉快': '😊',
@@ -117,15 +145,19 @@ export default function Home(props) {
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-amber-600">
-                {new Date().getDate()}
-              </p>
-              <p className="text-sm text-amber-700">
-                {new Date().toLocaleDateString('zh-CN', {
-                month: 'short'
-              })}
-              </p>
+            <div className="flex items-center space-x-4">
+              {/* 日期选择器 */}
+              <DateSelector dates={dailyReports.map(report => report.date)} selectedDate={selectedDate} onDateChange={handleDateChange} />
+              <div className="text-right">
+                <p className="text-2xl font-bold text-amber-600">
+                  {new Date().getDate()}
+                </p>
+                <p className="text-sm text-amber-700">
+                  {new Date().toLocaleDateString('zh-CN', {
+                  month: 'short'
+                })}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -133,7 +165,7 @@ export default function Home(props) {
 
       {/* 时间轴 */}
       <div className="container mx-auto px-4 py-6">
-        {dailyReports.map((report, index) => <div key={report.id} className="relative">
+        {dailyReports.map((report, index) => <div key={report.id} className="relative" ref={el => reportRefs.current[report.date] = el}>
             {/* 时间轴线 */}
             {index !== dailyReports.length - 1 && <div className="absolute left-6 top-20 w-0.5 h-full bg-gradient-to-b from-amber-300 to-transparent"></div>}
             
