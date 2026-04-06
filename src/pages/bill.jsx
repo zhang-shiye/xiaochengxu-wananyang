@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, useToast } from '@/components/ui';
 
 import TabBar from '@/components/TabBar';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import DataGuard from '@/components/DataGuard';
+import { safeGet, isEmptyData, formatData } from '@/lib/dataUtils';
 export default function Bill(props) {
   const {
     toast
@@ -31,14 +34,23 @@ export default function Bill(props) {
           }
         }
       });
-      if (elderResult.result && elderResult.result.data && elderResult.result.data.length > 0) {
-        const elder = elderResult.result.data[0];
-        setCurrentElder(elder);
+
+      // 安全访问数据
+      const elderData = safeGet(elderResult, 'result.data[0]');
+      if (elderData) {
+        setCurrentElder(elderData);
 
         // 获取账单数据
-        await fetchBills(elder._id);
+        await fetchBills(safeGet(elderData, '_id'));
+      } else {
+        toast({
+          title: '未找到老人信息',
+          description: '请检查老人是否已绑定',
+          variant: 'destructive'
+        });
       }
     } catch (error) {
+      console.error('获取老人信息失败:', error);
       toast({
         title: '获取数据失败',
         description: '请检查网络连接后重试',

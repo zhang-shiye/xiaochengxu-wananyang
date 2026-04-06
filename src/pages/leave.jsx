@@ -5,6 +5,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, 
 
 import { useForm } from 'react-hook-form';
 import TabBar from '@/components/TabBar';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import DataGuard from '@/components/DataGuard';
+import { safeGet, isEmptyData, formatData, validateData } from '@/lib/dataUtils';
 export default function Leave(props) {
   const {
     toast

@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, Avatar, AvatarImage, Button, useToast } from '@/components/ui';
 
 import TabBar from '@/components/TabBar';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import DataGuard from '@/components/DataGuard';
+import { safeGet, isEmptyData, formatData } from '@/lib/dataUtils';
 export default function Home(props) {
   const {
     toast
@@ -15,6 +18,7 @@ export default function Home(props) {
   // 获取老人信息
   const fetchElderInfo = async () => {
     try {
+      setLoading(true);
       const result = await props.$w.cloud.callFunction({
         name: 'callDataSource',
         data: {
@@ -28,17 +32,26 @@ export default function Home(props) {
           }
         }
       });
-      if (result.result && result.result.data && result.result.data.length > 0) {
-        const elder = result.result.data[0];
+
+      // 安全访问数据
+      const elderData = safeGet(result, 'result.data[0]');
+      if (elderData) {
         setCurrentUser({
-          name: elder.name,
+          name: safeGet(elderData, 'name', '老人'),
           avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
         });
 
         // 获取护理日报数据
-        await fetchDailyReports(elder._id);
+        await fetchDailyReports(safeGet(elderData, '_id'));
+      } else {
+        toast({
+          title: '未找到老人信息',
+          description: '请检查老人是否已绑定',
+          variant: 'destructive'
+        });
       }
     } catch (error) {
+      console.error('获取老人信息失败:', error);
       toast({
         title: '获取数据失败',
         description: '请检查网络连接后重试',

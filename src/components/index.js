@@ -3,3 +3,7 @@ export * from './LoadingSpinner.jsx';
 export * from './EmptyState.jsx';
 export * from './FormField.jsx';
 export * from './FormValidation.jsx';
+export * from './ErrorBoundary.jsx';
+export * from './DataGuard.jsx';
+export * from './AppErrorHandler.jsx';
+export * from './DataLoadingWrapper.jsx';

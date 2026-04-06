@@ -6,6 +6,9 @@ import { Card, Avatar, AvatarImage, Button, Badge, useToast } from '@/components
 import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign } from 'lucide-react';
 
 import TabBar from '@/components/TabBar';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import DataGuard from '@/components/DataGuard';
+import { safeGet, isEmptyData, formatData } from '@/lib/dataUtils';
 export default function CareHome(props) {
   const {
     toast
