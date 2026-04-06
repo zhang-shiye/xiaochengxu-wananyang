@@ -91,7 +91,7 @@ export default function CareHome(props) {
           <h1 className="text-3xl font-bold text-amber-900 mb-2" style={{
           fontFamily: 'Playfair Display, serif'
         }}>
-            关爱首页
+            皖安养
           </h1>
           <p className="text-amber-700" style={{
           fontFamily: 'Nunito Sans, sans-serif'

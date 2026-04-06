@@ -73,13 +73,22 @@ export default function Leave(props) {
       });
       return;
     }
+
+    // 处理请假事由显示文本
+    let reasonText = '';
+    if (data.reason === 'other' && data.customReason) {
+      reasonText = data.customReason;
+    } else {
+      const selectedOption = reasonOptions.find(option => option.value === data.reason);
+      reasonText = selectedOption ? selectedOption.label : data.reason;
+    }
     setIsSubmitting(true);
     try {
       // 模拟提交请假申请
       await new Promise(resolve => setTimeout(resolve, 1500));
       const newRequest = {
         id: Date.now(),
-        reason: data.reason,
+        reason: reasonText,
         startDate: data.startDate,
         endDate: data.endDate,
         status: 'pending',
