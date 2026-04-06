@@ -76,6 +76,42 @@ export default function CareHome(props) {
     });
   };
 
+  // 生成30天内的日期选项
+  const generateDateOptions = () => {
+    const options = [];
+    const today = new Date('2026-04-06'); // 当前时间
+
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const displayStr = date.toLocaleDateString('zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+        weekday: 'short'
+      });
+      options.push({
+        value: dateStr,
+        label: displayStr
+      });
+    }
+    return options;
+  };
+  const dateOptions = generateDateOptions();
+  const [selectedDate, setSelectedDate] = useState(dateOptions[0].value);
+
+  // 处理日期选择变化
+  const handleDateChange = dateValue => {
+    setSelectedDate(dateValue);
+    // 跳转到对应日期的护理记录页面
+    props.$w.utils.navigateTo({
+      pageId: 'daily-report',
+      params: {
+        date: dateValue
+      }
+    });
+  };
+
   // 计算入院天数
   const getAdmissionDays = () => {
     const admission = new Date(elderInfo.admissionDate);
