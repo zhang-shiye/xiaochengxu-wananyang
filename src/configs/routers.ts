@@ -5,7 +5,9 @@ import BILL from '../pages/bill.jsx';
 import BIND_SENIOR from '../pages/bind-senior.jsx';
 import WECHAT_LOGIN from '../pages/wechat-login.jsx';
 import CARE_HOME from '../pages/care-home.jsx';
-import ADMIN from '../pages/admin.jsx';
+import BACKEND_LOGIN from '../pages/backend-login.jsx';
+import STAFF_WORKSPACE from '../pages/staff-workspace.jsx';
+import DIRECTOR_WORKSPACE from '../pages/director-workspace.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -28,6 +30,12 @@ export const routers = [{
   id: "care-home",
   component: CARE_HOME
 }, {
-  id: "admin",
-  component: ADMIN
+  id: "backend-login",
+  component: BACKEND_LOGIN
+}, {
+  id: "staff-workspace",
+  component: STAFF_WORKSPACE
+}, {
+  id: "director-workspace",
+  component: DIRECTOR_WORKSPACE
 }]
