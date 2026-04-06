@@ -1,15 +1,13 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Card, Avatar, AvatarImage, Button, Badge, useToast } from '@/components/ui';
-// @ts-ignore;
+import { Card, Avatar, AvatarImage, Button, Badge, useToast } from '@/components/ui'; // @ts-ignore;
 import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign } from 'lucide-react';
-
 import TabBar from '@/components/TabBar';
 export default function CareHome(props) {
   const {
-    toast
-  } = useToast();
+    toast } =
+  useToast();
   const [elderInfo, setElderInfo] = useState({
     name: '王奶奶',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face',
@@ -23,62 +21,62 @@ export default function CareHome(props) {
     emergencyPhone: '0551-8888-6666',
     healthStatus: '良好',
     moodStatus: '愉快',
-    lastUpdate: '2024-04-05 14:30'
-  });
+    lastUpdate: '2024-04-05 14:30' });
+
   const [latestInfo, setLatestInfo] = useState({
     dailyReport: {
       date: '2024-04-05',
       meal: '午餐：米饭、清蒸鱼、炒时蔬',
       mood: '愉快',
-      time: '12:00'
-    },
+      time: '12:00' },
+
     leaveRequest: {
       status: '待审批',
       type: '外出请假',
       date: '2024-04-08',
-      time: '14:30'
-    },
+      time: '14:30' },
+
     bill: {
       month: '2024年4月',
       amount: '¥3,580',
       status: '待缴费',
-      dueDate: '2024-04-10'
-    }
-  });
+      dueDate: '2024-04-10' } });
+
+
   const handleNavigateToDaily = () => {
     props.$w.utils.navigateTo({
       pageId: 'home',
-      params: {}
-    });
+      params: {} });
+
   };
   const handleNavigateToLeave = () => {
     props.$w.utils.navigateTo({
       pageId: 'leave',
-      params: {}
-    });
+      params: {} });
+
   };
   const handleNavigateToBill = () => {
     props.$w.utils.navigateTo({
       pageId: 'bill',
-      params: {}
-    });
+      params: {} });
+
   };
   const handleCallNurse = () => {
     toast({
       title: '正在拨号',
-      description: `正在联系 ${elderInfo.primaryNurse}`
-    });
+      description: `正在联系 ${elderInfo.primaryNurse}` });
+
   };
   const handleEmergencyCall = () => {
     toast({
       title: '紧急联系',
-      description: `正在联系 ${elderInfo.emergencyContact}`
-    });
+      description: `正在联系 ${elderInfo.emergencyContact}` });
+
   };
 
   // 计算入院天数
-  const getAdmissionDays = () => {
-    const admission = new Date(elderInfo.admissionDate);
+  // 计算入院天数
+  const getAdmissionDays = () => {const admission = new Date(elderInfo.admissionDate);
     const today = new Date();
     const diffTime = Math.abs(today - admission);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -89,13 +87,13 @@ export default function CareHome(props) {
         {/* 头部标题 */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-amber-900 mb-2" style={{
-          fontFamily: 'Playfair Display, serif'
-        }}>
+          fontFamily: 'Playfair Display, serif' }}>
+
             皖安养
           </h1>
           <p className="text-amber-700" style={{
-          fontFamily: 'Nunito Sans, sans-serif'
-        }}>
+          fontFamily: 'Nunito Sans, sans-serif' }}>
+
             用心陪伴，安心养老
           </p>
         </div>
@@ -109,13 +107,13 @@ export default function CareHome(props) {
               </Avatar>
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-gray-800" style={{
-                fontFamily: 'Playfair Display, serif'
-              }}>
+                fontFamily: 'Playfair Display, serif' }}>
+
                   {elderInfo.name}
                 </h2>
                 <p className="text-gray-600" style={{
-                fontFamily: 'Nunito Sans, sans-serif'
-              }}>
+                fontFamily: 'Nunito Sans, sans-serif' }}>
+
                   {elderInfo.age}岁 · {elderInfo.careLevel}
                 </p>
               </div>
@@ -169,7 +167,7 @@ export default function CareHome(props) {
                   拨打
                 </Button>
               </div>
-              <p className="font-medium text-gray-800">{elderInfo.emergencyContact}</p>
+              <p className="font-medium text-gray-800 text-[1.125rem]">{elderInfo.emergencyContact}</p>
               <p className="text-sm text-gray-500">{elderInfo.emergencyPhone}</p>
             </div>
 
@@ -185,8 +183,8 @@ export default function CareHome(props) {
         {/* 最新信息区域 */}
         <div className="space-y-4 mb-6">
           <h3 className="text-xl font-bold text-gray-800" style={{
-          fontFamily: 'Playfair Display, serif'
-        }}>
+          fontFamily: 'Playfair Display, serif' }}>
+
             最新动态
           </h3>
 
