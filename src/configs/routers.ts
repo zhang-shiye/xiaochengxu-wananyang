@@ -6,11 +6,10 @@ import BIND_SENIOR from '../pages/bind-senior.jsx';
 import WECHAT_LOGIN from '../pages/wechat-login.jsx';
 import CARE_HOME from '../pages/care-home.jsx';
 import ADMIN_DASHBOARD from '../pages/admin-dashboard.jsx';
-import ADMIN_ELDERS from '../pages/admin-elders.jsx';
-import ADMIN_REPORTS from '../pages/admin-reports.jsx';
-import ADMIN_LEAVES from '../pages/admin-leaves.jsx';
-import ADMIN_BILLS from '../pages/admin-bills.jsx';
-import ADMIN_UPLOAD from '../pages/admin-upload.jsx';
+import DAILY_APPROVAL from '../pages/daily-approval.jsx';
+import LEAVE_APPROVAL from '../pages/leave-approval.jsx';
+import BILL_APPROVAL from '../pages/bill-approval.jsx';
+import BATCH_UPDATE from '../pages/batch-update.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -36,18 +35,15 @@ export const routers = [{
   id: "admin-dashboard",
   component: ADMIN_DASHBOARD
 }, {
-  id: "admin-elders",
-  component: ADMIN_ELDERS
+  id: "daily-approval",
+  component: DAILY_APPROVAL
 }, {
-  id: "admin-reports",
-  component: ADMIN_REPORTS
+  id: "leave-approval",
+  component: LEAVE_APPROVAL
 }, {
-  id: "admin-leaves",
-  component: ADMIN_LEAVES
+  id: "bill-approval",
+  component: BILL_APPROVAL
 }, {
-  id: "admin-bills",
-  component: ADMIN_BILLS
-}, {
-  id: "admin-upload",
-  component: ADMIN_UPLOAD
+  id: "batch-update",
+  component: BATCH_UPDATE
 }]

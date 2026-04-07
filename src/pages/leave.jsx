@@ -5,18 +5,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, 
 
 import { useForm } from 'react-hook-form';
 import TabBar from '@/components/TabBar';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import DataGuard from '@/components/DataGuard';
-import { safeGet, isEmptyData, formatData, validateData } from '@/lib/dataUtils';
 export default function Leave(props) {
   const {
     toast
   } = useToast();
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentElder, setCurrentElder] = useState(null);
-  const [loading, setLoading] = useState(true);
-
   // 常用请假事由选项
   const reasonOptions = [{
     value: 'family_visit',
@@ -46,148 +40,35 @@ export default function Leave(props) {
     }
   });
 
-  // 表单验证规则
-  const validationRules = {
-    reason: [value => !value && '请选择请假事由'],
-    startDate: [value => !value && '请选择开始日期', value => {
-      if (!value) return;
-      const selectedDate = new Date(value);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate < today) return '开始日期不能早于今天';
-    }],
-    endDate: [value => !value && '请选择结束日期', value => {
-      if (!value || !form.watch('startDate')) return;
-      const startDate = new Date(form.watch('startDate'));
-      const endDate = new Date(value);
-      if (endDate < startDate) return '结束日期不能早于开始日期';
-    }],
-    customReason: [value => {
-      if (form.watch('reason') === 'other' && !value) {
-        return '请输入具体事由';
-      }
-    }]
-  };
-
   // 监听请假事由选择变化
   const selectedReason = form.watch('reason');
-
-  // 获取老人信息和请假记录
-  const fetchElderInfoAndRequests = async () => {
-    try {
-      setLoading(true);
-      // 获取老人信息
-      const elderResult = await props.$w.cloud.callFunction({
-        name: 'callDataSource',
-        data: {
-          dataSourceName: 'elders',
-          methodName: 'query',
-          params: {
-            filter: {
-              status: 'active'
-            },
-            limit: 1
-          }
-        }
-      });
-      if (elderResult.result && elderResult.result.data && elderResult.result.data.length > 0) {
-        const elder = elderResult.result.data[0];
-        setCurrentElder(elder);
-
-        // 获取请假记录
-        await fetchLeaveRequests(elder._id);
-      }
-    } catch (error) {
-      toast({
-        title: '获取数据失败',
-        description: '请检查网络连接后重试',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 获取请假记录
-  const fetchLeaveRequests = async elderId => {
-    try {
-      const result = await props.$w.cloud.callFunction({
-        name: 'callDataSource',
-        data: {
-          dataSourceName: 'leave_requests',
-          methodName: 'query',
-          params: {
-            filter: {
-              elderId: elderId
-            },
-            sort: {
-              submitTime: -1
-            },
-            limit: 10
-          }
-        }
-      });
-      if (result.result && result.result.data) {
-        const requests = result.result.data.map(request => ({
-          id: request._id,
-          reason: request.reason,
-          startDate: request.startDate,
-          endDate: request.endDate,
-          status: request.status,
-          submitTime: new Date(request.submitTime).toLocaleString('zh-CN'),
-          approvalTime: request.approvalTime ? new Date(request.approvalTime).toLocaleString('zh-CN') : null
-        }));
-        setLeaveRequests(requests);
-      }
-    } catch (error) {
-      console.error('获取请假记录失败:', error);
-    }
-  };
   useEffect(() => {
-    fetchElderInfoAndRequests();
+    // 模拟获取历史请假记录
+    setLeaveRequests([{
+      id: 1,
+      reason: '家庭聚餐',
+      startDate: '2026-04-10',
+      endDate: '2026-04-10',
+      status: 'approved',
+      submitTime: '2026-04-08 14:30',
+      approvalTime: '2026-04-08 16:45'
+    }, {
+      id: 2,
+      reason: '医院检查',
+      startDate: '2026-04-15',
+      endDate: '2026-04-15',
+      status: 'pending',
+      submitTime: '2026-04-05 10:20',
+      approvalTime: null
+    }]);
   }, []);
   const onSubmit = async data => {
     // 表单验证
     const isValid = await form.trigger();
     if (!isValid) {
-      // 高亮显示错误字段
-      const errors = form.formState.errors;
-      const firstError = Object.keys(errors)[0];
-      if (firstError) {
-        const errorElement = document.querySelector(`[name="${firstError}"]`);
-        if (errorElement) {
-          errorElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-          errorElement.focus();
-        }
-      }
       toast({
         title: '表单验证失败',
         description: '请检查并完善表单信息',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // 日期验证
-    const startDate = new Date(data.startDate);
-    const endDate = new Date(data.endDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (startDate < today) {
-      toast({
-        title: '日期错误',
-        description: '开始日期不能早于今天',
-        variant: 'destructive'
-      });
-      return;
-    }
-    if (endDate < startDate) {
-      toast({
-        title: '日期错误',
-        description: '结束日期不能早于开始日期',
         variant: 'destructive'
       });
       return;
@@ -203,33 +84,23 @@ export default function Leave(props) {
     }
     setIsSubmitting(true);
     try {
-      // 提交请假申请到数据库
-      if (!currentElder) return;
-      const submitResult = await props.$w.cloud.callFunction({
-        name: 'callDataSource',
-        data: {
-          dataSourceName: 'leave_requests',
-          methodName: 'create',
-          params: {
-            elderId: currentElder._id,
-            elderName: currentElder.name,
-            reason: reasonText,
-            startDate: data.startDate,
-            endDate: data.endDate,
-            status: 'pending',
-            submitTime: new Date().toISOString(),
-            approvalTime: null
-          }
-        }
+      // 模拟提交请假申请
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const newRequest = {
+        id: Date.now(),
+        reason: reasonText,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        status: 'pending',
+        submitTime: new Date().toLocaleString('zh-CN'),
+        approvalTime: null
+      };
+      setLeaveRequests([newRequest, ...leaveRequests]);
+      toast({
+        title: '提交成功',
+        description: '请假申请已提交，请等待院长审批'
       });
-      if (submitResult.result && submitResult.result.success) {
-        // 重新获取请假记录
-        await fetchLeaveRequests(currentElder._id);
-        toast({
-          title: '提交成功',
-          description: '请假申请已提交，请等待院长审批'
-        });
-      }
+      form.reset();
     } catch (error) {
       toast({
         title: '提交失败',

@@ -4,112 +4,66 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, useToast } from '@/components/ui';
 
 import TabBar from '@/components/TabBar';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import DataGuard from '@/components/DataGuard';
-import { safeGet, isEmptyData, formatData } from '@/lib/dataUtils';
 export default function Bill(props) {
   const {
     toast
   } = useToast();
   const [bills, setBills] = useState([]);
   const [currentMonth, setCurrentMonth] = useState('2026-04');
-  const [currentElder, setCurrentElder] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // 获取老人信息和账单数据
-  const fetchElderInfoAndBills = async () => {
-    try {
-      setLoading(true);
-      // 获取老人信息
-      const elderResult = await props.$w.cloud.callFunction({
-        name: 'callDataSource',
-        data: {
-          dataSourceName: 'elders',
-          methodName: 'query',
-          params: {
-            filter: {
-              status: 'active'
-            },
-            limit: 1
-          }
-        }
-      });
-
-      // 安全访问数据
-      const elderData = safeGet(elderResult, 'result.data[0]');
-      if (elderData) {
-        setCurrentElder(elderData);
-
-        // 获取账单数据
-        await fetchBills(safeGet(elderData, '_id'));
-      } else {
-        toast({
-          title: '未找到老人信息',
-          description: '请检查老人是否已绑定',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('获取老人信息失败:', error);
-      toast({
-        title: '获取数据失败',
-        description: '请检查网络连接后重试',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 获取账单数据
-  const fetchBills = async elderId => {
-    try {
-      const result = await props.$w.cloud.callFunction({
-        name: 'callDataSource',
-        data: {
-          dataSourceName: 'bills',
-          methodName: 'query',
-          params: {
-            filter: {
-              elderId: elderId
-            },
-            sort: {
-              month: -1
-            },
-            limit: 12
-          }
-        }
-      });
-      if (result.result && result.result.data) {
-        const billsData = result.result.data.map(bill => ({
-          id: bill._id,
-          month: bill.month,
-          totalAmount: bill.totalAmount,
-          status: bill.status,
-          dueDate: bill.dueDate,
-          paymentDate: bill.paymentDate,
-          items: bill.items || [{
-            name: '基础床位费',
-            amount: 1800,
-            unit: '月'
-          }, {
-            name: '护理费',
-            amount: 1200,
-            unit: '月'
-          }, {
-            name: '餐费',
-            amount: 800,
-            unit: '月'
-          }]
-        }));
-        setBills(billsData);
-      }
-    } catch (error) {
-      console.error('获取账单数据失败:', error);
-    }
-  };
   useEffect(() => {
-    fetchElderInfoAndBills();
+    // 模拟账单数据
+    setBills([{
+      id: 1,
+      month: '2026-04',
+      totalAmount: 4200,
+      status: 'unpaid',
+      dueDate: '2026-04-15',
+      items: [{
+        name: '基础床位费',
+        amount: 1800,
+        unit: '月'
+      }, {
+        name: '护理费（二级）',
+        amount: 1200,
+        unit: '月'
+      }, {
+        name: '餐费',
+        amount: 800,
+        unit: '月'
+      }, {
+        name: '代办买药费',
+        amount: 350,
+        unit: '次'
+      }, {
+        name: '洗衣费',
+        amount: 50,
+        unit: '月'
+      }]
+    }, {
+      id: 2,
+      month: '2026-03',
+      totalAmount: 3850,
+      status: 'paid',
+      dueDate: '2026-03-15',
+      paymentDate: '2026-03-10',
+      items: [{
+        name: '基础床位费',
+        amount: 1800,
+        unit: '月'
+      }, {
+        name: '护理费（二级）',
+        amount: 1200,
+        unit: '月'
+      }, {
+        name: '餐费',
+        amount: 800,
+        unit: '月'
+      }, {
+        name: '洗衣费',
+        amount: 50,
+        unit: '月'
+      }]
+    }]);
   }, []);
   const currentBill = bills.find(bill => bill.month === currentMonth);
   const paymentMethodsRef = React.useRef(null);
@@ -137,24 +91,6 @@ export default function Bill(props) {
     };
     return statusMap[status] || statusMap.unpaid;
   };
-  if (loading) {
-    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
-          <p className="text-amber-700">加载中...</p>
-        </div>
-      </div>;
-  }
-  if (!currentElder) {
-    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-amber-700">未找到老人信息</p>
-          <Button className="mt-4" onClick={fetchElderInfoAndBills}>
-            重新加载
-          </Button>
-        </div>
-      </div>;
-  }
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
       {/* 头部 */}
       <div className="bg-white/80 backdrop-blur-sm shadow-sm">
