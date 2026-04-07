@@ -8,7 +8,8 @@ import CARE_HOME from '../pages/care-home.jsx';
 import ADMIN_DASHBOARD from '../pages/admin-dashboard.jsx';
 import ADMIN_LEAVE-REVIEW from '../pages/admin-leave-review.jsx';
 import ADMIN_BILL-REVIEW from '../pages/admin-bill-review.jsx';
-import ADMIN_BIND-CODE from '../pages/admin-bind-code.jsx';
+import ADMIN_DAILY-REVIEW from '../pages/admin-daily-review.jsx';
+import ADMIN_VERIFICATION-CODE from '../pages/admin-verification-code.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -40,6 +41,9 @@ export const routers = [{
   id: "admin-bill-review",
   component: ADMIN_BILL-REVIEW
 }, {
-  id: "admin-bind-code",
-  component: ADMIN_BIND-CODE
+  id: "admin-daily-review",
+  component: ADMIN_DAILY-REVIEW
+}, {
+  id: "admin-verification-code",
+  component: ADMIN_VERIFICATION-CODE
 }]

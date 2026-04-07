@@ -1,9 +1,9 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Search, Filter, Calendar, User, DollarSign, Edit3, Check, X, Image, Trash2, Plus, Save } from 'lucide-react';
+import { Search, Filter, Calendar, User, DollarSign, Edit3, Check, X, Image, Trash2, Plus, Save, ArrowLeft, Badge } from 'lucide-react';
 // @ts-ignore;
-import { useToast } from '@/components/ui';
+import { useToast, Button, Avatar, AvatarImage, Input, Textarea, Card, CardContent } from '@/components/ui';
 
 import AdminTabBar from '@/components/AdminTabBar';
 export default function AdminBillReview(props) {
@@ -16,510 +16,458 @@ export default function AdminBillReview(props) {
   const [selectedBill, setSelectedBill] = useState(null);
   const [isDetailView, setIsDetailView] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [bills, setBills] = useState([{
-    id: 1,
-    seniorName: '张爷爷',
-    month: '2026年4月',
-    totalAmount: 2850,
-    status: 'pending',
-    submitTime: '2026-04-07 10:30',
-    submitter: '王护士',
-    items: [{
-      name: '住宿费',
-      amount: 1200,
-      quantity: 1
-    }, {
-      name: '护理费',
-      amount: 800,
-      quantity: 1
-    }, {
-      name: '餐费',
-      amount: 600,
-      quantity: 1
-    }, {
-      name: '医疗费',
-      amount: 250,
-      quantity: 1
-    }],
-    images: ['https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&h=300&fit=crop', 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400&h=300&fit=crop'],
-    notes: '本月医疗费用包含常规体检费用'
-  }, {
-    id: 2,
-    seniorName: '李奶奶',
-    month: '2026年4月',
-    totalAmount: 3200,
-    status: 'pending',
-    submitTime: '2026-04-07 09:15',
-    submitter: '赵护士',
-    items: [{
-      name: '住宿费',
-      amount: 1500,
-      quantity: 1
-    }, {
-      name: '护理费',
-      amount: 1000,
-      quantity: 1
-    }, {
-      name: '餐费',
-      amount: 700,
-      quantity: 1
-    }],
-    images: ['https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=300&fit=crop'],
-    notes: '护理费增加，需要特殊护理服务'
-  }, {
-    id: 3,
-    seniorName: '王爷爷',
-    month: '2026年3月',
-    totalAmount: 2100,
-    status: 'approved',
-    submitTime: '2026-04-06 16:20',
-    submitter: '刘护士',
-    items: [{
-      name: '住宿费',
-      amount: 1000,
-      quantity: 1
-    }, {
-      name: '护理费',
-      amount: 600,
-      quantity: 1
-    }, {
-      name: '餐费',
-      amount: 500,
-      quantity: 1
-    }],
-    images: [],
-    notes: '常规费用，无特殊说明'
-  }, {
-    id: 4,
-    seniorName: '赵奶奶',
-    month: '2026年4月',
-    totalAmount: 3800,
-    status: 'rejected',
-    submitTime: '2026-04-07 08:45',
-    submitter: '陈护士',
-    items: [{
-      name: '住宿费',
-      amount: 1800,
-      quantity: 1
-    }, {
-      name: '护理费',
-      amount: 1200,
-      quantity: 1
-    }, {
-      name: '餐费',
-      amount: 800,
-      quantity: 1
-    }],
-    images: ['https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop'],
-    notes: '费用明细需要重新核对',
-    rejectReason: '医疗费用明细不完整，请补充相关凭证'
-  }]);
-  const [editingBill, setEditingBill] = useState(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [bills, setBills] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // 筛选和搜索逻辑
+  // 获取缴费清单数据
+  const fetchBills = async () => {
+    try {
+      setLoading(true);
+      const result = await props.$w.cloud.callFunction({
+        name: 'getBillsForReview',
+        data: {
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          search: searchTerm
+        }
+      });
+      if (result.result.success) {
+        setBills(result.result.data);
+      } else {
+        toast({
+          title: '获取数据失败',
+          description: result.result.error || '请重试',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: '网络错误',
+        description: '获取数据失败，请检查网络连接',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchBills();
+  }, [statusFilter, searchTerm]);
+
+  // 审批缴费清单
+  const handleReview = async (billId, status, comment = '') => {
+    try {
+      const result = await props.$w.cloud.callFunction({
+        name: 'reviewBill',
+        data: {
+          billId,
+          status,
+          comment,
+          reviewerId: props.$w.auth.currentUser?.userId || 'admin_001'
+        }
+      });
+      if (result.result.success) {
+        toast({
+          title: status === 'approved' ? '发布成功' : '已退回',
+          description: status === 'approved' ? '缴费清单已发布给家属' : '缴费清单已退回修改'
+        });
+        fetchBills();
+        if (selectedBill) {
+          setSelectedBill(prev => ({
+            ...prev,
+            status
+          }));
+        }
+      } else {
+        toast({
+          title: '操作失败',
+          description: result.result.error || '请重试',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: '网络错误',
+        description: '操作失败，请检查网络连接',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // 编辑缴费清单
+  const handleEdit = async updatedData => {
+    try {
+      const result = await props.$w.cloud.callFunction({
+        name: 'updateBill',
+        data: {
+          billId: selectedBill._id,
+          ...updatedData,
+          reviewerId: props.$w.auth.currentUser?.userId || 'admin_001'
+        }
+      });
+      if (result.result.success) {
+        toast({
+          title: '修改成功',
+          description: '缴费清单已更新'
+        });
+        fetchBills();
+        setSelectedBill(prev => ({
+          ...prev,
+          ...updatedData
+        }));
+        setIsEditMode(false);
+      } else {
+        toast({
+          title: '修改失败',
+          description: result.result.error || '请重试',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: '网络错误',
+        description: '修改失败，请检查网络连接',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // 删除图片
+  const handleDeleteImage = async imageIndex => {
+    try {
+      const newImages = selectedBill.images.filter((_, index) => index !== imageIndex);
+      await handleEdit({
+        images: newImages
+      });
+    } catch (error) {
+      toast({
+        title: '删除失败',
+        description: '图片删除失败，请重试',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // 添加费用项目
+  const handleAddItem = () => {
+    const newItem = {
+      name: '新项目',
+      amount: 0,
+      quantity: 1
+    };
+    const updatedItems = [...selectedBill.items, newItem];
+    const updatedTotal = updatedItems.reduce((sum, item) => sum + item.amount * item.quantity, 0);
+    setSelectedBill(prev => ({
+      ...prev,
+      items: updatedItems,
+      totalAmount: updatedTotal
+    }));
+  };
+
+  // 删除费用项目
+  const handleDeleteItem = index => {
+    const updatedItems = selectedBill.items.filter((_, i) => i !== index);
+    const updatedTotal = updatedItems.reduce((sum, item) => sum + item.amount * item.quantity, 0);
+    setSelectedBill(prev => ({
+      ...prev,
+      items: updatedItems,
+      totalAmount: updatedTotal
+    }));
+  };
+
+  // 更新费用项目
+  const handleUpdateItem = (index, field, value) => {
+    const updatedItems = selectedBill.items.map((item, i) => i === index ? {
+      ...item,
+      [field]: field === 'name' ? value : parseFloat(value) || 0
+    } : item);
+    const updatedTotal = updatedItems.reduce((sum, item) => sum + item.amount * item.quantity, 0);
+    setSelectedBill(prev => ({
+      ...prev,
+      items: updatedItems,
+      totalAmount: updatedTotal
+    }));
+  };
+  const getStatusBadge = status => {
+    const statusMap = {
+      pending: {
+        label: '待审批',
+        variant: 'secondary'
+      },
+      approved: {
+        label: '已发布',
+        variant: 'default'
+      },
+      rejected: {
+        label: '已退回',
+        variant: 'destructive'
+      }
+    };
+    return statusMap[status] || {
+      label: '未知',
+      variant: 'secondary'
+    };
+  };
   const filteredBills = bills.filter(bill => {
-    const matchesSearch = bill.seniorName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = bill.elderName?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || bill.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-
-  // 统计各状态数量
-  const stats = {
+  const statusCounts = {
+    all: bills.length,
     pending: bills.filter(b => b.status === 'pending').length,
     approved: bills.filter(b => b.status === 'approved').length,
     rejected: bills.filter(b => b.status === 'rejected').length
   };
-  const handleApprove = billId => {
-    setBills(prev => prev.map(bill => bill.id === billId ? {
-      ...bill,
-      status: 'approved'
-    } : bill));
-    toast({
-      title: '缴费清单已确认发布',
-      description: '家属端将立即收到推送通知',
-      className: 'bg-green-50 border-green-200'
-    });
-    setIsDetailView(false);
-    setSelectedBill(null);
-  };
-  const handleReject = billId => {
-    if (!rejectReason.trim()) {
-      toast({
-        title: '请填写退回理由',
-        description: '退回修改需要说明原因',
-        variant: 'destructive'
-      });
-      return;
-    }
-    setBills(prev => prev.map(bill => bill.id === billId ? {
-      ...bill,
-      status: 'rejected',
-      rejectReason: rejectReason
-    } : bill));
-    toast({
-      title: '缴费清单已退回修改',
-      description: '提交人将收到通知并重新提交',
-      className: 'bg-orange-50 border-orange-200'
-    });
-    setShowRejectModal(false);
-    setRejectReason('');
-    setIsDetailView(false);
-    setSelectedBill(null);
-  };
-  const handleEdit = bill => {
-    setEditingBill({
-      ...bill
-    });
-    setIsEditMode(true);
-  };
-  const handleSaveEdit = () => {
-    setBills(prev => prev.map(bill => bill.id === editingBill.id ? editingBill : bill));
-    toast({
-      title: '修改已保存',
-      description: '缴费清单已更新',
-      className: 'bg-blue-50 border-blue-200'
-    });
-    setIsEditMode(false);
-    setEditingBill(null);
-    if (selectedBill) {
-      setSelectedBill(editingBill);
-    }
-  };
-  const handleCancelEdit = () => {
-    setIsEditMode(false);
-    setEditingBill(null);
-  };
-  const updateBillItem = (itemIndex, field, value) => {
-    setEditingBill(prev => ({
-      ...prev,
-      items: prev.items.map((item, index) => index === itemIndex ? {
-        ...item,
-        [field]: value
-      } : item)
-    }));
-  };
-  const addBillItem = () => {
-    setEditingBill(prev => ({
-      ...prev,
-      items: [...prev.items, {
-        name: '',
-        amount: 0,
-        quantity: 1
-      }]
-    }));
-  };
-  const removeBillItem = itemIndex => {
-    setEditingBill(prev => ({
-      ...prev,
-      items: prev.items.filter((_, index) => index !== itemIndex)
-    }));
-  };
-  const removeImage = imageIndex => {
-    setEditingBill(prev => ({
-      ...prev,
-      images: prev.images.filter((_, index) => index !== imageIndex)
-    }));
-  };
-  const getStatusColor = status => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'approved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-  const getStatusText = status => {
-    switch (status) {
-      case 'pending':
-        return '待审批';
-      case 'approved':
-        return '已发布';
-      case 'rejected':
-        return '已退回';
-      default:
-        return '未知';
-    }
-  };
   if (isDetailView && selectedBill) {
-    const currentBill = isEditMode ? editingBill : selectedBill;
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
-        {/* 详情页头部 */}
-        <div className="bg-white shadow-sm border-b border-orange-100">
-          <div className="flex items-center justify-between p-4">
-            <button onClick={() => {
+        <div className="p-4">
+          <div className="flex items-center mb-6">
+            <Button variant="ghost" size="sm" onClick={() => {
             setIsDetailView(false);
             setSelectedBill(null);
             setIsEditMode(false);
-            setEditingBill(null);
-          }} className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
-              <span className="mr-2">←</span>
-              <span>返回列表</span>
-            </button>
-            <h1 className="text-lg font-semibold text-gray-800 font-['Playfair_Display']">缴费清单详情</h1>
-            <div className="w-16"></div>
-          </div>
-        </div>
-
-        {/* 详情内容 */}
-        <div className="flex-1 p-4 pb-24">
-          {/* 基本信息卡片 */}
-          <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-6 mb-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-800 font-['Playfair_Display']">{currentBill.seniorName}</h2>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(currentBill.status)}`}>
-                {getStatusText(currentBill.status)}
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="flex items-center text-gray-600">
-                <Calendar className="w-4 h-4 mr-2 text-orange-500" />
-                <span>{currentBill.month}</span>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <DollarSign className="w-4 h-4 mr-2 text-green-500" />
-                <span className="font-semibold text-lg">¥{currentBill.totalAmount}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center text-gray-600 mb-2">
-              <User className="w-4 h-4 mr-2 text-blue-500" />
-              <span>提交人：{currentBill.submitter}</span>
-            </div>
-            <div className="text-gray-500 text-sm">
-              提交时间：{currentBill.submitTime}
-            </div>
+          }} className="mr-3">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <h1 className="text-xl font-bold text-gray-800">缴费清单详情</h1>
           </div>
 
-          {/* 费用明细 */}
-          <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-6 mb-4">
+          <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">费用明细</h3>
-              {isEditMode && <button onClick={addBillItem} className="flex items-center px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm">
-                  <Plus className="w-4 h-4 mr-1" />
-                  添加项目
-                </button>}
+              <div className="flex items-center space-x-3">
+                <Avatar className="w-12 h-12">
+                  <AvatarImage src={`https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face`} />
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold text-gray-800">{selectedBill.elderName}</h3>
+                  <p className="text-sm text-gray-500">{selectedBill.month}</p>
+                </div>
+              </div>
+              <Badge variant={getStatusBadge(selectedBill.status).variant}>
+                {getStatusBadge(selectedBill.status).label}
+              </Badge>
             </div>
-            
-            <div className="space-y-3">
-              {currentBill.items.map((item, index) => <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  {isEditMode ? <div className="flex-1 grid grid-cols-3 gap-2">
-                      <input type="text" value={item.name} onChange={e => updateBillItem(index, 'name', e.target.value)} className="px-2 py-1 border border-gray-300 rounded text-sm" placeholder="项目名称" />
-                      <input type="number" value={item.amount} onChange={e => updateBillItem(index, 'amount', parseFloat(e.target.value) || 0)} className="px-2 py-1 border border-gray-300 rounded text-sm" placeholder="金额" />
-                      <div className="flex items-center gap-2">
-                        <input type="number" value={item.quantity} onChange={e => updateBillItem(index, 'quantity', parseInt(e.target.value) || 1)} className="px-2 py-1 border border-gray-300 rounded text-sm w-16" placeholder="数量" />
-                        <button onClick={() => removeBillItem(index)} className="text-red-500 hover:text-red-700">
+
+            {isEditMode ? <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">费用明细</label>
+                  <div className="space-y-2">
+                    {selectedBill.items.map((item, index) => <div key={index} className="flex items-center space-x-2 p-2 border rounded">
+                        <Input value={item.name} onChange={e => handleUpdateItem(index, 'name', e.target.value)} placeholder="项目名称" className="flex-1" />
+                        <Input type="number" value={item.amount} onChange={e => handleUpdateItem(index, 'amount', e.target.value)} placeholder="金额" className="w-24" />
+                        <Input type="number" value={item.quantity} onChange={e => handleUpdateItem(index, 'quantity', e.target.value)} placeholder="数量" className="w-16" />
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteItem(index)}>
                           <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div> : <>
-                      <div>
-                        <span className="font-medium text-gray-800">{item.name}</span>
-                        <span className="text-gray-500 text-sm ml-2">× {item.quantity}</span>
-                      </div>
-                      <span className="font-semibold text-gray-800">¥{item.amount}</span>
-                    </>}
-                </div>)}
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-800">总计：</span>
-                <span className="text-xl font-bold text-orange-600">
-                  ¥{currentBill.items.reduce((sum, item) => sum + item.amount * item.quantity, 0)}
-                </span>
-              </div>
-            </div>
+                        </Button>
+                      </div>)}
+                    <Button variant="outline" size="sm" onClick={handleAddItem} className="w-full">
+                      <Plus className="w-4 h-4 mr-2" />
+                      添加项目
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">总金额</label>
+                  <Input type="number" value={selectedBill.totalAmount} readOnly className="bg-gray-50" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">备注说明</label>
+                  <Textarea value={selectedBill.notes || ''} onChange={e => setSelectedBill(prev => ({
+                ...prev,
+                notes: e.target.value
+              }))} rows={3} placeholder="请输入备注说明" />
+                </div>
+
+                {selectedBill.images && selectedBill.images.length > 0 && <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">附件图片</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      {selectedBill.images.map((image, index) => <div key={index} className="relative group">
+                          <img src={image} alt={`附件 ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                          <Button size="sm" variant="destructive" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleDeleteImage(index)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>)}
+                    </div>
+                  </div>}
+
+                <div className="flex space-x-3">
+                  <Button onClick={() => handleEdit({
+                items: selectedBill.items,
+                totalAmount: selectedBill.totalAmount,
+                notes: selectedBill.notes
+              })}>
+                    <Save className="w-4 h-4 mr-2" />
+                    保存修改
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsEditMode(false)}>
+                    取消
+                  </Button>
+                </div>
+              </div> : <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-2">费用明细</h4>
+                  <div className="space-y-2">
+                    {selectedBill.items.map((item, index) => <div key={index} className="flex justify-between items-center py-2 border-b">
+                        <span className="text-gray-700">{item.name}</span>
+                        <span className="text-gray-900 font-medium">
+                          ¥{item.amount.toFixed(2)} × {item.quantity}
+                        </span>
+                      </div>)}
+                    <div className="flex justify-between items-center py-2 border-t font-semibold">
+                      <span className="text-gray-800">总计</span>
+                      <span className="text-gray-900">¥{selectedBill.totalAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedBill.notes && <div>
+                    <h4 className="font-medium text-gray-800 mb-2">备注说明</h4>
+                    <p className="text-gray-600">{selectedBill.notes}</p>
+                  </div>}
+
+                {selectedBill.images && selectedBill.images.length > 0 && <div>
+                    <h4 className="font-medium text-gray-800 mb-2">附件图片</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      {selectedBill.images.map((image, index) => <img key={index} src={image} alt={`附件 ${index + 1}`} className="w-full h-32 object-cover rounded-lg cursor-pointer" onClick={() => window.open(image, '_blank')} />)}
+                    </div>
+                  </div>}
+
+                {selectedBill.reviewerId && <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-sm text-gray-600">
+                      <strong>审批人：</strong>{selectedBill.reviewerId}
+                    </p>
+                    {selectedBill.reviewComment && <p className="text-sm text-gray-600 mt-1">
+                        <strong>审批意见：</strong>{selectedBill.reviewComment}
+                      </p>}
+                    {selectedBill.updatedAt && <p className="text-sm text-gray-600 mt-1">
+                        <strong>审批时间：</strong>{new Date(selectedBill.updatedAt).toLocaleString()}
+                      </p>}
+                  </div>}
+              </div>}
           </div>
 
-          {/* 备注信息 */}
-          <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-6 mb-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">备注说明</h3>
-            {isEditMode ? <textarea value={currentBill.notes || ''} onChange={e => setEditingBill(prev => ({
-            ...prev,
-            notes: e.target.value
-          }))} className="w-full p-3 border border-gray-300 rounded-lg resize-none" rows={3} placeholder="请输入备注说明" /> : <p className="text-gray-600">{currentBill.notes || '暂无备注'}</p>}
-          </div>
-
-          {/* 图片附件 */}
-          {currentBill.images && currentBill.images.length > 0 && <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-6 mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">附件图片</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {currentBill.images.map((image, index) => <div key={index} className="relative group">
-                    <img src={image} alt={`附件${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
-                    {isEditMode && <button onClick={() => removeImage(index)} className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Trash2 className="w-4 h-4" />
-                      </button>}
-                  </div>)}
+          {selectedBill.status === 'pending' && <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
+              <div className="flex space-x-3">
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => handleReview(selectedBill._id, 'approved')}>
+                  <Check className="w-4 h-4 mr-2" />
+                  确认发布
+                </Button>
+                <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
+              const reason = prompt('请输入退回修改原因：');
+              if (reason !== null) {
+                handleReview(selectedBill._id, 'rejected', reason);
+              }
+            }}>
+                  <X className="w-4 h-4 mr-2" />
+                  退回修改
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={() => setIsEditMode(true)}>
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  编辑
+                </Button>
               </div>
-            </div>}
-
-          {/* 退回原因 */}
-          {currentBill.status === 'rejected' && currentBill.rejectReason && <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-4">
-              <h3 className="text-lg font-semibold text-red-800 mb-2">退回原因</h3>
-              <p className="text-red-700">{currentBill.rejectReason}</p>
             </div>}
         </div>
-
-        {/* 底部操作按钮 */}
-        {currentBill.status === 'pending' && <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-            <div className="flex gap-3">
-              {isEditMode ? <>
-                  <button onClick={handleSaveEdit} className="flex-1 flex items-center justify-center bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition-colors">
-                    <Save className="w-5 h-5 mr-2" />
-                    保存修改
-                  </button>
-                  <button onClick={handleCancelEdit} className="flex-1 flex items-center justify-center bg-gray-500 text-white py-3 rounded-xl hover:bg-gray-600 transition-colors">
-                    <X className="w-5 h-5 mr-2" />
-                    取消
-                  </button>
-                </> : <>
-                  <button onClick={() => handleApprove(currentBill.id)} className="flex-1 flex items-center justify-center bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition-colors">
-                    <Check className="w-5 h-5 mr-2" />
-                    确认发布
-                  </button>
-                  <button onClick={() => setShowRejectModal(true)} className="flex-1 flex items-center justify-center bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-colors">
-                    <X className="w-5 h-5 mr-2" />
-                    退回修改
-                  </button>
-                  <button onClick={() => handleEdit(currentBill)} className="flex items-center justify-center bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors">
-                    <Edit3 className="w-5 h-5" />
-                  </button>
-                </>}
-            </div>
-          </div>}
-
-        {/* 退回理由弹窗 */}
-        {showRejectModal && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">填写退回理由</h3>
-              <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg resize-none" rows={4} placeholder="请输入退回修改的原因..." />
-              <div className="flex gap-3 mt-4">
-                <button onClick={() => handleReject(currentBill.id)} className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-                  确认退回
-                </button>
-                <button onClick={() => {
-              setShowRejectModal(false);
-              setRejectReason('');
-            }} className="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                  取消
-                </button>
-              </div>
-            </div>
-          </div>}
+        <AdminTabBar activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>;
   }
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
-      {/* 页面头部 */}
-      <div className="bg-white shadow-sm border-b border-orange-100">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-gray-800 font-['Playfair_Display']">缴费清单审批</h1>
-            <div className="flex items-center space-x-3">
-              <button className="p-2 text-gray-600 hover:text-gray-800 transition-colors">
-                <Filter className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-          
-          {/* 搜索栏 */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input type="text" placeholder="搜索老人姓名..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-3 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent bg-white/80 backdrop-blur-sm" />
-          </div>
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-xl font-bold text-gray-800">缴费清单审批</h1>
         </div>
 
-        {/* 状态筛选标签 */}
-        <div className="px-4 pb-4">
-          <div className="flex space-x-2 overflow-x-auto">
-            <button onClick={() => setStatusFilter('all')} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${statusFilter === 'all' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 hover:bg-orange-50'}`}>
-              全部 ({bills.length})
-            </button>
-            <button onClick={() => setStatusFilter('pending')} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${statusFilter === 'pending' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-600 hover:bg-yellow-50'}`}>
-              待审批 ({stats.pending})
-            </button>
-            <button onClick={() => setStatusFilter('approved')} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${statusFilter === 'approved' ? 'bg-green-500 text-white' : 'bg-white text-gray-600 hover:bg-green-50'}`}>
-              已发布 ({stats.approved})
-            </button>
-            <button onClick={() => setStatusFilter('rejected')} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${statusFilter === 'rejected' ? 'bg-red-500 text-white' : 'bg-white text-gray-600 hover:bg-red-50'}`}>
-              已退回 ({stats.rejected})
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 缴费清单列表 */}
-      <div className="flex-1 p-4 pb-20">
-        <div className="space-y-4">
-          {filteredBills.map(bill => <div key={bill.id} className="bg-white rounded-xl shadow-sm border border-orange-100 p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => {
-          setSelectedBill(bill);
-          setIsDetailView(true);
-        }}>
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800 font-['Playfair_Display']">{bill.seniorName}</h3>
-                  <p className="text-gray-600 text-sm">{bill.month}</p>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(bill.status)}`}>
-                  {getStatusText(bill.status)}
-                </span>
+        {/* 统计卡片 */}
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {[{
+          key: 'all',
+          label: '全部',
+          count: statusCounts.all,
+          color: 'bg-blue-100 text-blue-800'
+        }, {
+          key: 'pending',
+          label: '待审批',
+          count: statusCounts.pending,
+          color: 'bg-yellow-100 text-yellow-800'
+        }, {
+          key: 'approved',
+          label: '已发布',
+          count: statusCounts.approved,
+          color: 'bg-green-100 text-green-800'
+        }, {
+          key: 'rejected',
+          label: '已退回',
+          count: statusCounts.rejected,
+          color: 'bg-red-100 text-red-800'
+        }].map(item => <div key={item.key} className={`p-3 rounded-lg cursor-pointer transition-all ${statusFilter === item.key ? item.color : 'bg-white hover:bg-gray-50'}`} onClick={() => setStatusFilter(item.key)}>
+              <div className="text-center">
+                <div className="text-2xl font-bold">{item.count}</div>
+                <div className="text-sm">{item.label}</div>
               </div>
-
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center text-gray-600">
-                  <DollarSign className="w-4 h-4 mr-2 text-green-500" />
-                  <span className="text-lg font-bold text-green-600">¥{bill.totalAmount}</span>
-                </div>
-                <div className="text-gray-500 text-sm">
-                  {bill.items.length} 个项目
-                </div>
-              </div>
-
-              <div className="space-y-1 mb-3">
-                {bill.items.slice(0, 3).map((item, index) => <div key={index} className="flex justify-between text-sm text-gray-600">
-                    <span>{item.name}</span>
-                    <span>¥{item.amount}</span>
-                  </div>)}
-                {bill.items.length > 3 && <div className="text-sm text-gray-500 text-center">
-                    还有 {bill.items.length - 3} 个项目...
-                  </div>}
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <div className="flex items-center">
-                  <User className="w-4 h-4 mr-1" />
-                  <span>{bill.submitter}</span>
-                </div>
-                <span>{bill.submitTime}</span>
-              </div>
-
-              {bill.images && bill.images.length > 0 && <div className="mt-3 flex items-center text-sm text-gray-600">
-                  <Image className="w-4 h-4 mr-1" />
-                  <span>{bill.images.length} 张附件</span>
-                </div>}
-
-              {bill.status === 'rejected' && bill.rejectReason && <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-700">
-                    <strong>退回原因：</strong>{bill.rejectReason}
-                  </p>
-                </div>}
             </div>)}
         </div>
 
-        {filteredBills.length === 0 && <div className="text-center py-12">
-            <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">暂无缴费清单</p>
-            <p className="text-gray-400 text-sm mt-2">请尝试调整搜索条件或筛选状态</p>
+        {/* 搜索和筛选 */}
+        <div className="flex space-x-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input placeholder="搜索老人姓名..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+          </div>
+        </div>
+
+        {/* 缴费清单列表 */}
+        {loading ? <div className="text-center py-8">
+            <div className="text-gray-500">加载中...</div>
+          </div> : filteredBills.length === 0 ? <div className="text-center py-8">
+            <DollarSign className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500">暂无缴费清单</p>
+          </div> : <div className="space-y-4 mb-20">
+            {filteredBills.map(bill => <Card key={bill._id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+          setSelectedBill(bill);
+          setIsDetailView(true);
+        }}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-3 flex-1">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={`https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face`} />
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="font-semibold text-gray-800">{bill.elderName}</h3>
+                          <Badge variant={getStatusBadge(bill.status).variant} className="text-xs">
+                            {getStatusBadge(bill.status).label}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{bill.month}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span className="flex items-center">
+                              <DollarSign className="w-3 h-3 mr-1" />
+                              ¥{bill.totalAmount?.toFixed(2)}
+                            </span>
+                            <span className="flex items-center">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              {bill.items?.length || 0}个项目
+                            </span>
+                            {bill.images && bill.images.length > 0 && <span className="flex items-center">
+                                <Image className="w-3 h-3 mr-1" />
+                                {bill.images.length}张
+                              </span>}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(bill.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>)}
           </div>}
       </div>
-
-      {/* 底部导航 */}
       <AdminTabBar activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>;
 }

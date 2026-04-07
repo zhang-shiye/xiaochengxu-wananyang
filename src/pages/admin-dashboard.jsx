@@ -54,25 +54,46 @@ export default function AdminDashboard(props) {
       duration: 2000
     });
     const pageMap = {
-      'daily': 'admin-daily',
-      'leave': 'admin-leave',
-      'bill': 'admin-bill'
+      'daily': 'admin-daily-review',
+      'leave': 'admin-leave-review',
+      'bill': 'admin-bill-review',
+      'verification': 'admin-verification-code',
+      'import': 'admin-data-import'
     };
     props.$w.utils.navigateTo({
       pageId: pageMap[action],
       params: {}
     });
   };
-  const handleForwardCode = codeId => {
-    toast({
-      title: '验证码转发',
-      description: '验证码已转发给对应用户',
-      duration: 2000
-    });
-    setVerificationCodes(prev => prev.map(code => code.id === codeId ? {
-      ...code,
-      status: 'forwarded'
-    } : code));
+  const handleForwardCode = async code => {
+    try {
+      const shareText = `【专属验证码】\n\n验证码：${code.code}\n有效期：今日有效\n\n请在微信小程序中输入此验证码完成绑定。如有疑问请联系护理院工作人员。`;
+      if (navigator.share) {
+        await navigator.share({
+          title: '老人专属验证码',
+          text: shareText
+        });
+      } else {
+        // 降级方案：复制到剪贴板
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(shareText);
+          toast({
+            title: '验证码已复制',
+            description: '分享内容已复制到剪贴板'
+          });
+        }
+      }
+      setVerificationCodes(prev => prev.map(c => c.id === codeId ? {
+        ...c,
+        status: 'forwarded'
+      } : c));
+    } catch (error) {
+      toast({
+        title: '分享失败',
+        description: '请手动复制验证码发送',
+        variant: 'destructive'
+      });
+    }
   };
   const getPriorityColor = priority => {
     switch (priority) {
