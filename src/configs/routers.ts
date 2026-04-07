@@ -10,6 +10,7 @@ import ADMIN_LEAVE-REVIEW from '../pages/admin-leave-review.jsx';
 import ADMIN_BILL-REVIEW from '../pages/admin-bill-review.jsx';
 import ADMIN_DAILY-REVIEW from '../pages/admin-daily-review.jsx';
 import ADMIN_VERIFICATION-CODE from '../pages/admin-verification-code.jsx';
+import ADMIN_DATA-IMPORT from '../pages/admin-data-import.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -46,4 +47,7 @@ export const routers = [{
 }, {
   id: "admin-verification-code",
   component: ADMIN_VERIFICATION-CODE
+}, {
+  id: "admin-data-import",
+  component: ADMIN_DATA-IMPORT
 }]
