@@ -6,7 +6,6 @@ import { Card, Button, Badge, Checkbox, Calendar, Popover, PopoverContent, Popov
 import { Calendar as CalendarIcon, FileText, User, Clock, MapPin, CheckCircle, XCircle, Filter, Eye } from 'lucide-react';
 
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
 export default function LeaveApproval(props) {
   const {
     toast
