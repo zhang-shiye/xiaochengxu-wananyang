@@ -6,10 +6,8 @@ import BIND_SENIOR from '../pages/bind-senior.jsx';
 import WECHAT_LOGIN from '../pages/wechat-login.jsx';
 import CARE_HOME from '../pages/care-home.jsx';
 import ADMIN_DASHBOARD from '../pages/admin-dashboard.jsx';
-import DAILY_APPROVAL from '../pages/daily-approval.jsx';
-import LEAVE_APPROVAL from '../pages/leave-approval.jsx';
-import BILL_APPROVAL from '../pages/bill-approval.jsx';
-import BATCH_UPDATE from '../pages/batch-update.jsx';
+import ADMIN_LEAVE-REVIEW from '../pages/admin-leave-review.jsx';
+import ADMIN_BILL-REVIEW from '../pages/admin-bill-review.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -35,15 +33,9 @@ export const routers = [{
   id: "admin-dashboard",
   component: ADMIN_DASHBOARD
 }, {
-  id: "daily-approval",
-  component: DAILY_APPROVAL
+  id: "admin-leave-review",
+  component: ADMIN_LEAVE-REVIEW
 }, {
-  id: "leave-approval",
-  component: LEAVE_APPROVAL
-}, {
-  id: "bill-approval",
-  component: BILL_APPROVAL
-}, {
-  id: "batch-update",
-  component: BATCH_UPDATE
+  id: "admin-bill-review",
+  component: ADMIN_BILL-REVIEW
 }]
