@@ -8,8 +8,6 @@ export default function WechatLogin(props) {
     toast
   } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  // 获取登录渠道参数
-  const loginChannel = props.$w.page.dataset.params?.channel || 'family';
   const handleWeChatLogin = () => {
     setIsLoading(true);
 
@@ -17,24 +15,11 @@ export default function WechatLogin(props) {
     setTimeout(() => {
       setIsLoading(false);
 
-      // 根据登录渠道识别角色并跳转
-      if (loginChannel === 'admin') {
-        // 企业微信登录 - 跳转到管理端首页
-        props.$w.utils.redirectTo({
-          pageId: 'admin-home',
-          params: {
-            role: 'admin'
-          }
-        });
-      } else {
-        // 普通微信登录 - 跳转到家属端绑定页面
-        props.$w.utils.redirectTo({
-          pageId: 'bind-senior',
-          params: {
-            role: 'family'
-          }
-        });
-      }
+      // 跳转到绑定长者页面
+      props.$w.utils.navigateTo({
+        pageId: 'bind-senior',
+        params: {}
+      });
     }, 2000);
   };
   const handleBack = () => {
@@ -78,14 +63,14 @@ export default function WechatLogin(props) {
                 <h2 className="text-xl font-semibold text-gray-800 mb-2" style={{
                 fontFamily: 'Nunito Sans, sans-serif'
               }}>
-                  {loginChannel === 'admin' ? '企业微信授权登录' : '微信授权登录'}
+                  微信授权登录
                 </h2>
                 <p className="text-gray-600 text-sm">
-                  {loginChannel === 'admin' ? '使用企业微信账号登录，进行管理操作' : '使用微信账号快速登录，开始关爱之旅'}
+                  使用微信账号快速登录，开始关爱之旅
                 </p>
               </div>
               
-              <Button onClick={handleWeChatLogin} disabled={isLoading} className={`w-full rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${loginChannel === 'admin' ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'}`} style={{
+              <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
               fontFamily: 'Nunito Sans, sans-serif'
             }}>
                 {isLoading ? <div className="flex items-center justify-center">
@@ -98,7 +83,7 @@ export default function WechatLogin(props) {
                     <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
                     </svg>
-                    {loginChannel === 'admin' ? '企业微信授权登录' : '微信授权登录'}
+                    微信授权登录
                   </>}
               </Button>
             </div>

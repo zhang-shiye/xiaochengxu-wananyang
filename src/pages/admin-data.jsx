@@ -1,168 +1,216 @@
 // @ts-ignore;
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 // @ts-ignore;
-import { Upload, Download, FileText, AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
+import { Card, Button, Badge, useToast, Progress } from '@/components/ui';
 // @ts-ignore;
-import { useToast } from '@/components/ui';
+import { Upload, Download, FileText, Database, AlertCircle, CheckCircle, Clock, FileSpreadsheet, Plus, Trash2, User, DollarSign, BookOpen, FileCheck } from 'lucide-react';
 
-export default function AdminData(props) {
+export default function AdminDataImport(props) {
   const {
     toast
   } = useToast();
-  const [importTasks, setImportTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [importType, setImportType] = useState('elders');
+  const fileInputRef = useRef(null);
+  const [activeTab, setActiveTab] = useState('elder');
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [importHistory, setImportHistory] = useState([{
+    id: 1,
+    type: 'elder',
+    fileName: '老人信息模板.xlsx',
+    status: 'completed',
+    totalRecords: 50,
+    successCount: 48,
+    errorCount: 2,
+    createdAt: '2026-04-10 14:30',
+    duration: '2分15秒'
+  }, {
+    id: 2,
+    type: 'bill',
+    fileName: '4月缴费清单.xlsx',
+    status: 'completed',
+    totalRecords: 45,
+    successCount: 45,
+    errorCount: 0,
+    createdAt: '2026-04-10 10:15',
+    duration: '1分30秒'
+  }]);
 
-  // 获取导入任务列表
-  const fetchImportTasks = async () => {
-    try {
-      setLoading(true);
-      const result = await props.$w.cloud.callFunction({
-        name: 'getImportTasks',
-        data: {}
-      });
-      if (result.success) {
-        setImportTasks(result.data || []);
-      } else {
-        toast({
-          title: '获取数据失败',
-          description: result.error || '请稍后重试',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('获取导入任务失败:', error);
-      toast({
-        title: '获取数据失败',
-        description: '网络连接异常',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
+  // 导入类型配置
+  const importTypes = {
+    elder: {
+      name: '老人信息',
+      icon: User,
+      description: '批量导入老人基本信息',
+      templateFields: ['姓名', '年龄', '房间号', '护理等级', '健康状态', '紧急联系人', '紧急电话', '责任护士'],
+      exampleData: [['王奶奶', '78', '101', '二级护理', '良好', '王大明', '13800138000', '张护士'], ['李爷爷', '82', '102', '一级护理', '一般', '李小明', '13900139000', '李护士']]
+    },
+    bill: {
+      name: '缴费清单',
+      icon: DollarSign,
+      description: '批量导入月度缴费账单',
+      templateFields: ['老人姓名', '老人ID', '月份', '缴费项目', '金额', '缴费期限', '状态'],
+      exampleData: [['王奶奶', 'elder_001', '2026-04', '基础床位费', '1800', '2026-04-15', '未缴费'], ['王奶奶', 'elder_001', '2026-04', '护理费', '1200', '2026-04-15', '未缴费']]
+    },
+    daily: {
+      name: '日报数据',
+      icon: BookOpen,
+      description: '批量导入日常护理日报',
+      templateFields: ['老人姓名', '老人ID', '日期', '健康状态', '早餐', '午餐', '晚餐', '活动', '用药', '心情', '备注'],
+      exampleData: [['王奶奶', 'elder_001', '2026-04-10', '良好', '小米粥、鸡蛋', '米饭、青菜、鱼肉', '面条、蔬菜', '晨练太极、看电视', '降压药', '愉快', '食欲良好'], ['李爷爷', 'elder_002', '2026-04-10', '一般', '豆浆、包子', '面条、鸡蛋', '稀饭、咸菜', '散步、休息', '维生素', '平静', '需要多休息']]
+    },
+    leave: {
+      name: '请假记录',
+      icon: FileCheck,
+      description: '批量导入请假申请记录',
+      templateFields: ['老人姓名', '老人ID', '申请日期', '开始时间', '结束时间', '请假原因', '申请人', '状态'],
+      exampleData: [['王奶奶', 'elder_001', '2026-04-10', '2026-04-15 09:00', '2026-04-15 18:00', '家属探望', '王大明', '待审核'], ['李爷爷', 'elder_002', '2026-04-10', '2026-04-16 14:00', '2026-04-16 17:00', '医院检查', '李小明', '已批准']]
     }
   };
 
-  // 处理文件选择
-  const handleFileSelect = event => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-        setSelectedFile(file);
-      } else {
-        toast({
-          title: '文件格式错误',
-          description: '请选择CSV格式的文件',
-          variant: 'destructive'
-        });
-        event.target.value = '';
-      }
-    }
+  // 处理文件拖拽
+  const handleDragOver = e => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  const handleDragLeave = e => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+  const handleDrop = e => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    handleFileUpload(files);
   };
 
-  // 上传文件
-  const handleUpload = async () => {
-    if (!selectedFile) {
+  // 处理文件上传
+  const handleFileUpload = files => {
+    const file = files[0];
+    if (!file) return;
+
+    // 验证文件类型
+    const validTypes = ['.xlsx', '.xls', '.csv'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    if (!validTypes.includes(fileExtension)) {
       toast({
-        title: '请选择文件',
-        description: '请先选择要上传的CSV文件',
+        title: '文件格式错误',
+        description: '请上传 Excel (.xlsx, .xls) 或 CSV (.csv) 格式的文件',
         variant: 'destructive'
       });
       return;
     }
-    try {
-      setUploading(true);
 
-      // 读取文件内容
-      const text = await selectedFile.text();
-      const lines = text.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',').map(h => h.trim());
-      const data = lines.slice(1).map(line => {
-        const values = line.split(',').map(v => v.trim());
-        const row = {};
-        headers.forEach((header, index) => {
-          row[header] = values[index] || '';
-        });
-        return row;
-      });
-
-      // 调用导入函数
-      const result = await props.$w.cloud.callFunction({
-        name: 'importData',
-        data: {
-          type: importType,
-          data: data,
-          filename: selectedFile.name,
-          totalRows: data.length
-        }
-      });
-      if (result.success) {
-        toast({
-          title: '导入任务已创建',
-          description: `成功创建导入任务，共${data.length}条数据`
-        });
-        setShowUploadModal(false);
-        setSelectedFile(null);
-        fetchImportTasks();
-      } else {
-        toast({
-          title: '导入失败',
-          description: result.error || '请检查文件格式',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('文件上传失败:', error);
+    // 验证文件大小（最大10MB）
+    if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: '上传失败',
-        description: '文件读取或网络连接异常',
+        title: '文件过大',
+        description: '文件大小不能超过10MB',
         variant: 'destructive'
       });
-    } finally {
-      setUploading(false);
+      return;
     }
+
+    // 开始上传
+    startUpload(file);
+  };
+
+  // 开始上传处理
+  const startUpload = file => {
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    // 模拟上传进度
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            completeUpload(file);
+          }, 500);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+  };
+
+  // 完成上传处理
+  const completeUpload = file => {
+    setIsUploading(false);
+
+    // 模拟导入处理
+    const totalRecords = Math.floor(Math.random() * 50) + 10;
+    const successCount = Math.floor(totalRecords * 0.9);
+    const errorCount = totalRecords - successCount;
+
+    // 创建新的导入记录
+    const newImport = {
+      id: Date.now(),
+      type: activeTab,
+      fileName: file.name,
+      status: errorCount > 0 ? 'partial' : 'completed',
+      totalRecords,
+      successCount,
+      errorCount,
+      createdAt: new Date().toLocaleString('zh-CN'),
+      duration: `${Math.floor(Math.random() * 3) + 1}分${Math.floor(Math.random() * 60)}秒`
+    };
+    setImportHistory(prev => [newImport, ...prev]);
+
+    // 显示导入结果
+    if (errorCount === 0) {
+      toast({
+        title: '导入成功',
+        description: `成功导入 ${successCount} 条${importTypes[activeTab].name}记录`
+      });
+    } else {
+      toast({
+        title: '导入完成',
+        description: `成功导入 ${successCount} 条，失败 ${errorCount} 条${importTypes[activeTab].name}记录`,
+        variant: 'default'
+      });
+    }
+    setUploadProgress(0);
   };
 
   // 下载模板
-  const downloadTemplate = type => {
-    let template = '';
-    let filename = '';
-    if (type === 'elders') {
-      filename = '老人信息模板.csv';
-      template = '姓名,年龄,房间号,护理等级,健康状况,紧急联系人,紧急联系电话,责任护士\n' + '王奶奶,78,A栋 301室,二级护理,良好,张院长,0551-8888-6666,张护士\n' + '李爷爷,82,B栋 205室,一级护理,良好,李女士,138-0000-1234,王护士';
-    } else if (type === 'daily_reports') {
-      filename = '日报模板.csv';
-      template = '老人ID,日期,早餐,午餐,晚餐,活动,健康状况,心情,用药,备注\n' + 'elder_001,2026-04-05,小米粥、鸡蛋,红烧鱼、米饭,面条、青菜,晨练太极、午休,良好,愉快,降压药(8:00),食欲良好';
-    } else if (type === 'bills') {
-      filename = '缴费模板.csv';
-      template = '老人ID,月份,项目名称1,金额1,项目名称2,金额2,项目名称3,金额3\n' + 'elder_001,2026-04,基础床位费,1800,护理费（二级）,1200,餐费,800';
-    }
-    const blob = new Blob([template], {
+  const downloadTemplate = () => {
+    const currentType = importTypes[activeTab];
+
+    // 创建CSV内容
+    let csvContent = '\uFEFF' + currentType.templateFields.join(',') + '\n';
+    currentType.exampleData.forEach(row => {
+      csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+    });
+
+    // 创建下载链接
+    const blob = new Blob([csvContent], {
       type: 'text/csv;charset=utf-8;'
     });
     const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
+    link.href = URL.createObjectURL(blob);
+    link.download = `${currentType.name}导入模板.csv`;
     link.click();
-    document.body.removeChild(link);
+    toast({
+      title: '模板下载成功',
+      description: `${currentType.name}导入模板已下载`
+    });
   };
 
-  // 获取状态图标
-  const getStatusIcon = status => {
+  // 获取状态颜色
+  const getStatusColor = status => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return 'text-green-600 bg-green-100';
+      case 'partial':
+        return 'text-yellow-600 bg-yellow-100';
       case 'failed':
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
+        return 'text-red-600 bg-red-100';
       case 'processing':
-        return <Clock className="w-5 h-5 text-blue-500" />;
+        return 'text-blue-600 bg-blue-100';
       default:
-        return <Clock className="w-5 h-5 text-gray-500" />;
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -171,187 +219,212 @@ export default function AdminData(props) {
     switch (status) {
       case 'completed':
         return '已完成';
+      case 'partial':
+        return '部分完成';
       case 'failed':
         return '失败';
       case 'processing':
         return '处理中';
       default:
-        return '待处理';
+        return '未知';
     }
   };
-  useEffect(() => {
-    fetchImportTasks();
-  }, []);
+
+  // 获取类型图标
+  const getTypeIcon = type => {
+    const IconComponent = importTypes[type]?.icon || FileText;
+    return <IconComponent className="w-4 h-4" />;
+  };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
       {/* 头部 */}
-      <div className="bg-white shadow-sm border-b border-orange-100">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      <div className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-800">数据导入管理</h1>
-            <button onClick={() => setShowUploadModal(true)} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
-              <Upload className="w-4 h-4" />
-              导入数据
-            </button>
+            <div className="flex items-center gap-3">
+              <Database className="w-6 h-6 text-amber-600" />
+              <h1 className="text-xl font-bold text-gray-800" style={{
+              fontFamily: 'Nunito Sans, sans-serif'
+            }}>
+                数据导入管理
+              </h1>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => props.$w.utils.navigateBack()} className="text-gray-600 hover:text-gray-800">
+              返回
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        {/* 导入说明 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-            <div className="text-sm text-blue-800">
-              <p className="font-medium mb-1">导入说明：</p>
-              <ul className="list-disc list-inside space-y-1 text-blue-700">
-                <li>请使用CSV格式文件，文件大小不超过10MB</li>
-                <li>建议先下载模板文件，按照模板格式填写数据</li>
-                <li>导入过程中请勿关闭页面，导入完成后会收到通知</li>
-                <li>如导入失败，请检查数据格式是否正确</li>
-              </ul>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* 导入类型选择 */}
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl mb-6">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-amber-600" />
+              选择导入类型
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Object.entries(importTypes).map(([key, type]) => {
+              const IconComponent = type.icon;
+              return <div key={key} onClick={() => setActiveTab(key)} className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${activeTab === key ? 'border-amber-500 bg-amber-50 shadow-md' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`}>
+                    <IconComponent className={`w-8 h-8 mb-3 ${activeTab === key ? 'text-amber-600' : 'text-gray-500'}`} />
+                    <h3 className="font-semibold text-gray-800 mb-1">{type.name}</h3>
+                    <p className="text-sm text-gray-600">{type.description}</p>
+                  </div>;
+            })}
             </div>
           </div>
-        </div>
+        </Card>
 
-        {/* 模板下载 */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">模板下载</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button onClick={() => downloadTemplate('elders')} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <Download className="w-5 h-5 text-blue-500" />
-              <div className="text-left">
-                <div className="font-medium text-gray-800">老人信息模板</div>
-                <div className="text-sm text-gray-500">CSV格式</div>
-              </div>
-            </button>
-            <button onClick={() => downloadTemplate('daily_reports')} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <Download className="w-5 h-5 text-green-500" />
-              <div className="text-left">
-                <div className="font-medium text-gray-800">日报模板</div>
-                <div className="text-sm text-gray-500">CSV格式</div>
-              </div>
-            </button>
-            <button onClick={() => downloadTemplate('bills')} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <Download className="w-5 h-5 text-orange-500" />
-              <div className="text-left">
-                <div className="font-medium text-gray-800">缴费模板</div>
-                <div className="text-sm text-gray-500">CSV格式</div>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* 导入历史 */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">导入历史</h2>
-          </div>
-          
-          {loading ? <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-            </div> : <div className="divide-y divide-gray-200">
-              {importTasks.length === 0 ? <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">暂无导入记录</p>
-                </div> : importTasks.map(task => <div key={task._id} className="p-6 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        {getStatusIcon(task.status)}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium text-gray-800">{task.filename}</h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${task.status === 'completed' ? 'bg-green-100 text-green-800' : task.status === 'failed' ? 'bg-red-100 text-red-800' : task.status === 'processing' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
-                              {getStatusText(task.status)}
-                            </span>
-                          </div>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <p>导入类型：{task.type === 'elders' ? '老人信息' : task.type === 'daily_reports' ? '日报' : '缴费'}</p>
-                            <p>数据条数：{task.totalRows}条</p>
-                            <p>导入时间：{new Date(task.createdAt).toLocaleString()}</p>
-                            {task.successCount && <p className="text-green-600">成功：{task.successCount}条</p>}
-                            {task.failedCount && <p className="text-red-600">失败：{task.failedCount}条</p>}
-                            {task.errorMessage && <p className="text-red-600 text-xs mt-1">错误：{task.errorMessage}</p>}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-gray-500 mb-2">
-                          {task.processedRows}/{task.totalRows}
-                        </div>
-                        {task.status === 'processing' && <div className="w-16 bg-gray-200 rounded-full h-2">
-                            <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{
-                    width: `${task.processedRows / task.totalRows * 100}%`
-                  }}></div>
-                          </div>}
-                      </div>
-                    </div>
-                  </div>)}
-            </div>}
-        </div>
-      </div>
-
-      {/* 上传模态框 */}
-      {showUploadModal && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full">
+        {/* 当前选中类型的导入区域 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 左侧：导入区域 */}
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">数据导入</h2>
-                <button onClick={() => {
-              setShowUploadModal(false);
-              setSelectedFile(null);
-            }} className="text-gray-400 hover:text-gray-600">
-                  <X className="w-5 h-5" />
-                </button>
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  {getTypeIcon(activeTab)}
+                  {importTypes[activeTab].name}导入
+                </h2>
+                <Button variant="outline" size="sm" onClick={downloadTemplate} className="flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  下载模板
+                </Button>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">导入类型</label>
-                  <select value={importType} onChange={e => setImportType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    <option value="elders">老人信息</option>
-                    <option value="daily_reports">日报数据</option>
-                    <option value="bills">缴费数据</option>
-                  </select>
-                </div>
+              {/* 文件上传区域 */}
+              <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${isDragging ? 'border-amber-500 bg-amber-50' : 'border-gray-300 hover:border-gray-400'}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  拖拽文件到此处上传
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  支持 Excel (.xlsx, .xls) 和 CSV (.csv) 格式
+                </p>
+                <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="mb-4">
+                  选择文件
+                </Button>
+                <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" onChange={e => handleFileUpload(Array.from(e.target.files))} className="hidden" />
+                <p className="text-sm text-gray-500">
+                  文件大小不超过 10MB
+                </p>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">选择文件</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
-                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 mb-2">
-                      {selectedFile ? selectedFile.name : '点击选择或拖拽CSV文件到此处'}
-                    </p>
-                    <input type="file" accept=".csv" onChange={handleFileSelect} className="hidden" id="file-upload" />
-                    <label htmlFor="file-upload" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm cursor-pointer transition-colors">
-                      选择文件
-                    </label>
+              {/* 上传进度 */}
+              {isUploading && <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">上传进度</span>
+                    <span className="text-sm text-gray-600">{uploadProgress}%</span>
                   </div>
+                  <Progress value={uploadProgress} className="h-2" />
+                </div>}
+
+              {/* 模板字段说明 */}
+              <div className="mt-6">
+                <h4 className="font-semibold text-gray-800 mb-3">模板字段说明</h4>
+                <div className="space-y-2">
+                  {importTypes[activeTab].templateFields.map((field, index) => <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                      <span>{field}</span>
+                    </div>)}
                 </div>
-
-                {selectedFile && <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="text-sm text-green-800">已选择文件：{selectedFile.name}</span>
-                    </div>
-                  </div>}
               </div>
+            </div>
+          </Card>
 
-              <div className="flex gap-3 mt-6">
-                <button onClick={() => {
-              setShowUploadModal(false);
-              setSelectedFile(null);
-            }} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                  取消
-                </button>
-                <button onClick={handleUpload} disabled={!selectedFile || uploading} className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors">
-                  {uploading ? <div className="flex items-center justify-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      上传中...
-                    </div> : '开始导入'}
-                </button>
+          {/* 右侧：导入历史 */}
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
+            <div className="p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-amber-600" />
+                导入历史
+              </h2>
+
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {importHistory.length === 0 ? <div className="text-center py-8">
+                    <Database className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">暂无导入记录</p>
+                  </div> : importHistory.map(item => <div key={item.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          {getTypeIcon(item.type)}
+                          <div>
+                            <h4 className="font-semibold text-gray-800">{item.fileName}</h4>
+                            <p className="text-sm text-gray-600">{item.createdAt}</p>
+                          </div>
+                        </div>
+                        <Badge className={getStatusColor(item.status)}>
+                          {getStatusText(item.status)}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-lg font-semibold text-gray-800">{item.totalRecords}</p>
+                          <p className="text-xs text-gray-600">总记录</p>
+                        </div>
+                        <div>
+                          <p className="text-lg font-semibold text-green-600">{item.successCount}</p>
+                          <p className="text-xs text-gray-600">成功</p>
+                        </div>
+                        <div>
+                          <p className="text-lg font-semibold text-red-600">{item.errorCount}</p>
+                          <p className="text-xs text-gray-600">失败</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                        <span className="text-sm text-gray-500">耗时: {item.duration}</span>
+                        {item.errorCount > 0 && <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                            查看错误
+                          </Button>}
+                      </div>
+                    </div>)}
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* 导入统计 */}
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl mt-6">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Database className="w-5 h-5 text-amber-600" />
+              导入统计
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800">156</h3>
+                <p className="text-sm text-gray-600">总导入次数</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800">4,892</h3>
+                <p className="text-sm text-gray-600">成功记录</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800">23</h3>
+                <p className="text-sm text-gray-600">失败记录</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Clock className="w-6 h-6 text-amber-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800">98.5%</h3>
+                <p className="text-sm text-gray-600">成功率</p>
               </div>
             </div>
           </div>
-        </div>}
+        </Card>
+      </div>
     </div>;
 }
