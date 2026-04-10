@@ -10,6 +10,53 @@ export default function AdminLeave(props) {
   const {
     toast
   } = useToast();
+
+  // 检查用户角色权限
+  useEffect(() => {
+    const user = props.$w.auth.currentUser;
+    const allowedTypes = ['nurse', 'staff', 'admin'];
+    if (user?.type && !allowedTypes.includes(user.type)) {
+      toast({
+        title: '权限限制',
+        description: '此页面仅管理员、护工、文员可以访问',
+        variant: 'destructive'
+      });
+      props.$w.utils.redirectTo({
+        pageId: 'login',
+        params: {}
+      });
+    }
+  }, []);
+
+  // 如果用户未登录或角色不匹配，显示提示
+  const user = props.$w.auth.currentUser;
+  const allowedTypes = ['nurse', 'staff', 'admin'];
+  if (!user?.userId || user?.type && !allowedTypes.includes(user.type)) {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-8">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-3xl p-12 max-w-md">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              权限验证中...
+            </h2>
+            <p className="text-gray-600 mb-6" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              此页面仅管理员、护工、文员可以访问
+            </p>
+            <Button onClick={() => {
+            props.$w.utils.redirectTo({
+              pageId: 'login',
+              params: {}
+            });
+          }} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300">
+              前往登录
+            </Button>
+          </div>
+        </Card>
+      </div>;
+  }
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -26,6 +73,18 @@ export default function AdminLeave(props) {
   }, [searchTerm, statusFilter, leaveRequests]);
   const loadLeaveRequests = async () => {
     try {
+      const user = props.$w.auth.currentUser;
+
+      // 数据权限检查
+      if (!DataPermissionHelper.hasDataPermission(user, 'admin')) {
+        toast({
+          title: '权限限制',
+          description: '您没有权限查看请假数据',
+          variant: 'destructive'
+        });
+        setLoading(false);
+        return;
+      }
       const tcb = await props.$w.cloud.getCloudInstance();
       const db = tcb.database();
       const result = await db.collection('leave_requests').orderBy('createdAt', 'desc').get();

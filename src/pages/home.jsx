@@ -3,11 +3,58 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Card, Avatar, AvatarImage, Button, useToast } from '@/components/ui';
 
+import DataPermissionHelper from '@/components/PermissionCheck';
 import TabBar from '@/components/TabBar';
 export default function Home(props) {
   const {
     toast
   } = useToast();
+
+  // 检查用户角色权限
+  useEffect(() => {
+    const user = props.$w.auth.currentUser;
+    if (user?.type && user.type !== 'family') {
+      toast({
+        title: '权限限制',
+        description: '此页面仅家属用户可以访问',
+        variant: 'destructive'
+      });
+      // 跳转到登录页面
+      props.$w.utils.redirectTo({
+        pageId: 'login',
+        params: {}
+      });
+    }
+  }, []);
+
+  // 如果用户未登录或角色不匹配，显示提示
+  const user = props.$w.auth.currentUser;
+  if (!user?.userId || user?.type && user.type !== 'family') {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-8">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-3xl p-12 max-w-md">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              权限验证中...
+            </h2>
+            <p className="text-gray-600 mb-6" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              此页面仅家属用户可以访问
+            </p>
+            <Button onClick={() => {
+            props.$w.utils.redirectTo({
+              pageId: 'login',
+              params: {}
+            });
+          }} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300">
+              前往登录
+            </Button>
+          </div>
+        </Card>
+      </div>;
+  }
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   useEffect(() => {
