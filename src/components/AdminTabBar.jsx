@@ -9,28 +9,28 @@ export default function AdminTabBar({
   currentPage
 }) {
   const tabs = [{
-    id: 'admin-dashboard',
+    id: 'admin-home',
     name: '管理首页',
     icon: MessageSquare
   }, {
-    id: 'admin-verification-code',
-    name: '验证码',
+    id: 'admin-daily',
+    name: '日报审核',
     icon: FileCheck
   }, {
-    id: 'admin-daily-review',
-    name: '日报审批',
-    icon: FileCheck
-  }, {
-    id: 'admin-leave-review',
-    name: '请假审批',
+    id: 'admin-leave',
+    name: '请假审核',
     icon: UserCheck
   }, {
-    id: 'admin-bill-review',
-    name: '缴费审批',
+    id: 'admin-bill',
+    name: '缴费审核',
     icon: DollarSign
   }, {
-    id: 'admin-data-import',
-    name: '数据导入',
+    id: 'admin-elder',
+    name: '老人管理',
+    icon: FileCheck
+  }, {
+    id: 'admin-data',
+    name: '数据管理',
     icon: Database
   }];
   const handleTabClick = pageId => {

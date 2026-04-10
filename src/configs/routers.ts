@@ -11,6 +11,10 @@ import ADMIN_BILL-REVIEW from '../pages/admin-bill-review.jsx';
 import ADMIN_DAILY-REVIEW from '../pages/admin-daily-review.jsx';
 import ADMIN_VERIFICATION-CODE from '../pages/admin-verification-code.jsx';
 import ADMIN_DATA-IMPORT from '../pages/admin-data-import.jsx';
+import ADMIN_HOME from '../pages/admin-home.jsx';
+import ADMIN_DAILY from '../pages/admin-daily.jsx';
+import ADMIN_LEAVE from '../pages/admin-leave.jsx';
+import ADMIN_BILL from '../pages/admin-bill.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -50,4 +54,16 @@ export const routers = [{
 }, {
   id: "admin-data-import",
   component: ADMIN_DATA-IMPORT
+}, {
+  id: "admin-home",
+  component: ADMIN_HOME
+}, {
+  id: "admin-daily",
+  component: ADMIN_DAILY
+}, {
+  id: "admin-leave",
+  component: ADMIN_LEAVE
+}, {
+  id: "admin-bill",
+  component: ADMIN_BILL
 }]
