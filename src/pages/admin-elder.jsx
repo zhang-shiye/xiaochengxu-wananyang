@@ -25,6 +25,27 @@ export default function AdminElder(props) {
     emergencyPhone: '',
     primaryNurse: ''
   });
+  useEffect(() => {
+    // 角色检查
+    const userRole = localStorage.getItem('userRole');
+    if (!userRole) {
+      // 未登录，跳转到登录页
+      props.$w.utils.navigateTo({
+        pageId: 'login',
+        params: {}
+      });
+      return;
+    }
+    if (userRole === 'family') {
+      // 是家属角色，跳转到家属端
+      props.$w.utils.navigateTo({
+        pageId: 'care-home',
+        params: {}
+      });
+      return;
+    }
+    fetchElders();
+  }, []);
 
   // 获取老人列表
   const fetchElders = async () => {

@@ -8,22 +8,138 @@ export default function WechatLogin(props) {
     toast
   } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const handleWeChatLogin = () => {
+  const [loginType, setLoginType] = useState('personal'); // 'personal' 或 'enterprise'
+
+  // 处理普通微信登录
+  const handlePersonalWeChatLogin = async () => {
     setIsLoading(true);
+    try {
+      // 模拟微信登录获取用户信息
+      const mockUserInfo = {
+        openid: 'mock_personal_openid_' + Date.now(),
+        unionid: 'mock_personal_unionid_' + Date.now(),
+        nickname: '微信用户',
+        avatar: 'https://via.placeholder.com/150'
+      };
 
-    // 模拟微信登录过程
-    setTimeout(() => {
-      setIsLoading(false);
-
-      // 跳转到绑定长者页面
-      props.$w.utils.navigateTo({
-        pageId: 'bind-senior',
-        params: {}
+      // 保存用户信息到数据库，role 默认为 family
+      const result = await props.$w.cloud.callFunction({
+        name: 'login',
+        data: {
+          action: 'wechat_login',
+          userInfo: mockUserInfo,
+          wechatType: 'personal',
+          role: 'family' // 普通微信登录默认为家属角色
+        }
       });
-    }, 2000);
+      if (result.success) {
+        // 保存角色信息到全局状态
+        localStorage.setItem('userRole', 'family');
+        localStorage.setItem('userInfo', JSON.stringify(result.userInfo));
+        toast({
+          title: '登录成功',
+          description: '正在跳转到家属端...',
+          duration: 2000
+        });
+
+        // 跳转到家属端首页
+        setTimeout(() => {
+          props.$w.utils.navigateTo({
+            pageId: 'care-home',
+            params: {}
+          });
+        }, 1000);
+      }
+    } catch (error) {
+      toast({
+        title: '登录失败',
+        description: error.message || '请重试',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 处理企业微信登录
+  const handleEnterpriseWeChatLogin = async () => {
+    setIsLoading(true);
+    try {
+      // 模拟企业微信登录获取用户信息
+      const mockEnterpriseUserInfo = {
+        openid: 'mock_enterprise_openid_' + Date.now(),
+        unionid: 'mock_enterprise_unionid_' + Date.now(),
+        nickname: '企业员工',
+        avatar: 'https://via.placeholder.com/150',
+        // 企业微信返回的身份信息
+        enterpriseInfo: {
+          department: '护理部',
+          position: '护工' // 可以是：护工、文员、院长等
+        }
+      };
+
+      // 根据企业微信返回的身份映射角色
+      const positionRoleMap = {
+        '护工': 'nurse',
+        '护士': 'nurse',
+        '护理员': 'nurse',
+        '文员': 'staff',
+        '行政': 'staff',
+        '院长': 'admin',
+        '管理员': 'admin',
+        '主任': 'admin'
+      };
+      const userRole = positionRoleMap[mockEnterpriseUserInfo.enterpriseInfo.position] || 'staff';
+
+      // 保存用户信息到数据库
+      const result = await props.$w.cloud.callFunction({
+        name: 'login',
+        data: {
+          action: 'wechat_login',
+          userInfo: mockEnterpriseUserInfo,
+          wechatType: 'enterprise',
+          role: userRole // 根据企业微信身份映射角色
+        }
+      });
+      if (result.success) {
+        // 保存角色信息到全局状态
+        localStorage.setItem('userRole', userRole);
+        localStorage.setItem('userInfo', JSON.stringify(result.userInfo));
+        toast({
+          title: '登录成功',
+          description: `身份：${mockEnterpriseUserInfo.enterpriseInfo.position}，正在跳转到管理端...`,
+          duration: 2000
+        });
+
+        // 跳转到管理端首页
+        setTimeout(() => {
+          props.$w.utils.navigateTo({
+            pageId: 'admin-home',
+            params: {}
+          });
+        }, 1000);
+      }
+    } catch (error) {
+      toast({
+        title: '登录失败',
+        description: error.message || '请重试',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   const handleBack = () => {
     props.$w.utils.navigateBack();
+  };
+
+  // 根据选择的登录类型执行相应的登录
+  const handleLogin = () => {
+    if (loginType === 'personal') {
+      handlePersonalWeChatLogin();
+    } else {
+      handleEnterpriseWeChatLogin();
+    }
   };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
       <div className="container mx-auto px-4 py-8">
@@ -70,7 +186,26 @@ export default function WechatLogin(props) {
                 </p>
               </div>
               
-              <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
+              {/* 登录类型选择 */}
+              <div className="mb-6">
+                <div className="flex bg-gray-100 rounded-full p-1">
+                  <button onClick={() => setLoginType('personal')} className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${loginType === 'personal' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-600 hover:text-gray-800'}`}>
+                    普通微信
+                  </button>
+                  <button onClick={() => setLoginType('enterprise')} className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${loginType === 'enterprise' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-800'}`}>
+                    企业微信
+                  </button>
+                </div>
+              </div>
+
+              {/* 登录说明 */}
+              <div className="mb-6 p-3 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600">
+                  {loginType === 'personal' ? '使用个人微信登录，适用于家属用户' : '使用企业微信登录，适用于护工、文员、管理员等工作人员'}
+                </p>
+              </div>
+
+              <Button onClick={handleLogin} disabled={isLoading} className={`w-full rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${loginType === 'personal' ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white' : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'}`} style={{
               fontFamily: 'Nunito Sans, sans-serif'
             }}>
                 {isLoading ? <div className="flex items-center justify-center">
@@ -83,7 +218,7 @@ export default function WechatLogin(props) {
                     <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
                     </svg>
-                    微信授权登录
+                    {loginType === 'personal' ? '普通微信登录' : '企业微信登录'}
                   </>}
               </Button>
             </div>

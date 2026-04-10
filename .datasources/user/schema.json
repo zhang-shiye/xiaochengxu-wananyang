@@ -1,0 +1,52 @@
+{
+  "name": "user",
+  "title": "用户账号",
+  "schemas": [
+    {
+      "name": "nickname",
+      "title": "昵称",
+      "type": "String"
+    },
+    {
+      "name": "avatar",
+      "title": "头像",
+      "type": "Image"
+    },
+    {
+      "name": "phone",
+      "title": "手机号",
+      "type": "String"
+    },
+    {
+      "name": "wechat_openid",
+      "title": "微信OpenID",
+      "type": "String"
+    },
+    {
+      "name": "wechat_unionid",
+      "title": "微信UnionID",
+      "type": "String"
+    },
+    {
+      "name": "wechat_type",
+      "title": "微信类型",
+      "type": "String"
+    },
+    {
+      "name": "role",
+      "title": "角色",
+      "type": "String"
+    },
+    {
+      "name": "status",
+      "title": "状态",
+      "type": "String"
+    },
+    {
+      "name": "last_login_at",
+      "title": "最后登录时间",
+      "type": "DateTime",
+      "format": "timestamp-ms"
+    }
+  ]
+}

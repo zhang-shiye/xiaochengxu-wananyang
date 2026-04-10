@@ -11,6 +11,25 @@ export default function Bill(props) {
   const [bills, setBills] = useState([]);
   const [currentMonth, setCurrentMonth] = useState('2026-04');
   useEffect(() => {
+    // 角色检查
+    const userRole = localStorage.getItem('userRole');
+    if (!userRole) {
+      // 未登录，跳转到登录页
+      props.$w.utils.navigateTo({
+        pageId: 'login',
+        params: {}
+      });
+      return;
+    }
+    if (userRole !== 'family') {
+      // 不是家属角色，跳转到管理端
+      props.$w.utils.navigateTo({
+        pageId: 'admin-home',
+        params: {}
+      });
+      return;
+    }
+
     // 模拟账单数据
     setBills([{
       id: 1,

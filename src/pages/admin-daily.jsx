@@ -19,6 +19,24 @@ export default function AdminDaily(props) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   useEffect(() => {
+    // 角色检查
+    const userRole = localStorage.getItem('userRole');
+    if (!userRole) {
+      // 未登录，跳转到登录页
+      props.$w.utils.navigateTo({
+        pageId: 'login',
+        params: {}
+      });
+      return;
+    }
+    if (userRole === 'family') {
+      // 是家属角色，跳转到家属端
+      props.$w.utils.navigateTo({
+        pageId: 'care-home',
+        params: {}
+      });
+      return;
+    }
     loadDailyReports();
   }, []);
   useEffect(() => {
