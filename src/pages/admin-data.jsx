@@ -15,27 +15,6 @@ export default function AdminData(props) {
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [importType, setImportType] = useState('elders');
-  useEffect(() => {
-    // 角色检查
-    const userRole = localStorage.getItem('userRole');
-    if (!userRole) {
-      // 未登录，跳转到登录页
-      props.$w.utils.navigateTo({
-        pageId: 'login',
-        params: {}
-      });
-      return;
-    }
-    if (userRole === 'family') {
-      // 是家属角色，跳转到家属端
-      props.$w.utils.navigateTo({
-        pageId: 'care-home',
-        params: {}
-      });
-      return;
-    }
-    fetchImportTasks();
-  }, []);
 
   // 获取导入任务列表
   const fetchImportTasks = async () => {

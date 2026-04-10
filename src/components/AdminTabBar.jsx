@@ -1,5 +1,5 @@
 // @ts-ignore;
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 // @ts-ignore;
 import { Button } from '@/components/ui';
 // @ts-ignore;
@@ -8,28 +8,6 @@ import { MessageSquare, FileCheck, UserCheck, DollarSign } from 'lucide-react';
 export default function AdminTabBar({
   currentPage
 }) {
-  const [userRole, setUserRole] = useState('');
-  useEffect(() => {
-    // 从本地存储获取用户角色
-    const role = localStorage.getItem('userRole');
-    setUserRole(role);
-
-    // 如果角色是 family，跳转到家属端页面
-    if (role === 'family') {
-      const currentPath = window.location.pathname;
-      if (currentPath.includes('/admin-')) {
-        window.$w?.utils?.navigateTo({
-          pageId: 'care-home',
-          params: {}
-        });
-      }
-    }
-  }, []);
-
-  // 如果不是管理端角色，不显示管理端导航栏
-  if (userRole === 'family') {
-    return null;
-  }
   const tabs = [{
     id: 'admin-home',
     name: '管理首页',

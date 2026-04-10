@@ -8,26 +8,8 @@ export default function Login(props) {
     toast
   } = useToast();
 
-  // 检查是否已登录，如果已登录则根据角色跳转到对应页面
+  // 3秒后自动跳转到微信登录页
   useEffect(() => {
-    const userRole = localStorage.getItem('userRole');
-    if (userRole) {
-      // 已登录，根据角色跳转到对应页面
-      if (userRole === 'family') {
-        props.$w.utils.navigateTo({
-          pageId: 'care-home',
-          params: {}
-        });
-      } else {
-        props.$w.utils.navigateTo({
-          pageId: 'admin-home',
-          params: {}
-        });
-      }
-      return;
-    }
-
-    // 3秒后自动跳转到微信登录页
     const timer = setTimeout(() => {
       // 跳转到微信登录页面
       props.$w.utils.navigateTo({

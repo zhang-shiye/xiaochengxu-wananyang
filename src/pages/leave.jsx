@@ -11,26 +11,6 @@ export default function Leave(props) {
   } = useToast();
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  useEffect(() => {
-    // 角色检查
-    const userRole = localStorage.getItem('userRole');
-    if (!userRole) {
-      // 未登录，跳转到登录页
-      props.$w.utils.navigateTo({
-        pageId: 'login',
-        params: {}
-      });
-      return;
-    }
-    if (userRole !== 'family') {
-      // 不是家属角色，跳转到管理端
-      props.$w.utils.navigateTo({
-        pageId: 'admin-home',
-        params: {}
-      });
-      return;
-    }
   // 常用请假事由选项
   const reasonOptions = [{
     value: 'family_visit',
@@ -295,19 +275,15 @@ export default function Leave(props) {
               申请记录
             </h2>
             
-            {leaveRequests.length === 0 ? (
-              <div className="text-center py-8">
+            {leaveRequests.length === 0 ? <div className="text-center py-8">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-2xl">📝</span>
                 </div>
                 <p className="text-gray-600">暂无请假记录</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
+              </div> : <div className="space-y-4">
                 {leaveRequests.map(request => {
-                  const statusInfo = getStatusInfo(request.status);
-                  return (
-                    <div key={request.id} className="border border-gray-200 rounded-xl p-4">
+              const statusInfo = getStatusInfo(request.status);
+              return <div key={request.id} className="border border-gray-200 rounded-xl p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <h3 className="font-medium text-gray-800 mb-1">
@@ -342,18 +318,14 @@ export default function Leave(props) {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            </div>
-          </Card>
-        </div>
+                    </div>;
+            })}
+              </div>}
+          </div>
+        </Card>
       </div>
 
       {/* 底部导航 */}
       <TabBar currentPage="leave" />
-    </div>
-  );
+    </div>;
 }

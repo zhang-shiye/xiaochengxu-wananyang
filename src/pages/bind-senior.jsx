@@ -1,5 +1,5 @@
 // @ts-ignore;
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 // @ts-ignore;
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Button, Card, useToast } from '@/components/ui';
 
@@ -9,26 +9,6 @@ export default function BindSenior(props) {
     toast
   } = useToast();
   const [isBinding, setIsBinding] = useState(false);
-  useEffect(() => {
-    // 角色检查
-    const userRole = localStorage.getItem('userRole');
-    if (!userRole) {
-      // 未登录，跳转到登录页
-      props.$w.utils.navigateTo({
-        pageId: 'login',
-        params: {}
-      });
-      return;
-    }
-    if (userRole !== 'family') {
-      // 不是家属角色，跳转到管理端
-      props.$w.utils.navigateTo({
-        pageId: 'admin-home',
-        params: {}
-      });
-      return;
-    }
-  }, []);
   const form = useForm();
   const onSubmit = async data => {
     setIsBinding(true);

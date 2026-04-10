@@ -1,5 +1,5 @@
 // @ts-ignore;
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 // @ts-ignore;
 import { Button } from '@/components/ui';
 // @ts-ignore;
@@ -8,28 +8,6 @@ import { Home, BookOpen, FileText, DollarSign } from 'lucide-react';
 export default function TabBar({
   currentPage
 }) {
-  const [userRole, setUserRole] = useState('');
-  useEffect(() => {
-    // 从本地存储获取用户角色
-    const role = localStorage.getItem('userRole');
-    setUserRole(role);
-
-    // 如果角色不是 family，跳转到对应的管理端页面
-    if (role && role !== 'family') {
-      const currentPath = window.location.pathname;
-      if (currentPath.includes('/care-home') || currentPath.includes('/home') || currentPath.includes('/leave') || currentPath.includes('/bill')) {
-        window.$w?.utils?.navigateTo({
-          pageId: 'admin-home',
-          params: {}
-        });
-      }
-    }
-  }, []);
-
-  // 如果不是家属角色，不显示家属端导航栏
-  if (userRole && userRole !== 'family') {
-    return null;
-  }
   const tabs = [{
     id: 'care-home',
     name: '皖安养',
