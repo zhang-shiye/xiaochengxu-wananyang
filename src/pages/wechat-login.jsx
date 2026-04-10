@@ -8,103 +8,34 @@ export default function WechatLogin(props) {
     toast
   } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const handleWeChatLogin = async () => {
+  // 获取登录渠道参数
+  const loginChannel = props.$w.page.dataset.params?.channel || 'family';
+  const handleWeChatLogin = () => {
     setIsLoading(true);
-    try {
-      // 获取云开发实例
-      const tcb = await props.$w.cloud.getCloudInstance();
 
-      // 模拟微信登录 - 获取用户信息
-      const mockUserInfo = {
-        openId: 'mock_openid_' + Date.now(),
-        nickName: '微信用户',
-        avatarUrl: 'https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mGLo4u1oD0dpY4YViaiaViaViaViaia/132',
-        // 模拟微信类型：普通微信 vs 企业微信
-        wechatType: Math.random() > 0.5 ? 'personal' : 'enterprise',
-        // 模拟企业身份
-        enterpriseRole: Math.random() > 0.5 ? 'nurse' : Math.random() > 0.5 ? 'staff' : 'admin'
-      };
-
-      // 根据微信类型确定角色
-      let role;
-      if (mockUserInfo.wechatType === 'personal') {
-        role = 'family'; // 普通微信登录 -> 家属角色
-      } else {
-        // 企业微信登录 -> 根据企业身份分配角色
-        role = mockUserInfo.enterpriseRole;
-      }
-
-      // 检查用户是否已存在
-      const existingUser = await tcb.database().collection('family_members').where({
-        _openid: mockUserInfo.openId
-      }).get();
-      let userData;
-      if (existingUser.data.length > 0) {
-        // 用户已存在，更新角色信息
-        userData = existingUser.data[0];
-        await tcb.database().collection('family_members').doc(userData._id).update({
-          data: {
-            role: role,
-            wechatType: mockUserInfo.wechatType,
-            updatedAt: Date.now()
-          }
-        });
-      } else {
-        // 新用户，创建记录
-        const result = await tcb.database().collection('family_members').add({
-          data: {
-            name: mockUserInfo.nickName,
-            avatar: mockUserInfo.avatarUrl,
-            role: role,
-            wechatType: mockUserInfo.wechatType,
-            openId: mockUserInfo.openId,
-            phone: '',
-            status: 'active',
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            createBy: mockUserInfo.openId,
-            updateBy: mockUserInfo.openId,
-            _openid: mockUserInfo.openId
-          }
-        });
-        userData = result;
-      }
+    // 模拟微信登录过程
+    setTimeout(() => {
       setIsLoading(false);
 
-      // 根据角色跳转到对应页面
-      if (role === 'family') {
-        // 家属角色 -> 跳转到绑定长者页面
-        props.$w.utils.navigateTo({
-          pageId: 'bind-senior',
-          params: {
-            userId: userData._id
-          }
-        });
-      } else {
-        // 管理角色（nurse/staff/admin）-> 跳转到管理端首页
-        props.$w.utils.navigateTo({
+      // 根据登录渠道识别角色并跳转
+      if (loginChannel === 'admin') {
+        // 企业微信登录 - 跳转到管理端首页
+        props.$w.utils.redirectTo({
           pageId: 'admin-home',
           params: {
-            userId: userData._id,
-            role: role
+            role: 'admin'
+          }
+        });
+      } else {
+        // 普通微信登录 - 跳转到家属端绑定页面
+        props.$w.utils.redirectTo({
+          pageId: 'bind-senior',
+          params: {
+            role: 'family'
           }
         });
       }
-      toast({
-        title: '登录成功',
-        description: `欢迎${role === 'family' ? '家属' : '管理员'}用户`,
-        duration: 2000
-      });
-    } catch (error) {
-      setIsLoading(false);
-      console.error('微信登录失败:', error);
-      toast({
-        title: '登录失败',
-        description: '请重试或联系客服',
-        variant: 'destructive',
-        duration: 3000
-      });
-    }
+    }, 2000);
   };
   const handleBack = () => {
     props.$w.utils.navigateBack();
@@ -147,14 +78,14 @@ export default function WechatLogin(props) {
                 <h2 className="text-xl font-semibold text-gray-800 mb-2" style={{
                 fontFamily: 'Nunito Sans, sans-serif'
               }}>
-                  微信授权登录
+                  {loginChannel === 'admin' ? '企业微信授权登录' : '微信授权登录'}
                 </h2>
                 <p className="text-gray-600 text-sm">
-                  使用微信账号快速登录，开始关爱之旅
+                  {loginChannel === 'admin' ? '使用企业微信账号登录，进行管理操作' : '使用微信账号快速登录，开始关爱之旅'}
                 </p>
               </div>
               
-              <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
+              <Button onClick={handleWeChatLogin} disabled={isLoading} className={`w-full rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${loginChannel === 'admin' ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'}`} style={{
               fontFamily: 'Nunito Sans, sans-serif'
             }}>
                 {isLoading ? <div className="flex items-center justify-center">
@@ -167,7 +98,7 @@ export default function WechatLogin(props) {
                     <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
                     </svg>
-                    微信授权登录
+                    {loginChannel === 'admin' ? '企业微信授权登录' : '微信授权登录'}
                   </>}
               </Button>
             </div>

@@ -1,53 +1,45 @@
 {
   "name": "user",
-  "title": "用户",
+  "title": "用户信息",
   "schemas": [
     {
-      "name": "name",
-      "title": "姓名",
-      "type": "String"
-    },
-    {
-      "name": "avatar",
-      "title": "头像",
-      "type": "Image"
-    },
-    {
-      "name": "role",
-      "title": "角色",
-      "type": "String"
-    },
-    {
-      "name": "wechatType",
-      "title": "微信类型",
-      "type": "String"
-    },
-    {
-      "name": "openId",
+      "name": "openid",
       "title": "微信OpenID",
       "type": "String"
     },
     {
-      "name": "phone",
-      "title": "手机号",
+      "name": "nickname",
+      "title": "微信昵称",
       "type": "String"
     },
     {
-      "name": "elderIds",
-      "title": "关联老人ID",
-      "type": "Array",
-      "items": {
-        "type": "String"
-      }
+      "name": "avatar",
+      "title": "微信头像",
+      "type": "Url"
     },
     {
-      "name": "department",
-      "title": "部门",
+      "name": "role",
+      "title": "用户角色",
+      "type": "String"
+    },
+    {
+      "name": "elderId",
+      "title": "关联老人ID",
+      "type": "String"
+    },
+    {
+      "name": "careHomeId",
+      "title": "关联养老院ID",
+      "type": "String"
+    },
+    {
+      "name": "phone",
+      "title": "联系电话",
       "type": "String"
     },
     {
       "name": "status",
-      "title": "状态",
+      "title": "用户状态",
       "type": "String"
     }
   ]
