@@ -9,6 +9,8 @@ import ADMIN_HOME from '../pages/admin-home.jsx';
 import ADMIN_DAILY from '../pages/admin-daily.jsx';
 import ADMIN_LEAVE from '../pages/admin-leave.jsx';
 import ADMIN_BILL from '../pages/admin-bill.jsx';
+import ADMIN_ELDER from '../pages/admin-elder.jsx';
+import ADMIN_DATA from '../pages/admin-data.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -42,4 +44,10 @@ export const routers = [{
 }, {
   id: "admin-bill",
   component: ADMIN_BILL
+}, {
+  id: "admin-elder",
+  component: ADMIN_ELDER
+}, {
+  id: "admin-data",
+  component: ADMIN_DATA
 }]
