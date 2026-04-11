@@ -6,6 +6,7 @@ import { Card, Avatar, AvatarImage, Button, Badge, useToast } from '@/components
 import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign } from 'lucide-react';
 
 import TabBar from '@/components/TabBar';
+import BrandHeader from '@/components/BrandHeader';
 export default function Home(props) {
   const {
     toast
@@ -133,20 +134,7 @@ export default function Home(props) {
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
       <div className="container mx-auto px-4 py-6">
         {/* 头部标题 */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-amber-900 mb-2" style={{
-          fontFamily: 'Playfair Display, serif'
-        }}>
-
-            # 家属首页
-          </h1>
-          <p className="text-amber-700" style={{
-          fontFamily: 'Nunito Sans, sans-serif'
-        }}>
-
-            用心陪伴，安心养老
-          </p>
-        </div>
+        <BrandHeader variant="small" className="mb-6" />
 
         {/* 老人基本信息卡片 */}
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl rounded-3xl mb-6">
@@ -299,8 +287,9 @@ export default function Home(props) {
             </div>
           </Card>
         </div>
-      </div>
 
+      </div>
+      
       {/* 底部导航 */}
       <TabBar currentPage="home" />
     </div>;

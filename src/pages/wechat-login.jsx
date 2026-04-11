@@ -1,5 +1,5 @@
 // @ts-ignore;
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Button, Card, useToast } from '@/components/ui';
 
@@ -8,19 +8,185 @@ export default function WechatLogin(props) {
     toast
   } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const handleWeChatLogin = () => {
-    setIsLoading(true);
+  const [userInfo, setUserInfo] = useState(null);
+  const [loginCode, setLoginCode] = useState('');
+  const [sessionKey, setSessionKey] = useState('');
+  const [currentStep, setCurrentStep] = useState(1); // 1: 微信授权, 2: 手机号授权
 
-    // 模拟微信登录过程
-    setTimeout(() => {
-      setIsLoading(false);
-
-      // 跳转到绑定长者页面
-      props.$w.utils.navigateTo({
-        pageId: 'bind-senior',
-        params: {}
+  // 获取微信登录code
+  const getWeChatCode = () => {
+    return new Promise((resolve, reject) => {
+      wx.login({
+        success: res => {
+          if (res.code) {
+            resolve(res.code);
+          } else {
+            reject(new Error('获取微信登录code失败'));
+          }
+        },
+        fail: err => {
+          reject(err);
+        }
       });
-    }, 2000);
+    });
+  };
+
+  // 获取用户信息
+  const getUserProfile = () => {
+    return new Promise((resolve, reject) => {
+      wx.getUserProfile({
+        desc: '用于完善用户资料',
+        success: res => {
+          resolve(res.userInfo);
+        },
+        fail: err => {
+          reject(err);
+        }
+      });
+    });
+  };
+
+  // 处理微信登录
+  const handleWeChatLogin = async () => {
+    try {
+      setIsLoading(true);
+
+      // 1. 获取微信登录code
+      const code = await getWeChatCode();
+      setLoginCode(code);
+
+      // 2. 获取用户信息
+      let userProfile = null;
+      try {
+        userProfile = await getUserProfile();
+        setUserInfo(userProfile);
+      } catch (err) {
+        console.log('用户拒绝授权用户信息，继续登录流程');
+      }
+
+      // 3. 调用云函数进行登录
+      const loginResult = await props.$w.cloud.callFunction({
+        name: 'wechatLogin',
+        data: {
+          code: code,
+          userInfo: userProfile
+        }
+      });
+      if (loginResult.result.success) {
+        const userData = loginResult.result.data;
+
+        // 保存用户信息到全局状态
+        if (props.$w.auth && props.$w.auth.setCurrentUser) {
+          props.$w.auth.setCurrentUser({
+            userId: userData.userId,
+            openid: userData.openid,
+            role: userData.role,
+            name: userData.name,
+            nickName: userData.nickName,
+            avatarUrl: userData.avatarUrl,
+            phone: userData.phone
+          });
+        }
+        toast({
+          title: '登录成功',
+          description: `欢迎回来，${userData.nickName || userData.name}`
+        });
+
+        // 进入下一步：手机号授权
+        setCurrentStep(2);
+      } else {
+        throw new Error(loginResult.result.error || '登录失败');
+      }
+    } catch (error) {
+      console.error('微信登录失败:', error);
+      toast({
+        title: '登录失败',
+        description: error.message || '请重试',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 处理手机号获取
+  const handleGetPhoneNumber = async e => {
+    if (e.detail.errMsg === 'getPhoneNumber:ok') {
+      try {
+        setIsLoading(true);
+
+        // 调用云函数获取手机号
+        const phoneResult = await props.$w.cloud.callFunction({
+          name: 'getPhoneNumber',
+          data: {
+            encryptedData: e.detail.encryptedData,
+            iv: e.detail.iv,
+            sessionKey: sessionKey,
+            userId: props.$w.auth.currentUser?.userId
+          }
+        });
+        if (phoneResult.result.success) {
+          // 更新用户手机号
+          if (props.$w.auth && props.$w.auth.currentUser) {
+            props.$w.auth.currentUser.phone = phoneResult.result.data.phoneNumber;
+          }
+          toast({
+            title: '手机号获取成功',
+            description: '已完成登录流程'
+          });
+
+          // 跳转到首页或绑定页面
+          setTimeout(() => {
+            if (props.$w.auth.currentUser?.isNewUser) {
+              // 新用户跳转到绑定老人页面
+              props.$w.utils.navigateTo({
+                pageId: 'bind-senior',
+                params: {}
+              });
+            } else {
+              // 老用户直接跳转到首页
+              props.$w.utils.navigateTo({
+                pageId: 'care-home',
+                params: {}
+              });
+            }
+          }, 1000);
+        } else {
+          throw new Error(phoneResult.result.error || '获取手机号失败');
+        }
+      } catch (error) {
+        console.error('获取手机号失败:', error);
+        toast({
+          title: '获取手机号失败',
+          description: '您可以稍后在个人中心补充手机号',
+          variant: 'destructive'
+        });
+
+        // 即使没有手机号也继续跳转到首页
+        setTimeout(() => {
+          props.$w.utils.navigateTo({
+            pageId: 'care-home',
+            params: {}
+          });
+        }, 1000);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // 用户拒绝授权手机号
+      toast({
+        title: '手机号授权取消',
+        description: '您可以稍后在个人中心补充手机号'
+      });
+
+      // 继续跳转到首页
+      setTimeout(() => {
+        props.$w.utils.navigateTo({
+          pageId: 'care-home',
+          params: {}
+        });
+      }, 1000);
+    }
   };
   const handleBack = () => {
     props.$w.utils.navigateBack();
@@ -41,53 +207,110 @@ export default function WechatLogin(props) {
           {/* 步骤指示器 */}
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${currentStep >= 1 ? 'bg-amber-500' : 'bg-gray-300'}`}>
                 1
               </div>
-              <div className="w-16 h-1 bg-amber-300 mx-2"></div>
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm font-medium">
+              <div className={`w-16 h-1 mx-2 ${currentStep >= 2 ? 'bg-amber-300' : 'bg-gray-200'}`}></div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${currentStep >= 2 ? 'bg-amber-500' : 'bg-gray-300'}`}>
                 2
               </div>
             </div>
           </div>
 
-          {/* 微信登录卡片 */}
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl rounded-3xl">
-            <div className="p-10">
-              <div className="text-center mb-8">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                  <svg className="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .167.054.25.25 0 0 0 .25-.25c0-.073-.029-.144-.043-.216l-.27-1.027a.582.582 0 0 1 .023-.261 8.67 8.67 0 0 0 1.122-4.135c0-4.162-3.465-7.531-7.74-7.531zM11.89 13.06c-.642 0-1.162-.529-1.162-1.18a1.17 1.17 0 0 1 1.162-1.178c.642 0 1.162.529 1.162 1.178 0 .651-.52 1.18-1.162 1.18zm5.34 0c-.642 0-1.162-.529-1.162-1.18a1.17 1.17 0 0 1 1.162-1.178c.642 0 1.162.529 1.162 1.178 0 .651-.52 1.18-1.162 1.18z" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-2" style={{
+          {/* 步骤1: 微信授权登录 */}
+          {currentStep === 1 && <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl rounded-3xl">
+              <div className="p-10">
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    <svg className="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .167.054.25.25 0 0 0 .25-.25c0-.073-.029-.144-.043-.216l-.27-1.027a.582.582 0 0 1 .023-.261 8.67 8.67 0 0 0 1.122-4.135c0-4.162-3.465-7.531-7.74-7.531zM11.89 13.06c-.642 0-1.162-.529-1.162-1.18a1.17 1.17 0 0 1 1.162-1.178c.642 0 1.162.529 1.162 1.178 0 .651-.52 1.18-1.162 1.18zm5.34 0c-.642 0-1.162-.529-1.162-1.18a1.17 1.17 0 0 1 1.162-1.178c.642 0 1.162.529 1.162 1.178 0 .651-.52 1.18-1.162 1.18z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-800 mb-2" style={{
                 fontFamily: 'Nunito Sans, sans-serif'
               }}>
-                  微信授权登录
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  使用微信账号快速登录，开始关爱之旅
-                </p>
-              </div>
-              
-              <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
+                    微信授权登录
+                  </h2>
+                  <p className="text-gray-600 text-sm">
+                    使用微信账号快速登录，开始关爱之旅
+                  </p>
+                </div>
+                
+                <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
               fontFamily: 'Nunito Sans, sans-serif'
             }}>
-                {isLoading ? <div className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  {isLoading ? <div className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      登录中...
+                    </div> : <>
+                      <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
+                      </svg>
+                      微信授权登录
+                    </>}
+                </Button>
+              </div>
+            </Card>}
+
+          {/* 步骤2: 手机号授权 */}
+          {currentStep === 2 && <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl rounded-3xl">
+              <div className="p-10">
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
-                    登录中...
-                  </div> : <>
-                    <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
-                    </svg>
-                    微信授权登录
-                  </>}
-              </Button>
-            </div>
-          </Card>
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-800 mb-2" style={{
+                fontFamily: 'Nunito Sans, sans-serif'
+              }}>
+                    获取手机号
+                  </h2>
+                  <p className="text-gray-600 text-sm">
+                    授权获取您的手机号，方便我们为您提供更好的服务
+                  </p>
+                </div>
+                
+                <Button openType="getPhoneNumber" onGetPhoneNumber={handleGetPhoneNumber} disabled={isLoading} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full py-4 font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
+              fontFamily: 'Nunito Sans, sans-serif'
+            }}>
+                  {isLoading ? <div className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      处理中...
+                    </div> : <>
+                      <svg className="w-6 h-6 mr-3 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      授权获取手机号
+                    </>}
+                </Button>
+                
+                <div className="mt-4 text-center">
+                  <button onClick={() => {
+                // 跳过手机号授权，直接跳转
+                if (props.$w.auth.currentUser?.isNewUser) {
+                  props.$w.utils.navigateTo({
+                    pageId: 'bind-senior',
+                    params: {}
+                  });
+                } else {
+                  props.$w.utils.navigateTo({
+                    pageId: 'care-home',
+                    params: {}
+                  });
+                }
+              }} className="text-gray-500 hover:text-gray-700 text-sm underline">
+                    跳过，稍后再说
+                  </button>
+                </div>
+              </div>
+            </Card>}
 
           {/* 底部装饰 */}
           <div className="text-center mt-8">

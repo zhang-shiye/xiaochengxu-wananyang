@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, useToast } from '@/components/ui';
 
 import TabBar from '@/components/TabBar';
+import BrandHeader from '@/components/BrandHeader';
 export default function Bill(props) {
   const {
     toast
@@ -249,7 +250,7 @@ export default function Bill(props) {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">户名：</span>
-                        <span className="font-medium">皖安养老院</span>
+                        <span className="font-medium"><BrandHeader variant="minimal" /></span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">账号：</span>
