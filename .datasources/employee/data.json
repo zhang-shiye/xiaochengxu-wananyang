@@ -1,0 +1,47 @@
+[
+  {
+    "_id": "emp_001",
+    "openid": "wx_nurse_001",
+    "name": "李护士",
+    "role": "nurse",
+    "phone": "13800138001",
+    "email": "li.nurse@example.com",
+    "department": "护理部",
+    "status": "active",
+    "createdAt": 1703980800000,
+    "updatedAt": 1703980800000,
+    "owner": "system",
+    "createBy": "admin",
+    "updateBy": "admin"
+  },
+  {
+    "_id": "emp_002",
+    "openid": "wx_staff_001",
+    "name": "王会计",
+    "role": "staff",
+    "phone": "13800138002",
+    "email": "wang.staff@example.com",
+    "department": "财务部",
+    "status": "active",
+    "createdAt": 1703980800000,
+    "updatedAt": 1703980800000,
+    "owner": "system",
+    "createBy": "admin",
+    "updateBy": "admin"
+  },
+  {
+    "_id": "emp_003",
+    "openid": "wx_admin_001",
+    "name": "陈院长",
+    "role": "admin",
+    "phone": "13800138003",
+    "email": "chen.admin@example.com",
+    "department": "院长办公室",
+    "status": "active",
+    "createdAt": 1703980800000,
+    "updatedAt": 1703980800000,
+    "owner": "system",
+    "createBy": "system",
+    "updateBy": "system"
+  }
+]

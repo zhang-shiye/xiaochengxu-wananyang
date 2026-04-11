@@ -1,0 +1,41 @@
+{
+  "name": "employee",
+  "title": "员工管理",
+  "schemas": [
+    {
+      "name": "openid",
+      "title": "微信唯一标识",
+      "type": "String"
+    },
+    {
+      "name": "name",
+      "title": "姓名",
+      "type": "String"
+    },
+    {
+      "name": "role",
+      "title": "角色",
+      "type": "String"
+    },
+    {
+      "name": "phone",
+      "title": "手机号",
+      "type": "String"
+    },
+    {
+      "name": "email",
+      "title": "邮箱",
+      "type": "Email"
+    },
+    {
+      "name": "department",
+      "title": "部门",
+      "type": "String"
+    },
+    {
+      "name": "status",
+      "title": "在职状态",
+      "type": "String"
+    }
+  ]
+}
