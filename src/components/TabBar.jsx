@@ -5,13 +5,12 @@ import { Button } from '@/components/ui';
 // @ts-ignore;
 import { Home, BookOpen, FileText, DollarSign } from 'lucide-react';
 
-import BrandHeader from '@/components/BrandHeader';
 export default function TabBar({
   currentPage
 }) {
   const tabs = [{
     id: 'care-home',
-    name: '首页',
+    name: '皖安养',
     icon: Home
   }, {
     id: 'home',

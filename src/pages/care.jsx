@@ -5,7 +5,7 @@ import { Card, Avatar, AvatarImage, Button, useToast } from '@/components/ui';
 
 import DataPermissionHelper from '@/components/PermissionCheck';
 import TabBar from '@/components/TabBar';
-export default function CareHome(props) {
+export default function Home(props) {
   const {
     toast
   } = useToast();
@@ -279,6 +279,6 @@ export default function CareHome(props) {
       </div>
 
       {/* 底部导航 */}
-      <TabBar currentPage="care-home" />
+      <TabBar currentPage="home" />
     </div>;
 }

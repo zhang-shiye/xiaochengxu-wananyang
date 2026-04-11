@@ -4,13 +4,13 @@ import LEAVE from '../pages/leave.jsx';
 import BILL from '../pages/bill.jsx';
 import BIND_SENIOR from '../pages/bind-senior.jsx';
 import WECHAT_LOGIN from '../pages/wechat-login.jsx';
-import CARE_HOME from '../pages/care-home.jsx';
 import ADMIN_HOME from '../pages/admin-home.jsx';
 import ADMIN_DAILY from '../pages/admin-daily.jsx';
 import ADMIN_LEAVE from '../pages/admin-leave.jsx';
 import ADMIN_BILL from '../pages/admin-bill.jsx';
 import ADMIN_ELDER from '../pages/admin-elder.jsx';
 import ADMIN_DATA from '../pages/admin-data.jsx';
+import CARE from '../pages/care.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -30,9 +30,6 @@ export const routers = [{
   id: "wechat-login",
   component: WECHAT_LOGIN
 }, {
-  id: "care-home",
-  component: CARE_HOME
-}, {
   id: "admin-home",
   component: ADMIN_HOME
 }, {
@@ -50,4 +47,7 @@ export const routers = [{
 }, {
   id: "admin-data",
   component: ADMIN_DATA
+}, {
+  id: "care",
+  component: CARE
 }]
