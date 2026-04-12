@@ -14,32 +14,13 @@ export default function WechatLogin(props) {
     toast
   } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 检查登录状态 - 重置为仅检查，不自动跳转
+  // 完全移除登录状态检查，让用户始终看到页面内容
   useEffect(() => {
-    checkLoginStatus();
+    // 页面加载完成，不检查登录状态
+    setLoading(false);
   }, []);
-  const checkLoginStatus = async () => {
-    setLoading(true);
-    try {
-      const user = props.$w.auth.currentUser;
-      if (user?.userId) {
-        setUserInfo(user);
-        // 仅显示已登录状态，不自动跳转，让用户看到页面内容
-        toast({
-          title: '已登录',
-          description: '您已登录，可点击授权按钮继续',
-          duration: 2000
-        });
-      }
-    } catch (error) {
-      console.error('检查登录状态失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // 微信授权登录
   const handleWeChatLogin = async () => {
