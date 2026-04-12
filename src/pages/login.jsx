@@ -1,76 +1,96 @@
 // @ts-ignore;
 import React, { useEffect, useState } from 'react';
+// @ts-ignore;
+import { useToast } from '@/components/ui';
 
 import { NursingHomeBrand } from '@/components/NursingHomeBrand';
 export default function Login(props) {
-  const [brandName, setBrandName] = useState('XX养老院');
+  const {
+    toast
+  } = useToast();
   const [countdown, setCountdown] = useState(1);
 
-  // 加载品牌配置
+  // 1秒后自动跳转到微信登录页
   useEffect(() => {
-    const loadBrandConfig = async () => {
-      try {
-        const result = await props.$w.cloud.callDataSource({
-          dataSourceName: 'branding',
-          methodName: 'wedaGetV2',
-          params: {}
-        });
-        if (result && result.data && result.data.length > 0) {
-          setBrandName(result.data[0].name || 'XX养老院');
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          props.$w.utils.navigateTo({
+            pageId: 'wechat-login',
+            params: {}
+          });
+          return 0;
         }
-      } catch (error) {
-        console.error('加载品牌配置失败:', error);
-      }
-    };
-    loadBrandConfig();
-  }, []);
-
-  // 倒计时
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setInterval(() => {
-        setCountdown(prev => prev - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    } else {
-      // 1秒后跳转到微信登录页
-      props.$w.utils.navigateTo({
-        pageId: 'wechat-login',
-        params: {}
+        return prev - 1;
       });
-    }
-  }, [countdown]);
-  return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex flex-col items-center justify-center px-4">
-      {/* 顶部品牌区域 */}
-      <div className="mb-auto pt-16">
-        <NursingHomeBrand showLogo={true} showSlogan={true} size="large" $w={props.$w} />
-      </div>
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+  return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* 背景装饰 */}
+      <div className="absolute top-0 left-0 w-64 h-64 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 bg-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{
+      animationDelay: '1s'
+    }}></div>
+      <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{
+      animationDelay: '2s'
+    }}></div>
 
-      {/* 中部欢迎标语 */}
-      <div className="flex-1 flex items-center justify-center">
-        <h1 className="text-3xl font-semibold text-gray-800 text-center leading-relaxed" style={{
-        fontFamily: 'Nunito Sans, sans-serif'
-      }}>
-          欢迎使用 {brandName} 家属服务平台
-        </h1>
-      </div>
+      {/* 主内容区 */}
+      <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 py-12 w-full max-w-lg mx-auto">
+        
+        {/* 顶部品牌信息 */}
+        <div className="mb-12 w-full">
+          <NursingHomeBrand showLogo={true} showSlogan={true} size="large" $w={props.$w} />
+        </div>
 
-      {/* 底部加载提示 */}
-      <div className="mb-16 text-center">
-        <p className="text-gray-600 mb-4" style={{
-        fontFamily: 'Nunito Sans, sans-serif'
-      }}>
-          正在跳转至微信登录...{countdown}s
-        </p>
-        {/* 加载动画 */}
-        <div className="flex justify-center space-x-2">
-          <div className="w-3 h-3 bg-amber-400 rounded-full animate-bounce"></div>
-          <div className="w-3 h-3 bg-orange-400 rounded-full animate-bounce" style={{
-          animationDelay: '0.1s'
-        }}></div>
-          <div className="w-3 h-3 bg-rose-400 rounded-full animate-bounce" style={{
-          animationDelay: '0.2s'
-        }}></div>
+        {/* 中部欢迎标语 */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-6 leading-tight" style={{
+          fontFamily: 'Nunito Sans, sans-serif'
+        }}>
+            欢迎使用<br />养老院家属服务平台
+          </h1>
+          <div className="flex items-center justify-center space-x-2 text-amber-700">
+            <div className="w-12 h-0.5 bg-gradient-to-r from-transparent to-amber-400"></div>
+            <span className="text-sm md:text-base" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              用心陪伴 · 安心养老
+            </span>
+            <div className="w-12 h-0.5 bg-gradient-to-l from-transparent to-amber-400"></div>
+          </div>
+        </div>
+
+        {/* 底部跳转提示和加载动画 */}
+        <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center justify-center space-y-4">
+          {/* 加载动画 */}
+          <div className="flex items-center space-x-3">
+            <div className="w-3 h-3 bg-orange-400 rounded-full animate-bounce" style={{
+            animationDelay: '0s'
+          }}></div>
+            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{
+            animationDelay: '0.2s'
+          }}></div>
+            <div className="w-3 h-3 bg-orange-600 rounded-full animate-bounce" style={{
+            animationDelay: '0.4s'
+          }}></div>
+          </div>
+          
+          {/* 跳转提示 */}
+          <div className="text-center">
+            <p className="text-gray-600 text-sm md:text-base mb-1" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              正在跳转至微信登录...
+            </p>
+            <p className="text-amber-700 font-semibold text-xs md:text-sm" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              {countdown}s 后自动跳转
+            </p>
+          </div>
         </div>
       </div>
     </div>;

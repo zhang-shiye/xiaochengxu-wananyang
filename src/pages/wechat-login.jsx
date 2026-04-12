@@ -2,6 +2,12 @@
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Button, Card, useToast } from '@/components/ui';
+// @ts-ignore;
+import { MessageCircle, ArrowLeft } from 'lucide-react';
+
+// @ts-ignore;
+import { NursingHomeBrand } from '@/components/NursingHomeBrand.jsx';
+// @ts-ignore;
 
 export default function WechatLogin(props) {
   const {
@@ -9,42 +15,31 @@ export default function WechatLogin(props) {
   } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [brandName, setBrandName] = useState('XX养老院');
-
-  // 加载品牌配置
-  useEffect(() => {
-    const loadBrandConfig = async () => {
-      try {
-        const result = await props.$w.cloud.callDataSource({
-          dataSourceName: 'branding',
-          methodName: 'wedaGetV2',
-          params: {}
-        });
-        if (result && result.data && result.data.length > 0) {
-          setBrandName(result.data[0].name || 'XX养老院');
-        }
-      } catch (error) {
-        console.error('加载品牌配置失败:', error);
-      }
-    };
-    loadBrandConfig();
-  }, []);
+  const [loading, setLoading] = useState(false);
 
   // 检查登录状态
   useEffect(() => {
     checkLoginStatus();
   }, []);
   const checkLoginStatus = async () => {
-    const user = props.$w.auth.currentUser;
-    if (user?.userId) {
-      setUserInfo(user);
-      // 已经登录，跳转到绑定长者页面
-      setTimeout(() => {
-        props.$w.utils.navigateTo({
-          pageId: 'bind-senior',
-          params: {}
-        });
-      }, 500);
+    setLoading(true);
+    try {
+      const user = props.$w.auth.currentUser;
+      if (user?.userId) {
+        setUserInfo(user);
+        // 已登录，保存用户信息并跳转到绑定长者页面
+        await saveUserInfo(user);
+        setTimeout(() => {
+          props.$w.utils.navigateTo({
+            pageId: 'bind-senior',
+            params: {}
+          });
+        }, 500);
+      }
+    } catch (error) {
+      console.error('检查登录状态失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,18 +69,18 @@ export default function WechatLogin(props) {
     }
   };
 
-  // 获取并保存用户信息
+  // 获取并保存用户手机号
   const saveUserInfo = async user => {
     try {
-      // 从微信登录用户信息中获取信息
+      // 从微信登录用户信息中获取手机号（如果有的话）
       const phone = user.phone || user.phoneNumber || null;
-      const openid = user.openid || user.uid || null;
-      const name = user.nickname || user.name || '微信用户';
+      const openid = user.openid || user.uid || user.userId || null;
+      const name = user.nickname || user.name || user.nickName || '微信用户';
       const avatar = user.avatarUrl || user.avatar || null;
-      console.log('获取用户信息:', {
+      console.log('保存用户信息:', {
+        openid,
         name,
         phone,
-        openid,
         avatar
       });
 
@@ -102,7 +97,7 @@ export default function WechatLogin(props) {
               openid: openid,
               name: name,
               phone: phone,
-              avatarUrl: avatar,
+              avatar: avatar,
               role: '家属',
               status: '在职',
               updatedAt: new Date().toISOString()
@@ -120,7 +115,7 @@ export default function WechatLogin(props) {
                 openid: openid,
                 name: name,
                 phone: phone,
-                avatarUrl: avatar,
+                avatar: avatar,
                 role: '家属',
                 status: '在职',
                 createdAt: new Date().toISOString(),
@@ -144,7 +139,7 @@ export default function WechatLogin(props) {
   };
 
   // 如果已经登录且正在跳转，显示加载状态
-  if (userInfo) {
+  if (userInfo || loading) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
         <div className="text-center">
           <div className="flex justify-center space-x-2 mb-4">
@@ -156,72 +151,94 @@ export default function WechatLogin(props) {
             animationDelay: '0.2s'
           }}></div>
           </div>
-          <p className="text-amber-700 font-medium">正在跳转...</p>
+          <p className="text-amber-700 font-medium">正在跳转至绑定长者页面...</p>
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex flex-col">
-      {/* 顶部区域 */}
-      <div className="px-4 py-4">
-        {/* 返回按钮 + 标题 + 步骤提示 */}
-        <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" size="sm" onClick={handleBack} className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 p-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </Button>
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-800" style={{
-            fontFamily: 'Nunito Sans, sans-serif'
-          }}>
-              微信快捷登录
-            </h2>
-            <p className="text-sm text-amber-600 mt-1" style={{
-            fontFamily: 'Nunito Sans, sans-serif'
-          }}>
-              1/2 完成绑定
-            </p>
-          </div>
-          <div className="w-9"></div>
-        </div>
+  return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      {/* 背景装饰 */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-1/2 -left-20 w-72 h-72 bg-orange-200 rounded-full blur-3xl opacity-30 animate-pulse" style={{
+        animationDelay: '1s'
+      }}></div>
+        <div className="absolute -bottom-32 right-1/4 w-64 h-64 bg-rose-200 rounded-full blur-3xl opacity-30 animate-pulse" style={{
+        animationDelay: '2s'
+      }}></div>
       </div>
 
-      {/* 中部核心操作区 */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-sm">
-          {/* 微信图标 + 提示文案 */}
-          <div className="text-center mb-8">
+      <div className="relative z-10">
+        {/* 返回按钮 */}
+        <div className="absolute top-4 left-4 z-20">
+          <Button variant="ghost" size="sm" onClick={handleBack} className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 rounded-full">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            返回
+          </Button>
+        </div>
+
+        <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-screen">
+          {/* 顶部品牌信息 */}
+          <div className="mb-12 text-center">
+            <NursingHomeBrand showLogo={true} showSlogan={true} size="large" $w={props.$w} />
+          </div>
+
+          {/* 中部微信图标和提示文案 */}
+          <div className="text-center mb-12">
             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <svg className="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
-              </svg>
+              <MessageCircle className="w-12 h-12 text-green-600" strokeWidth={2} />
             </div>
-            <p className="text-gray-700 text-lg mb-2" style={{
+            <h2 className="text-2xl font-bold text-amber-900 mb-3" style={{
             fontFamily: 'Nunito Sans, sans-serif'
           }}>
+              微信授权登录
+            </h2>
+            <p className="text-amber-700 text-lg mb-2">
               授权登录即可绑定长者信息
             </p>
-            <p className="text-gray-500 text-sm" style={{
-            fontFamily: 'Nunito Sans, sans-serif'
-          }}>
-              登录{brandName}家属服务平台
+            <p className="text-sm text-gray-600">
+              安全快捷，一键完成身份验证
             </p>
           </div>
 
-          {/* 醒目圆角按钮 */}
-          <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full py-4 font-medium text-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105" style={{
-          fontFamily: 'Nunito Sans, sans-serif'
-        }}>
-            {isLoading ? <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                正在跳转微信授权...
-              </div> : <>
-                微信授权登录
-              </>}
-          </Button>
+          {/* 底部授权按钮 */}
+          <div className="w-full max-w-xs">
+            <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-3xl py-5 font-semibold text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              {isLoading ? <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  正在跳转微信授权...
+                </div> : <>
+                  <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
+                  </svg>
+                  微信授权登录
+                </>}
+            </Button>
+
+            {/* 提示文字 */}
+            <div className="text-center mt-6">
+              <p className="text-xs text-gray-500">
+                点击授权即表示同意《用户服务协议》和《隐私政策》
+              </p>
+            </div>
+          </div>
+
+          {/* 底部装饰 */}
+          <div className="text-center mt-16">
+            <div className="flex justify-center space-x-2">
+              <div className="w-3 h-3 bg-amber-300 rounded-full animate-bounce"></div>
+              <div className="w-3 h-3 bg-orange-300 rounded-full animate-bounce" style={{
+              animationDelay: '0.1s'
+            }}></div>
+              <div className="w-3 h-3 bg-rose-300 rounded-full animate-bounce" style={{
+              animationDelay: '0.2s'
+            }}></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>;
