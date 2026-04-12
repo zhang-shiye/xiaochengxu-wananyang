@@ -9,11 +9,11 @@ export default function TabBar({
   currentPage
 }) {
   const tabs = [{
-    id: 'welcome',
-    name: '皖安养',
+    id: 'home',
+    name: '首页',
     icon: Home
   }, {
-    id: 'home',
+    id: 'care',
     name: '护理日报',
     icon: BookOpen
   }, {
