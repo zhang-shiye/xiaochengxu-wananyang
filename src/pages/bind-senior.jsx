@@ -5,6 +5,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, 
 // @ts-ignore;
 import { CheckCircle2 } from 'lucide-react';
 
+// @ts-ignore;
+import { useForm } from 'react-hook-form';
+// @ts-ignore;
+
 export default function BindSenior(props) {
   const {
     toast
