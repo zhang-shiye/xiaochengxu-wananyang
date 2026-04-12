@@ -7,20 +7,35 @@ import { MessageCircle, ArrowLeft } from 'lucide-react';
 
 // @ts-ignore;
 import { NursingHomeBrand } from '@/components/NursingHomeBrand.jsx';
-// @ts-ignore;
-
 export default function WechatLogin(props) {
   const {
     toast
   } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  // 完全移除登录状态检查，让用户始终看到页面内容
+  // 检查登录状态（仅在页面加载时执行一次）
   useEffect(() => {
-    // 页面加载完成，不检查登录状态
-    setLoading(false);
+    checkLoginAndRedirect();
   }, []);
+  const checkLoginAndRedirect = async () => {
+    try {
+      const user = props.$w.auth.currentUser;
+      // 如果用户已登录且有 openid，说明是从微信授权返回，自动跳转
+      if (user?.userId && user?.openid) {
+        setIsNavigating(true);
+        await saveUserInfo(user);
+        setTimeout(() => {
+          props.$w.utils.navigateTo({
+            pageId: 'bind-senior',
+            params: {}
+          });
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('检查登录状态失败:', error);
+    }
+  };
 
   // 微信授权登录
   const handleWeChatLogin = async () => {
@@ -117,8 +132,8 @@ export default function WechatLogin(props) {
     props.$w.utils.navigateBack();
   };
 
-  // 如果已经登录且正在跳转，显示加载状态
-  if (userInfo || loading) {
+  // 如果正在跳转，显示加载状态
+  if (isNavigating) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
         <div className="text-center">
           <div className="flex justify-center space-x-2 mb-4">
