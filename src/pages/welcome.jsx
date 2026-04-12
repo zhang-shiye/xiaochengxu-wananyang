@@ -1,16 +1,13 @@
 // @ts-ignore;
-import React, { useEffect } from 'react';
+import React from 'react';
 // @ts-ignore;
-import { Card, Button, Avatar, AvatarImage, Badge, useToast } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 // @ts-ignore;
 import { Heart, Star, Phone, MapPin, ArrowRight, Users, Shield, Calendar } from 'lucide-react';
 
 import TabBar from '@/components/TabBar';
 import NursingHomeBrand from '@/components/NursingHomeBrand';
 export default function Welcome(props) {
-  const {
-    toast
-  } = useToast();
   const handleQuickAction = action => {
     const pageMap = {
       'daily': 'home',
