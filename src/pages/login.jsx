@@ -1,77 +1,76 @@
 // @ts-ignore;
-import React, { useEffect } from 'react';
-// @ts-ignore;
-import { Card, useToast } from '@/components/ui';
+import React, { useEffect, useState } from 'react';
 
 import { NursingHomeBrand } from '@/components/NursingHomeBrand';
 export default function Login(props) {
-  const {
-    toast
-  } = useToast();
+  const [brandName, setBrandName] = useState('XX养老院');
+  const [countdown, setCountdown] = useState(1);
 
-  // 1秒后自动跳转到微信登录页
+  // 加载品牌配置
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // 跳转到微信登录页面
+    const loadBrandConfig = async () => {
+      try {
+        const result = await props.$w.cloud.callDataSource({
+          dataSourceName: 'branding',
+          methodName: 'wedaGetV2',
+          params: {}
+        });
+        if (result && result.data && result.data.length > 0) {
+          setBrandName(result.data[0].name || 'XX养老院');
+        }
+      } catch (error) {
+        console.error('加载品牌配置失败:', error);
+      }
+    };
+    loadBrandConfig();
+  }, []);
+
+  // 倒计时
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    } else {
+      // 1秒后跳转到微信登录页
       props.$w.utils.navigateTo({
         pageId: 'wechat-login',
         params: {}
       });
-    }, 1000);
+    }
+  }, [countdown]);
+  return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex flex-col items-center justify-center px-4">
+      {/* 顶部品牌区域 */}
+      <div className="mb-auto pt-16">
+        <NursingHomeBrand showLogo={true} showSlogan={true} size="large" $w={props.$w} />
+      </div>
 
-    // 清理定时器
-    return () => clearTimeout(timer);
-  }, []);
-  return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          {/* 头部标题 */}
-          <div className="mb-12">
-            <NursingHomeBrand showLogo={false} showSlogan={true} size="large" />
-          </div>
+      {/* 中部欢迎标语 */}
+      <div className="flex-1 flex items-center justify-center">
+        <h1 className="text-3xl font-semibold text-gray-800 text-center leading-relaxed" style={{
+        fontFamily: 'Nunito Sans, sans-serif'
+      }}>
+          欢迎使用 {brandName} 家属服务平台
+        </h1>
+      </div>
 
-          {/* 欢迎插画区域 */}
-          <div className="text-center mb-12">
-            <div className="relative inline-block">
-              <div className="w-40 h-40 bg-gradient-to-br from-amber-200 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <svg className="w-20 h-20 text-amber-700" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-              </div>
-            </div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-3" style={{
-            fontFamily: 'Nunito Sans, sans-serif'
-          }}>
-              正在为您准备登录...
-            </h2>
-            <p className="text-gray-600" style={{
-            fontFamily: 'Nunito Sans, sans-serif'
-          }}>
-              即将跳转到微信登录页面
-            </p>
-          </div>
-
-          {/* 加载动画 */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center space-x-2">
-              <div className="w-3 h-3 bg-amber-400 rounded-full animate-bounce"></div>
-              <div className="w-3 h-3 bg-orange-400 rounded-full animate-bounce" style={{
-              animationDelay: '0.1s'
-            }}></div>
-              <div className="w-3 h-3 bg-rose-400 rounded-full animate-bounce" style={{
-              animationDelay: '0.2s'
-            }}></div>
-            </div>
-          </div>
-
-          {/* 底部装饰 */}
-          <div className="text-center mt-12">
-            <div className="flex justify-center space-x-2">
-              <div className="w-3 h-3 bg-amber-300 rounded-full"></div>
-              <div className="w-3 h-3 bg-orange-300 rounded-full"></div>
-              <div className="w-3 h-3 bg-rose-300 rounded-full"></div>
-            </div>
-          </div>
+      {/* 底部加载提示 */}
+      <div className="mb-16 text-center">
+        <p className="text-gray-600 mb-4" style={{
+        fontFamily: 'Nunito Sans, sans-serif'
+      }}>
+          正在跳转至微信登录...{countdown}s
+        </p>
+        {/* 加载动画 */}
+        <div className="flex justify-center space-x-2">
+          <div className="w-3 h-3 bg-amber-400 rounded-full animate-bounce"></div>
+          <div className="w-3 h-3 bg-orange-400 rounded-full animate-bounce" style={{
+          animationDelay: '0.1s'
+        }}></div>
+          <div className="w-3 h-3 bg-rose-400 rounded-full animate-bounce" style={{
+          animationDelay: '0.2s'
+        }}></div>
         </div>
       </div>
     </div>;

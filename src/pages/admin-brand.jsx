@@ -9,13 +9,7 @@ export default function AdminBrand(props) {
   const {
     toast
   } = useToast();
-  const [brandConfig, setBrandConfig] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  // 默认配置
-  const defaultConfig = {
-    _id: null,
+  const [brandConfig, setBrandConfig] = useState({
     name: '',
     slogan: '',
     logoUrl: '',
@@ -23,7 +17,9 @@ export default function AdminBrand(props) {
     contactPhone: '',
     contactAddress: '',
     description: ''
-  };
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // 加载品牌配置
   useEffect(() => {
@@ -62,8 +58,7 @@ export default function AdminBrand(props) {
     }
   };
   const handleSave = async () => {
-    const currentConfig = brandConfig || defaultConfig;
-    if (!currentConfig.name.trim()) {
+    if (!brandConfig.name.trim()) {
       toast({
         title: '验证失败',
         description: '请输入养老院名称',
@@ -71,7 +66,7 @@ export default function AdminBrand(props) {
       });
       return;
     }
-    if (!currentConfig.slogan.trim()) {
+    if (!brandConfig.slogan.trim()) {
       toast({
         title: '验证失败',
         description: '请输入养老院口号',
@@ -82,23 +77,23 @@ export default function AdminBrand(props) {
     setSaving(true);
     try {
       const updateData = {
-        name: currentConfig.name,
-        slogan: currentConfig.slogan,
-        logoUrl: currentConfig.logoUrl,
-        primaryColor: currentConfig.primaryColor,
-        contactPhone: currentConfig.contactPhone,
-        contactAddress: currentConfig.contactAddress,
-        description: currentConfig.description,
+        name: brandConfig.name,
+        slogan: brandConfig.slogan,
+        logoUrl: brandConfig.logoUrl,
+        primaryColor: brandConfig.primaryColor,
+        contactPhone: brandConfig.contactPhone,
+        contactAddress: brandConfig.contactAddress,
+        description: brandConfig.description,
         updatedAt: new Date().toISOString()
       };
-      if (currentConfig._id) {
+      if (brandConfig._id) {
         // 更新现有配置
         await props.$w.cloud.callDataSource({
           dataSourceName: 'branding',
           methodName: 'wedaUpdateV2',
           params: {
             where: {
-              _id: currentConfig._id
+              _id: brandConfig._id
             },
             data: updateData
           }
@@ -163,9 +158,6 @@ export default function AdminBrand(props) {
         {loading ? <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
           </div> : <Card className="p-6 shadow-lg">
-            {(() => {
-          const currentConfig = brandConfig || defaultConfig;
-          return <>
             {/* Logo 设置 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -174,18 +166,18 @@ export default function AdminBrand(props) {
               <div className="flex items-start space-x-4">
                 {/* Logo 预览 */}
                 <div className="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
-                  {currentConfig.logoUrl ? <img src={currentConfig.logoUrl} alt="Logo" className="w-full h-full object-cover" onError={() => setBrandConfig(prev => ({
-                    ...prev,
-                    logoUrl: ''
-                  }))} /> : <ImageIcon className="w-8 h-8 text-gray-400" />}
+                  {brandConfig.logoUrl ? <img src={brandConfig.logoUrl} alt="Logo" className="w-full h-full object-cover" onError={() => setBrandConfig(prev => ({
+                ...prev,
+                logoUrl: ''
+              }))} /> : <ImageIcon className="w-8 h-8 text-gray-400" />}
                 </div>
                 
                 {/* Logo 输入 */}
                 <div className="flex-1">
-                  <Input placeholder="请输入 Logo 图片 URL" value={currentConfig.logoUrl} onChange={e => setBrandConfig(prev => ({
-                    ...prev,
-                    logoUrl: e.target.value
-                  }))} className="mb-2" />
+                  <Input placeholder="请输入 Logo 图片 URL" value={brandConfig.logoUrl} onChange={e => setBrandConfig(prev => ({
+                ...prev,
+                logoUrl: e.target.value
+              }))} className="mb-2" />
                   <p className="text-xs text-gray-500">
                     支持 JPG、PNG 格式，建议尺寸 200x200 像素
                   </p>
@@ -198,10 +190,10 @@ export default function AdminBrand(props) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 养老院名称 <span className="text-red-500">*</span>
               </label>
-              <Input placeholder="请输入养老院名称" value={currentConfig.name} onChange={e => setBrandConfig(prev => ({
-                ...prev,
-                name: e.target.value
-              }))} maxLength={50} />
+              <Input placeholder="请输入养老院名称" value={brandConfig.name} onChange={e => setBrandConfig(prev => ({
+            ...prev,
+            name: e.target.value
+          }))} maxLength={50} />
               <p className="text-xs text-gray-500 mt-1">
                 最多 50 个字符
               </p>
@@ -212,10 +204,10 @@ export default function AdminBrand(props) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 养老院口号 <span className="text-red-500">*</span>
               </label>
-              <Input placeholder="请输入养老院口号" value={currentConfig.slogan} onChange={e => setBrandConfig(prev => ({
-                ...prev,
-                slogan: e.target.value
-              }))} maxLength={100} />
+              <Input placeholder="请输入养老院口号" value={brandConfig.slogan} onChange={e => setBrandConfig(prev => ({
+            ...prev,
+            slogan: e.target.value
+          }))} maxLength={100} />
               <p className="text-xs text-gray-500 mt-1">
                 最多 100 个字符
               </p>
@@ -227,14 +219,14 @@ export default function AdminBrand(props) {
                 主题颜色
               </label>
               <div className="flex items-center space-x-3">
-                <Input type="color" value={currentConfig.primaryColor} onChange={e => setBrandConfig(prev => ({
-                  ...prev,
-                  primaryColor: e.target.value
-                }))} className="w-20 h-10 p-1 cursor-pointer" />
-                <Input placeholder="#f97316" value={currentConfig.primaryColor} onChange={e => setBrandConfig(prev => ({
-                  ...prev,
-                  primaryColor: e.target.value
-                }))} className="flex-1" />
+                <Input type="color" value={brandConfig.primaryColor} onChange={e => setBrandConfig(prev => ({
+              ...prev,
+              primaryColor: e.target.value
+            }))} className="w-20 h-10 p-1 cursor-pointer" />
+                <Input placeholder="#f97316" value={brandConfig.primaryColor} onChange={e => setBrandConfig(prev => ({
+              ...prev,
+              primaryColor: e.target.value
+            }))} className="flex-1" />
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 影响整个应用的主色调
@@ -246,10 +238,10 @@ export default function AdminBrand(props) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 联系电话
               </label>
-              <Input type="tel" placeholder="请输入联系电话" value={currentConfig.contactPhone} onChange={e => setBrandConfig(prev => ({
-                ...prev,
-                contactPhone: e.target.value
-              }))} maxLength={20} />
+              <Input type="tel" placeholder="请输入联系电话" value={brandConfig.contactPhone} onChange={e => setBrandConfig(prev => ({
+            ...prev,
+            contactPhone: e.target.value
+          }))} maxLength={20} />
             </div>
             
             {/* 联系地址 */}
@@ -257,10 +249,10 @@ export default function AdminBrand(props) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 联系地址
               </label>
-              <Input placeholder="请输入联系地址" value={currentConfig.contactAddress} onChange={e => setBrandConfig(prev => ({
-                ...prev,
-                contactAddress: e.target.value
-              }))} maxLength={200} />
+              <Input placeholder="请输入联系地址" value={brandConfig.contactAddress} onChange={e => setBrandConfig(prev => ({
+            ...prev,
+            contactAddress: e.target.value
+          }))} maxLength={200} />
             </div>
             
             {/* 养老院简介 */}
@@ -268,12 +260,12 @@ export default function AdminBrand(props) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 养老院简介
               </label>
-              <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none" rows={4} placeholder="请输入养老院简介" value={currentConfig.description} onChange={e => setBrandConfig(prev => ({
-                ...prev,
-                description: e.target.value
-              }))} maxLength={500} />
+              <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none" rows={4} placeholder="请输入养老院简介" value={brandConfig.description} onChange={e => setBrandConfig(prev => ({
+            ...prev,
+            description: e.target.value
+          }))} maxLength={500} />
               <p className="text-xs text-gray-500 mt-1">
-                {currentConfig.description.length}/500 字符
+                {brandConfig.description.length}/500 字符
               </p>
             </div>
             
@@ -299,30 +291,28 @@ export default function AdminBrand(props) {
             <div className="mt-8 pt-6 border-t border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">配置预览</h3>
               <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-6 space-y-3">
-                {currentConfig.logoUrl && <div className="flex justify-center">
-                    <img src={currentConfig.logoUrl} alt="Logo" className="w-20 h-20 object-contain" onError={() => setBrandConfig(prev => ({
-                    ...prev,
-                    logoUrl: ''
-                  }))} />
+                {brandConfig.logoUrl && <div className="flex justify-center">
+                    <img src={brandConfig.logoUrl} alt="Logo" className="w-20 h-20 object-contain" onError={() => setBrandConfig(prev => ({
+                ...prev,
+                logoUrl: ''
+              }))} />
                   </div>}
                 <h3 className="text-2xl font-bold text-center" style={{
-                  color: currentConfig.primaryColor
-                }}>
-                  {currentConfig.name || '养老院名称'}
+              color: brandConfig.primaryColor
+            }}>
+                  {brandConfig.name || '养老院名称'}
                 </h3>
                 <p className="text-center text-gray-600">
-                  {currentConfig.slogan || '养老院口号'}
+                  {brandConfig.slogan || '养老院口号'}
                 </p>
-                {currentConfig.contactPhone && <p className="text-center text-sm text-gray-500">
-                    📞 {currentConfig.contactPhone}
+                {brandConfig.contactPhone && <p className="text-center text-sm text-gray-500">
+                    📞 {brandConfig.contactPhone}
                   </p>}
-                {currentConfig.contactAddress && <p className="text-center text-sm text-gray-500">
-                    📍 {currentConfig.contactAddress}
+                {brandConfig.contactAddress && <p className="text-center text-sm text-gray-500">
+                    📍 {brandConfig.contactAddress}
                   </p>}
               </div>
             </div>
-            </>;
-        })()}
           </Card>}
       </div>
     </div>;
