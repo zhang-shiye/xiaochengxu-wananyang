@@ -27,14 +27,14 @@ export default function WechatLogin(props) {
       const user = props.$w.auth.currentUser;
       if (user?.userId) {
         setUserInfo(user);
-        // 已登录，保存用户信息并跳转到绑定长者页面
+        // 已登录，保存用户信息但不自动跳转
         await saveUserInfo(user);
-        setTimeout(() => {
-          props.$w.utils.navigateTo({
-            pageId: 'bind-senior',
-            params: {}
-          });
-        }, 500);
+        // 显示已登录状态，让用户手动选择下一步
+        toast({
+          title: '已登录',
+          description: '您已登录，可以继续绑定长者信息',
+          variant: 'success'
+        });
       }
     } catch (error) {
       console.error('检查登录状态失败:', error);
@@ -202,27 +202,48 @@ export default function WechatLogin(props) {
 
           {/* 底部授权按钮 */}
           <div className="w-full max-w-xs">
-            <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-3xl py-5 font-semibold text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
+            {userInfo ? <div className="space-y-4">
+                {/* 已登录状态显示 */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-green-700 font-medium">已登录成功</span>
+                  </div>
+                  <p className="text-sm text-green-600">欢迎 {userInfo.name || '用户'}</p>
+                </div>
+                
+                {/* 手动跳转按钮 */}
+                <Button onClick={() => {
+              props.$w.utils.navigateTo({
+                pageId: 'bind-senior',
+                params: {}
+              });
+            }} className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-3xl py-4 font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                  继续绑定长者信息
+                </Button>
+              </div> : <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-3xl py-5 font-semibold text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
             fontFamily: 'Nunito Sans, sans-serif'
           }}>
-              {isLoading ? <div className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  正在跳转微信授权...
-                </div> : <>
-                  <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
-                  </svg>
-                  微信授权登录
-                </>}
-            </Button>
+                {isLoading ? <div className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    正在跳转微信授权...
+                  </div> : <>
+                    <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
+                    </svg>
+                    微信授权登录
+                  </>}
+              </Button>}
 
             {/* 提示文字 */}
             <div className="text-center mt-6">
               <p className="text-xs text-gray-500">
-                点击授权即表示同意《用户服务协议》和《隐私政策》
+                {!userInfo ? '点击授权即表示同意《用户服务协议》和《隐私政策》' : '您已登录，可以继续绑定长者信息'}
               </p>
             </div>
           </div>
