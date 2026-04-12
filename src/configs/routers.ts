@@ -11,6 +11,7 @@ import ADMIN_BILL from '../pages/admin-bill.jsx';
 import ADMIN_ELDER from '../pages/admin-elder.jsx';
 import ADMIN_DATA from '../pages/admin-data.jsx';
 import CARE from '../pages/care.jsx';
+import WELCOME from '../pages/welcome.jsx';
 export const routers = [{
   id: "login",
   component: LOGIN
@@ -50,4 +51,7 @@ export const routers = [{
 }, {
   id: "care",
   component: CARE
+}, {
+  id: "welcome",
+  component: WELCOME
 }]

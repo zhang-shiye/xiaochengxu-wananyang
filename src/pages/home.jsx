@@ -303,6 +303,6 @@ export default function CareHome(props) {
       </div>
       
       {/* 底部导航 */}
-      <TabBar currentPage="care-home" />
+      <TabBar currentPage="home" />
     </div>;
 }

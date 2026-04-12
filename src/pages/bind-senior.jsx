@@ -64,7 +64,7 @@ export default function BindSenior(props) {
 
       // 跳转到关爱首页
       props.$w.utils.navigateTo({
-        pageId: 'care-home',
+        pageId: 'home',
         params: {}
       });
     } catch (error) {

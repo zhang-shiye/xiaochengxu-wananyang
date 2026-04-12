@@ -9,7 +9,7 @@ export default function TabBar({
   currentPage
 }) {
   const tabs = [{
-    id: 'care-home',
+    id: 'welcome',
     name: '皖安养',
     icon: Home
   }, {
