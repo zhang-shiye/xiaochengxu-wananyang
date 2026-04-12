@@ -8,6 +8,26 @@ export default function Bill(props) {
   const {
     toast
   } = useToast();
+  const [brandName, setBrandName] = useState('皖安养老院');
+
+  // 加载品牌配置
+  useEffect(() => {
+    const loadBrandConfig = async () => {
+      try {
+        const result = await props.$w.cloud.callDataSource({
+          dataSourceName: 'branding',
+          methodName: 'wedaGetV2',
+          params: {}
+        });
+        if (result && result.data && result.data.length > 0) {
+          setBrandName(result.data[0].name || '皖安养老院');
+        }
+      } catch (error) {
+        console.error('加载品牌配置失败:', error);
+      }
+    };
+    loadBrandConfig();
+  }, []);
 
   // 检查用户角色权限
   useEffect(() => {
@@ -249,7 +269,7 @@ export default function Bill(props) {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">户名：</span>
-                        <span className="font-medium">皖安养老院</span>
+                        <span className="font-medium">{brandName}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">账号：</span>

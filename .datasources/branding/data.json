@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "branding_001",
+    "name": "皖安养",
+    "slogan": "用心陪伴 安心养老",
+    "logoUrl": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200&h=200&fit=crop",
+    "primaryColor": "#f97316",
+    "contactPhone": "400-123-4567",
+    "contactAddress": "安徽省合肥市蜀山区政务区XX路123号",
+    "description": "皖安养是一家专业的养老服务机构，致力于为老年人提供优质的生活照料和温馨的居住环境。我们拥有专业的护理团队和完善的服务体系，用心陪伴每一位老人，让他们安心享受幸福的晚年生活。",
+    "createdAt": 1705276800000,
+    "updatedAt": 1705276800000
+  }
+]

@@ -3,12 +3,13 @@ import React, { useEffect } from 'react';
 // @ts-ignore;
 import { Card, useToast } from '@/components/ui';
 
+import { NursingHomeBrand } from '@/components/NursingHomeBrand';
 export default function Login(props) {
   const {
     toast
   } = useToast();
 
-  // 3秒后自动跳转到微信登录页
+  // 1秒后自动跳转到微信登录页
   useEffect(() => {
     const timer = setTimeout(() => {
       // 跳转到微信登录页面
@@ -16,33 +17,17 @@ export default function Login(props) {
         pageId: 'wechat-login',
         params: {}
       });
-    }, 3000);
+    }, 1000);
 
     // 清理定时器
     return () => clearTimeout(timer);
   }, []);
-  const handleSkipLogin = () => {
-    // 开发模式下允许跳过登录
-    props.$w.utils.navigateTo({
-      pageId: 'home',
-      params: {}
-    });
-  };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto">
           {/* 头部标题 */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-amber-900 mb-3" style={{
-            fontFamily: 'Playfair Display, serif'
-          }}>
-              皖安养
-            </h1>
-            <p className="text-amber-700 text-lg" style={{
-            fontFamily: 'Nunito Sans, sans-serif'
-          }}>
-              用心陪伴，安心养老
-            </p>
+          <div className="mb-12">
+            <NursingHomeBrand showLogo={false} showSlogan={true} size="large" />
           </div>
 
           {/* 欢迎插画区域 */}
@@ -77,13 +62,6 @@ export default function Login(props) {
               animationDelay: '0.2s'
             }}></div>
             </div>
-          </div>
-
-          {/* 开发模式跳过按钮 */}
-          <div className="text-center">
-            <button onClick={handleSkipLogin} className="text-gray-500 hover:text-gray-700 text-sm underline">
-              开发模式 - 跳过登录
-            </button>
           </div>
 
           {/* 底部装饰 */}

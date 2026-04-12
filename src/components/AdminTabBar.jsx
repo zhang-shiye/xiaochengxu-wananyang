@@ -3,7 +3,7 @@ import React from 'react';
 // @ts-ignore;
 import { Button } from '@/components/ui';
 // @ts-ignore;
-import { MessageSquare, FileCheck, UserCheck, DollarSign } from 'lucide-react';
+import { MessageSquare, FileCheck, UserCheck, DollarSign, Settings, Users, Database } from 'lucide-react';
 
 export default function AdminTabBar({
   currentPage
@@ -24,6 +24,18 @@ export default function AdminTabBar({
     id: 'admin-bill',
     name: '缴费审核',
     icon: DollarSign
+  }, {
+    id: 'admin-elder',
+    name: '老人管理',
+    icon: Users
+  }, {
+    id: 'admin-data',
+    name: '数据导入',
+    icon: Database
+  }, {
+    id: 'admin-brand',
+    name: '品牌设置',
+    icon: Settings
   }];
   const handleTabClick = pageId => {
     // 使用应用内导航

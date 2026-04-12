@@ -6,6 +6,7 @@ import { Card, Avatar, AvatarImage, Button, Badge, useToast } from '@/components
 import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileText, DollarSign } from 'lucide-react';
 
 import TabBar from '@/components/TabBar';
+import { NursingHomeBrand } from '@/components/NursingHomeBrand';
 export default function CareHome(props) {
   const {
     toast
@@ -92,7 +93,7 @@ export default function CareHome(props) {
   });
   const handleNavigateToDaily = () => {
     props.$w.utils.navigateTo({
-      pageId: 'home',
+      pageId: 'care',
       params: {}
     });
   };
@@ -133,19 +134,8 @@ export default function CareHome(props) {
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
       <div className="container mx-auto px-4 py-6">
         {/* 头部标题 */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-amber-900 mb-2" style={{
-          fontFamily: 'Playfair Display, serif'
-        }}>
-
-            皖安养
-          </h1>
-          <p className="text-amber-700" style={{
-          fontFamily: 'Nunito Sans, sans-serif'
-        }}>
-
-            用心陪伴，安心养老
-          </p>
+        <div className="mb-6">
+          <NursingHomeBrand showLogo={false} showSlogan={true} size="normal" />
         </div>
 
         {/* 老人基本信息卡片 */}

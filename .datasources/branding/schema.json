@@ -1,0 +1,41 @@
+{
+  "name": "branding",
+  "title": "全局配置",
+  "schemas": [
+    {
+      "name": "name",
+      "title": "养老院名称",
+      "type": "String"
+    },
+    {
+      "name": "slogan",
+      "title": "口号",
+      "type": "String"
+    },
+    {
+      "name": "logoUrl",
+      "title": "Logo地址",
+      "type": "String"
+    },
+    {
+      "name": "primaryColor",
+      "title": "主色调",
+      "type": "String"
+    },
+    {
+      "name": "contactPhone",
+      "title": "联系电话",
+      "type": "String"
+    },
+    {
+      "name": "contactAddress",
+      "title": "联系地址",
+      "type": "String"
+    },
+    {
+      "name": "description",
+      "title": "简介",
+      "type": "MultiLineString"
+    }
+  ]
+}
