@@ -20,9 +20,15 @@ export default function WechatLogin(props) {
   }, []);
   const checkLoginAndRedirect = async () => {
     try {
+      // 强制刷新用户信息，确保获取最新的登录状态
+      await props.$w.auth.getUserInfo({
+        force: true
+      });
       const user = props.$w.auth.currentUser;
-      // 如果用户已登录且有 openid，说明是从微信授权返回，自动跳转
-      if (user?.userId && user?.openid) {
+      console.log('当前用户信息:', user);
+
+      // 检查用户是否已登录（不依赖 openid，因为不同登录方式字段可能不同）
+      if (user?.userId) {
         setIsNavigating(true);
         await saveUserInfo(user);
         setTimeout(() => {
@@ -61,6 +67,8 @@ export default function WechatLogin(props) {
       });
       setIsLoading(false);
     }
+    // 注意：调用 toDefaultLoginPage 后会跳转页面，不会执行到这里
+    // setIsLoading(false) 不会被执行，因为页面已经跳转
   };
 
   // 获取并保存用户手机号
@@ -72,6 +80,7 @@ export default function WechatLogin(props) {
       const name = user.nickname || user.name || user.nickName || '微信用户';
       const avatar = user.avatarUrl || user.avatar || null;
       console.log('保存用户信息:', {
+        userId: user.userId,
         openid,
         name,
         phone,
@@ -79,16 +88,24 @@ export default function WechatLogin(props) {
       });
 
       // 保存或更新用户信息到 employee 数据模型
-      if (openid) {
+      if (openid || user.userId) {
+        const searchField = openid ? 'openid' : 'userId';
+        const searchValue = openid || user.userId;
         const result = await props.$w.cloud.callDataSource({
           dataSourceName: 'employee',
           methodName: 'wedaUpdateV2',
           params: {
-            where: {
-              openid: openid
+            filter: {
+              where: {
+                $and: [{
+                  [searchField]: {
+                    $eq: searchValue
+                  }
+                }]
+              }
             },
             data: {
-              openid: openid,
+              openid: openid || user.userId,
               name: name,
               phone: phone,
               avatar: avatar,

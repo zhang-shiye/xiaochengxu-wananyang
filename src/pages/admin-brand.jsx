@@ -31,27 +31,19 @@ export default function AdminBrand(props) {
       const result = await props.$w.cloud.callDataSource({
         dataSourceName: 'branding',
         methodName: 'wedaGetV2',
-        params: {
-          where: {}
-        }
+        params: {}
       });
       if (result && result.data && result.data.length > 0) {
         const config = result.data[0];
         setBrandConfig({
           _id: config._id,
-          name: config.name || '皖安养',
-          slogan: config.slogan || '用心陪伴 安心养老',
-          logoUrl: config.logoUrl || 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=200&h=200&fit=crop&crop=face',
+          name: config.name || '',
+          slogan: config.slogan || '',
+          logoUrl: config.logoUrl || '',
           primaryColor: config.primaryColor || '#f97316',
           contactPhone: config.contactPhone || '',
           contactAddress: config.contactAddress || '',
           description: config.description || ''
-        });
-      } else {
-        // 如果没有数据，创建默认配置
-        toast({
-          title: '初始化配置',
-          description: '系统已自动创建默认品牌配置'
         });
       }
     } catch (error) {
@@ -96,7 +88,7 @@ export default function AdminBrand(props) {
       };
       if (brandConfig._id) {
         // 更新现有配置
-        const updateResult = await props.$w.cloud.callDataSource({
+        await props.$w.cloud.callDataSource({
           dataSourceName: 'branding',
           methodName: 'wedaUpdateV2',
           params: {
@@ -106,11 +98,6 @@ export default function AdminBrand(props) {
             data: updateData
           }
         });
-
-        // 检查更新是否成功
-        if (!updateResult || updateResult.total === 0) {
-          throw new Error('更新失败，未找到对应的记录');
-        }
       } else {
         // 创建新配置
         await props.$w.cloud.callDataSource({
