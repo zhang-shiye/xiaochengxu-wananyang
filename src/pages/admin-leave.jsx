@@ -85,11 +85,65 @@ export default function AdminLeave(props) {
         setLoading(false);
         return;
       }
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      const result = await db.collection('leave_requests').orderBy('createdAt', 'desc').get();
-      setLeaveRequests(result.data);
-      setFilteredRequests(result.data);
+      // 使用数据模型 API 查询请假申请
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'leave_requests',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {}
+          },
+          select: {
+            $master: true
+          },
+          sort: [{
+            key: 'createdAt',
+            direction: -1
+          }],
+          pageSize: 100,
+          pageNumber: 1
+        }
+      });
+      const leaveRequests = result.data || [];
+
+      // 获取关联的老人信息
+      const elderIds = leaveRequests.map(request => request.elderId);
+      if (elderIds.length > 0) {
+        const elderResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'elders',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            filter: {
+              where: {
+                $and: [{
+                  _id: {
+                    $in: elderIds
+                  }
+                }]
+              }
+            },
+            select: {
+              $master: true
+            }
+          }
+        });
+        const elderMap = {};
+        elderResult.data.forEach(elder => {
+          elderMap[elder._id] = elder;
+        });
+
+        // 合并数据
+        const requestsWithElder = leaveRequests.map(request => ({
+          ...request,
+          elderName: elderMap[request.elderId]?.name || '未知老人',
+          elderRoom: elderMap[request.elderId]?.room || '未知房间'
+        }));
+        setLeaveRequests(requestsWithElder);
+        setFilteredRequests(requestsWithElder);
+      } else {
+        setLeaveRequests([]);
+        setFilteredRequests([]);
+      }
       setLoading(false);
     } catch (error) {
       console.error('加载请假数据失败:', error);
@@ -118,11 +172,25 @@ export default function AdminLeave(props) {
   };
   const handleApprove = async () => {
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      await db.collection('leave_requests').doc(selectedRequest._id).update({
-        status: 'approved',
-        updatedAt: new Date().getTime()
+      // 使用数据模型 API 更新请假状态
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'leave_requests',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: selectedRequest._id
+                }
+              }]
+            }
+          },
+          data: {
+            status: 'approved',
+            updatedAt: new Date().toISOString()
+          }
+        }
       });
       toast({
         title: '审核通过',

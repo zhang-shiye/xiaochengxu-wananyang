@@ -97,21 +97,61 @@ export default function AdminBill(props) {
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
-            where: {}
+            where: {
+              $and: [...(statusFilter === 'all' ? [] : [{
+                status: {
+                  $eq: statusFilter
+                }
+              }])]
+            }
           },
           select: {
             $master: true
           },
-          orderBy: [{
-            createdAt: 'desc'
+          sort: [{
+            key: 'createdAt',
+            direction: -1
           }],
           pageSize: 100,
           pageNumber: 1
         }
       });
-      if (result && result.records) {
-        setBills(result.records);
-        setFilteredBills(result.records);
+      const bills = result.data || [];
+
+      // 获取关联的老人信息
+      const elderIds = bills.map(bill => bill.elderId);
+      if (elderIds.length > 0) {
+        const elderResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'elders',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            filter: {
+              where: {
+                $and: [{
+                  _id: {
+                    $in: elderIds
+                  }
+                }]
+              }
+            },
+            select: {
+              $master: true
+            }
+          }
+        });
+        const elderMap = {};
+        elderResult.data.forEach(elder => {
+          elderMap[elder._id] = elder;
+        });
+
+        // 合并数据
+        const billsWithElder = bills.map(bill => ({
+          ...bill,
+          elderName: elderMap[bill.elderId]?.name || '未知老人',
+          elderRoom: elderMap[bill.elderId]?.room || '未知房间'
+        }));
+        setBills(billsWithElder);
+        setFilteredBills(billsWithElder);
       } else {
         setBills([]);
         setFilteredBills([]);
@@ -188,19 +228,19 @@ export default function AdminBill(props) {
         params: {
           filter: {
             where: {
-              $and: [
-                {
-                  _id: {
-                    $eq: selectedBill._id
-                  }
+              $and: [{
+                _id: {
+                  $eq: selectedBill._id
                 }
-              ]
+              }]
             }
           },
           data: {
             status: 'rejected',
-        reviewComment: reason,
-        updatedAt: new Date().getTime()
+            reviewComment: reason,
+            updatedAt: new Date().toISOString()
+          }
+        }
       });
       toast({
         title: '已退回',

@@ -92,21 +92,61 @@ export default function AdminDaily(props) {
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
-            where: {}
+            where: {
+              $and: [...(statusFilter === 'all' ? [] : [{
+                status: {
+                  $eq: statusFilter
+                }
+              }])]
+            }
           },
           select: {
             $master: true
           },
-          orderBy: [{
-            createdAt: 'desc'
+          sort: [{
+            key: 'createdAt',
+            direction: -1
           }],
           pageSize: 100,
           pageNumber: 1
         }
       });
-      if (result && result.records) {
-        setDailyReports(result.records);
-        setFilteredReports(result.records);
+      const dailyReports = result.data || [];
+
+      // 获取关联的老人信息
+      const elderIds = dailyReports.map(report => report.elderId);
+      if (elderIds.length > 0) {
+        const elderResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'elders',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            filter: {
+              where: {
+                $and: [{
+                  _id: {
+                    $in: elderIds
+                  }
+                }]
+              }
+            },
+            select: {
+              $master: true
+            }
+          }
+        });
+        const elderMap = {};
+        elderResult.data.forEach(elder => {
+          elderMap[elder._id] = elder;
+        });
+
+        // 合并数据
+        const reportsWithElder = dailyReports.map(report => ({
+          ...report,
+          elderName: elderMap[report.elderId]?.name || '未知老人',
+          elderRoom: elderMap[report.elderId]?.room || '未知房间'
+        }));
+        setDailyReports(reportsWithElder);
+        setFilteredReports(reportsWithElder);
       } else {
         setDailyReports([]);
         setFilteredReports([]);

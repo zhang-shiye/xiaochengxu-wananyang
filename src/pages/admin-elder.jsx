@@ -122,9 +122,10 @@ export default function AdminElder(props) {
           pageNumber: 1
         }
       });
-      if (result && result.records) {
-        setElders(result.records);
+      if (result && result.data) {
+        setElders(result.data);
       } else {
+        setElders([]);
         toast({
           title: '加载失败',
           description: '无法加载老人信息',
@@ -165,11 +166,10 @@ export default function AdminElder(props) {
         createdAt: Date.now(),
         updatedAt: Date.now()
       };
-      const result = await props.$w.cloud.callFunction({
-        name: 'mcp_readNoSqlDatabaseContent',
-        data: {
-          collectionName: 'elders',
-          action: 'insert',
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'elders',
+        methodName: 'wedaCreateV2',
+        params: {
           data: newElder
         }
       });
@@ -213,17 +213,20 @@ export default function AdminElder(props) {
         age: parseInt(formData.age),
         updatedAt: Date.now()
       };
-      const result = await props.$w.cloud.callFunction({
-        name: 'mcp_readNoSqlDatabaseContent',
-        data: {
-          collectionName: 'elders',
-          action: 'update',
-          query: {
-            _id: editingElder._id
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'elders',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: editingElder._id
+                }
+              }]
+            }
           },
-          update: {
-            $set: updatedElder
-          }
+          data: updatedElder
         }
       });
       if (result.success) {
@@ -257,13 +260,18 @@ export default function AdminElder(props) {
       return;
     }
     try {
-      const result = await props.$w.cloud.callFunction({
-        name: 'mcp_readNoSqlDatabaseContent',
-        data: {
-          collectionName: 'elders',
-          action: 'delete',
-          query: {
-            _id: elderId
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'elders',
+        methodName: 'wedaDeleteV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: elderId
+                }
+              }]
+            }
           }
         }
       });
