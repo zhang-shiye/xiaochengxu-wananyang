@@ -318,7 +318,7 @@ export default function BindSenior(props) {
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
               <DialogTitle className="text-2xl font-bold text-gray-900 mb-2" style={{
-              fontFamily: 'Nunito Sans, sans-serif'
+              fontFamily: 'Playfair Display, serif'
             }}>
                 绑定成功！
               </DialogTitle>
