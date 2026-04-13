@@ -57,7 +57,12 @@ export default function Home(props) {
   }
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [selectedDate, setSelectedDate] = useState('2026-04-13');
+  // 获取今天的日期（格式：YYYY-MM-DD）
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+  const [selectedDate, setSelectedDate] = useState(getTodayDate());
   useEffect(() => {
     // 从home页面获取老人信息，保持一致性
     const elderInfo = window.currentElderInfo || {
