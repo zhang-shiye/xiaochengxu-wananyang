@@ -1,7 +1,7 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Card, Avatar, AvatarImage, Button, useToast } from '@/components/ui';
+import { Card, Avatar, AvatarImage, Button, useToast, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
 
 import DataPermissionHelper from '@/components/PermissionCheck';
 import TabBar from '@/components/TabBar';
@@ -57,7 +57,7 @@ export default function Home(props) {
   }
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [selectedDate, setSelectedDate] = useState('2026-04-13');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   useEffect(() => {
     // 从home页面获取老人信息，保持一致性
     const elderInfo = window.currentElderInfo || {
@@ -69,29 +69,25 @@ export default function Home(props) {
     // 模拟日报数据
     setDailyReports([{
       id: 1,
-      date: '2026-04-13',
-      dayOfWeek: '周一',
+      date: '2026-04-05',
+      dayOfWeek: '周日',
       meals: [{
         time: '早餐',
-        food: '小米粥、鸡蛋、凉拌黄瓜'
+        food: '小米粥、鸡蛋、青菜'
       }, {
         time: '午餐',
-        food: '红烧排骨、米饭、冬瓜汤、清炒白菜'
+        food: '红烧鱼、米饭、冬瓜汤'
       }, {
         time: '晚餐',
-        food: '面条、卤蛋、青菜豆腐汤'
+        food: '面条、青菜、豆腐'
       }],
       medications: [{
         name: '降压药',
         time: '8:00',
         status: '已服用'
       }, {
-        name: '维生素C',
-        time: '9:00',
-        status: '已服用'
-      }, {
-        name: '钙片',
-        time: '20:00',
+        name: '维生素',
+        time: '12:00',
         status: '已服用'
       }],
       activities: [{
@@ -101,83 +97,57 @@ export default function Home(props) {
         name: '书法练习',
         time: '14:00',
         image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop'
-      }, {
-        name: '听音乐放松',
-        time: '16:00'
       }],
       mood: '愉快',
       health: '良好'
     }, {
       id: 2,
-      date: '2026-04-12',
-      dayOfWeek: '周日',
+      date: '2026-04-04',
+      dayOfWeek: '周六',
       meals: [{
         time: '早餐',
-        food: '豆浆、包子、咸鸭蛋'
+        food: '豆浆、包子、咸菜'
       }, {
         time: '午餐',
-        food: '清蒸鲈鱼、米饭、紫菜蛋花汤、清炒西兰花'
+        food: '鸡肉、米饭、紫菜汤'
       }, {
         time: '晚餐',
-        food: '小米粥、馒头、拌土豆丝'
+        food: '粥、馒头、青菜'
       }],
       medications: [{
         name: '降压药',
         time: '8:00',
-        status: '已服用'
-      }, {
-        name: '维生素C',
-        time: '9:00',
-        status: '已服用'
-      }, {
-        name: '钙片',
-        time: '20:00',
         status: '已服用'
       }],
       activities: [{
         name: '园艺活动',
         time: '10:00',
         image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=200&fit=crop'
-      }, {
-        name: '与朋友聊天',
-        time: '15:00'
       }],
       mood: '平静',
       health: '良好'
     }, {
       id: 3,
-      date: '2026-04-11',
-      dayOfWeek: '周六',
+      date: '2026-04-03',
+      dayOfWeek: '周五',
       meals: [{
         time: '早餐',
-        food: '牛奶、面包、鸡蛋'
+        food: '馒头、稀饭、鸡蛋'
       }, {
         time: '午餐',
-        food: '糖醋排骨、米饭、青菜豆腐汤、凉拌黄瓜'
+        food: '排骨、米饭、青菜汤'
       }, {
         time: '晚餐',
-        food: '饺子、凉拌黄瓜、小米粥'
+        food: '饺子、拌黄瓜'
       }],
       medications: [{
         name: '降压药',
         time: '8:00',
         status: '已服用'
-      }, {
-        name: '维生素C',
-        time: '9:00',
-        status: '已服用'
-      }, {
-        name: '钙片',
-        time: '20:00',
-        status: '已服用'
       }],
       activities: [{
-        name: '散步',
-        time: '9:00'
-      }, {
-        name: '阅读报纸',
-        time: '14:00',
-        image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop'
+        name: '散步休息',
+        time: '15:00'
       }],
       mood: '愉快',
       health: '良好'
@@ -224,9 +194,16 @@ export default function Home(props) {
               </div>
             </div>
             <div className="text-right">
-              <div className="relative">
-                <input type="date" value={selectedDate} onChange={handleDateChange} className="px-3 py-2 border border-amber-200 rounded-lg text-amber-900 bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-300 font-medium" />
-              </div>
+              <Select value={selectedDate} onValueChange={setSelectedDate}>
+                <SelectTrigger className="w-[200px] px-3 py-2 border border-amber-200 rounded-lg text-amber-900 bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-300 font-medium">
+                  <SelectValue placeholder="选择日期" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dailyReports.map(report => <SelectItem key={report.date} value={report.date}>
+                      {report.dayOfWeek} {report.date}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
