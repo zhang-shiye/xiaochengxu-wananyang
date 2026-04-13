@@ -57,20 +57,77 @@ export default function CareHome(props) {
       </div>;
   }
   const [elderInfo, setElderInfo] = useState({
-    name: '王奶奶',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face',
-    age: 78,
-    admissionDate: '2023-03-15',
-    roomNumber: 'A栋 301室',
-    careLevel: '二级护理',
-    primaryNurse: '张护士',
-    nursePhone: '138-0000-1234',
-    emergencyContact: '张院长',
-    emergencyPhone: '0551-8888-6666',
-    healthStatus: '良好',
-    moodStatus: '愉快',
-    lastUpdate: '2024-04-05 14:30'
+    name: '',
+    avatar: '',
+    age: 0,
+    admissionDate: '',
+    roomNumber: '',
+    careLevel: '',
+    primaryNurse: '',
+    nursePhone: '',
+    emergencyContact: '',
+    emergencyPhone: '',
+    healthStatus: '',
+    moodStatus: '',
+    lastUpdate: ''
   });
+
+  // 加载老人信息
+  useEffect(() => {
+    const loadElderInfo = async () => {
+      try {
+        // 获取当前家属绑定的老人信息
+        const user = props.$w.auth.currentUser;
+        if (user?.userId) {
+          // 查询家属-老人绑定关系
+          const bindingResult = await props.$w.cloud.callDataSource({
+            dataSourceName: 'elder_family_bindings',
+            methodName: 'wedaGetV2',
+            params: {
+              filter: {
+                familyId: user.userId,
+                status: 'active'
+              }
+            }
+          });
+          if (bindingResult && bindingResult.data && bindingResult.data.length > 0) {
+            const binding = bindingResult.data[0];
+            // 获取老人详细信息
+            const elderResult = await props.$w.cloud.callDataSource({
+              dataSourceName: 'elders',
+              methodName: 'wedaGetV2',
+              params: {
+                filter: {
+                  _id: binding.elderId
+                }
+              }
+            });
+            if (elderResult && elderResult.data && elderResult.data.length > 0) {
+              const elder = elderResult.data[0];
+              setElderInfo({
+                name: elder.name,
+                avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face',
+                age: elder.age,
+                admissionDate: elder.admissionDate,
+                roomNumber: elder.roomNumber,
+                careLevel: elder.careLevel,
+                primaryNurse: elder.primaryNurse,
+                nursePhone: '138-0000-1234',
+                emergencyContact: elder.emergencyContact,
+                emergencyPhone: elder.emergencyPhone,
+                healthStatus: elder.healthStatus,
+                moodStatus: '愉快',
+                lastUpdate: new Date().toLocaleString('zh-CN')
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('加载老人信息失败:', error);
+      }
+    };
+    loadElderInfo();
+  }, []);
 
   // 将老人信息存储到全局，供其他页面使用
   useEffect(() => {

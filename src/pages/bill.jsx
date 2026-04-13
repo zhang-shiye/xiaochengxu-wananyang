@@ -75,60 +75,57 @@ export default function Bill(props) {
   }
   const [bills, setBills] = useState([]);
   const [currentMonth, setCurrentMonth] = useState('2026-04');
+
+  // 加载账单数据
   useEffect(() => {
-    // 模拟账单数据
-    setBills([{
-      id: 1,
-      month: '2026-04',
-      totalAmount: 4200,
-      status: 'unpaid',
-      dueDate: '2026-04-15',
-      items: [{
-        name: '基础床位费',
-        amount: 1800,
-        unit: '月'
-      }, {
-        name: '护理费（二级）',
-        amount: 1200,
-        unit: '月'
-      }, {
-        name: '餐费',
-        amount: 800,
-        unit: '月'
-      }, {
-        name: '代办买药费',
-        amount: 350,
-        unit: '次'
-      }, {
-        name: '洗衣费',
-        amount: 50,
-        unit: '月'
-      }]
-    }, {
-      id: 2,
-      month: '2026-03',
-      totalAmount: 3850,
-      status: 'paid',
-      dueDate: '2026-03-15',
-      paymentDate: '2026-03-10',
-      items: [{
-        name: '基础床位费',
-        amount: 1800,
-        unit: '月'
-      }, {
-        name: '护理费（二级）',
-        amount: 1200,
-        unit: '月'
-      }, {
-        name: '餐费',
-        amount: 800,
-        unit: '月'
-      }, {
-        name: '洗衣费',
-        amount: 50,
-        unit: '月'
-      }]
-    }]);
+    const loadBills = async () => {
+      try {
+        const user = props.$w.auth.currentUser;
+        if (user?.userId) {
+          // 获取当前家属绑定的老人信息
+          const bindingResult = await props.$w.cloud.callDataSource({
+            dataSourceName: 'elder_family_bindings',
+            methodName: 'wedaGetV2',
+            params: {
+              filter: {
+                familyId: user.userId,
+                status: 'active'
+              }
+            }
+          });
+          if (bindingResult && bindingResult.data && bindingResult.data.length > 0) {
+            const binding = bindingResult.data[0];
+            // 获取账单数据
+            const billResult = await props.$w.cloud.callDataSource({
+              dataSourceName: 'bills',
+              methodName: 'wedaGetV2',
+              params: {
+                filter: {
+                  elderId: binding.elderId
+                },
+                sort: [{
+                  key: 'createdAt',
+                  direction: -1
+                }]
+              }
+            });
+            if (billResult && billResult.data) {
+              setBills(billResult.data.map(bill => ({
+                id: bill._id,
+                month: bill.month,
+                totalAmount: bill.totalAmount,
+                status: bill.status,
+                dueDate: bill.dueDate,
+                items: bill.items
+              })));
+            }
+          }
+        }
+      } catch (error) {
+        console.error('加载账单数据失败:', error);
+      }
+    };
+    loadBills();
   }, []);
   const currentBill = bills.find(bill => bill.month === currentMonth);
   const paymentMethodsRef = React.useRef(null);
