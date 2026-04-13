@@ -57,12 +57,7 @@ export default function Home(props) {
   }
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  // 获取今天的日期（格式：YYYY-MM-DD）
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
-  const [selectedDate, setSelectedDate] = useState(getTodayDate());
+  const [selectedDate, setSelectedDate] = useState('');
   useEffect(() => {
     // 从home页面获取老人信息，保持一致性
     const elderInfo = window.currentElderInfo || {
@@ -71,24 +66,35 @@ export default function Home(props) {
     };
     setCurrentUser(elderInfo);
 
-    // 生成15天的日报数据
-    const fifteenDaysReports = Array.from({
-      length: 15
-    }, (_, i) => {
-      const date = new Date(2026, 3, 30 + i); // 从2026-03-30开始
+    // 生成最近15天的日报数据
+    const today = new Date('2026-04-13'); // 当前日期
+    const reports = [];
+    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    for (let i = 0; i < 15; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-      const dayOfWeek = days[date.getDay()];
+      const dayOfWeek = weekDays[date.getDay()];
+      const dayNum = date.getDate();
 
-      // 模拟不同的饮食
-      const breakfasts = ['小米粥、鸡蛋、青菜', '豆浆、包子、咸菜', '馒头、稀饭、鸡蛋', '八宝粥、油条、咸菜', '面条、荷包蛋、青菜', '玉米、鸡蛋、牛奶', '粥、面包、果酱', '汤圆、鸡蛋、咸菜', '红豆粥、馒头、咸菜', '银耳汤、面包、鸡蛋', '燕麦粥、牛奶、鸡蛋', '绿豆粥、包子、咸菜', '粥、煎蛋、青菜', '汤圆、面包、果酱', '豆浆、馒头、咸菜'];
-      const lunches = ['红烧鱼、米饭、冬瓜汤', '鸡肉、米饭、紫菜汤', '排骨、米饭、青菜汤', '猪肉炖粉条、米饭、萝卜汤', '牛肉面、配菜、豆腐汤', '鱼香肉丝、米饭、番茄汤', '宫保鸡丁、米饭、青菜汤', '红烧排骨、米饭、冬瓜汤', '清蒸鱼、米饭、紫菜汤', '回锅肉、米饭、萝卜汤', '京酱肉丝、米饭、青菜汤', '水煮鱼、米饭、冬瓜汤', '糖醋排骨、米饭、番茄汤', '红烧肉、米饭、紫菜汤', '鱼香茄子、米饭、青菜汤'];
-      const dinners = ['面条、青菜、豆腐', '粥、馒头、青菜', '饺子、拌黄瓜', '炒饭、紫菜汤、青菜', '馄饨、配菜、豆腐', '面条、鸡蛋、青菜', '粥、咸菜、豆腐', '饺子、紫菜汤、青菜', '面条、配菜、豆腐', '粥、咸菜、鸡蛋', '馄饨、青菜、豆腐', '面条、配菜、紫菜汤', '粥、咸菜、青菜', '馄饨、配菜、鸡蛋', '面条、豆腐、青菜'];
-
-      // 模拟不同的活动
-      const activitiesList = [[{
+      // 根据天数生成不同的数据，增加多样性
+      const mealOptions = [{
+        breakfast: ['小米粥、鸡蛋、青菜', '豆浆、包子、咸菜', '馒头、稀饭、鸡蛋', '牛奶、面包、水果', '面条、鸡蛋、青菜'],
+        lunch: ['红烧鱼、米饭、冬瓜汤', '鸡肉、米饭、紫菜汤', '排骨、米饭、青菜汤', '牛肉、面条、萝卜汤', '虾仁、米饭、蛋花汤'],
+        dinner: ['面条、青菜、豆腐', '粥、馒头、青菜', '饺子、拌黄瓜', '粥、咸菜、鸡蛋', '面条、西红柿、鸡蛋']
+      }, {
+        breakfast: ['稀饭、馒头、咸菜', '牛奶、三明治、水果', '豆浆、油条、咸菜', '小米粥、包子、鸡蛋', '燕麦粥、面包、牛奶'],
+        lunch: ['鱼香肉丝、米饭、青菜汤', '宫保鸡丁、米饭、蛋花汤', '红烧茄子、面条、黄瓜汤', '糖醋排骨、米饭、紫菜汤', '麻婆豆腐、米饭、冬瓜汤'],
+        dinner: ['饺子、拌黄瓜', '粥、馒头、咸菜', '面条、西红柿、鸡蛋', '粥、咸菜、鸡蛋', '馒头、粥、咸菜']
+      }, {
+        breakfast: ['八宝粥、鸡蛋、水果', '牛奶、面包、香蕉', '豆浆、包子、鸡蛋', '小米粥、馒头、咸菜', '燕麦片、牛奶、水果'],
+        lunch: ['清蒸鱼、米饭、青菜', '糖醋里脊、面条、萝卜汤', '红烧鸡翅、米饭、紫菜汤', '青椒肉丝、米饭、蛋花汤', '番茄鸡蛋、米饭、冬瓜汤'],
+        dinner: ['粥、馒头、咸菜', '饺子、凉拌菜', '面条、青菜、豆腐', '馒头、稀饭、咸菜', '粥、鸡蛋、咸菜']
+      }];
+      const activityOptions = [[{
         name: '晨练太极',
-        time: '7:00'
+        time: '7:00',
+        image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=200&fit=crop'
       }, {
         name: '书法练习',
         time: '14:00',
@@ -101,68 +107,33 @@ export default function Home(props) {
         name: '散步休息',
         time: '15:00'
       }], [{
-        name: '太极晨练',
+        name: '唱歌活动',
+        time: '14:00',
+        image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=200&fit=crop'
+      }], [{
+        name: '太极拳',
         time: '7:00'
       }, {
-        name: '音乐欣赏',
-        time: '16:00'
-      }], [{
-        name: '书法练习',
-        time: '14:00',
-        image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop'
-      }], [{
-        name: '读书看报',
-        time: '10:00'
-      }], [{
-        name: '散步聊天',
-        time: '15:00'
-      }], [{
-        name: '太极晨练',
-        time: '7:00'
-      }, {
-        name: '园艺活动',
+        name: '手工制作',
         time: '10:00',
-        image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=200&fit=crop'
-      }], [{
-        name: '音乐欣赏',
-        time: '16:00'
-      }], [{
-        name: '散步休息',
-        time: '15:00'
-      }], [{
-        name: '书法练习',
-        time: '14:00',
-        image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop'
-      }], [{
-        name: '读书看报',
-        time: '10:00'
-      }], [{
-        name: '太极晨练',
-        time: '7:00'
-      }], [{
-        name: '园艺活动',
-        time: '10:00',
-        image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=200&fit=crop'
-      }], [{
-        name: '散步聊天',
-        time: '15:00'
+        image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=300&h=200&fit=crop'
       }]];
-
-      // 模拟不同的情绪
-      const moods = ['愉快', '平静', '愉快', '一般', '愉快', '平静', '愉快', '愉快', '平静', '愉快', '愉快', '平静', '愉快', '愉快', '平静'];
-      return {
+      const mealOption = mealOptions[i % 3];
+      const activityOption = activityOptions[i % 5];
+      const moodOptions = ['愉快', '平静', '愉快', '愉快', '平静', '一般', '愉快', '愉快', '平静', '愉快', '愉快', '愉快', '平静', '愉快', '愉快'];
+      reports.push({
         id: i + 1,
         date: dateStr,
         dayOfWeek: dayOfWeek,
         meals: [{
           time: '早餐',
-          food: breakfasts[i]
+          food: mealOption.breakfast[i % 5]
         }, {
           time: '午餐',
-          food: lunches[i]
+          food: mealOption.lunch[i % 5]
         }, {
           time: '晚餐',
-          food: dinners[i]
+          food: mealOption.dinner[i % 5]
         }],
         medications: [{
           name: '降压药',
@@ -173,12 +144,17 @@ export default function Home(props) {
           time: '12:00',
           status: '已服用'
         }],
-        activities: activitiesList[i],
-        mood: moods[i],
+        activities: activityOption,
+        mood: moodOptions[i],
         health: '良好'
-      };
-    });
-    setDailyReports(fifteenDaysReports);
+      });
+    }
+    setDailyReports(reports);
+
+    // 设置默认日期：如果当天有数据就显示当天，否则显示最新一天
+    const todayStr = today.toISOString().split('T')[0];
+    const hasTodayData = reports.some(report => report.date === todayStr);
+    setSelectedDate(hasTodayData ? todayStr : reports[0].date);
   }, []);
 
   // 根据选择的日期过滤日报
@@ -186,8 +162,8 @@ export default function Home(props) {
     if (!selectedDate) return dailyReports;
     return dailyReports.filter(report => report.date === selectedDate);
   };
-  const handleDateChange = e => {
-    setSelectedDate(e.target.value);
+  const handleDateChange = value => {
+    setSelectedDate(value);
   };
   const getMoodEmoji = mood => {
     const moodMap = {
@@ -221,13 +197,16 @@ export default function Home(props) {
               </div>
             </div>
             <div className="text-right">
-              <Select value={selectedDate} onValueChange={setSelectedDate}>
-                <SelectTrigger className="w-[200px] px-3 py-2 border border-amber-200 rounded-lg text-amber-900 bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-300 font-medium">
+              <Select value={selectedDate} onValueChange={handleDateChange}>
+                <SelectTrigger className="w-[140px] bg-amber-50 border-amber-200 text-amber-900">
                   <SelectValue placeholder="选择日期" />
                 </SelectTrigger>
                 <SelectContent>
                   {dailyReports.map(report => <SelectItem key={report.date} value={report.date}>
-                      {report.dayOfWeek} {report.date}
+                      {new Date(report.date).toLocaleDateString('zh-CN', {
+                    month: 'short',
+                    day: 'numeric'
+                  })} ({report.dayOfWeek})
                     </SelectItem>)}
                 </SelectContent>
               </Select>
