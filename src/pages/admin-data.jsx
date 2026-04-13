@@ -183,42 +183,316 @@ export default function AdminDataImport(props) {
   };
 
   // 完成上传处理
-  const completeUpload = file => {
+  const completeUpload = async file => {
     setIsUploading(false);
+    try {
+      // 模拟Excel数据解析（实际项目中需要使用xlsx等库解析）
+      const mockData = generateMockData(activeTab);
+      const totalRecords = mockData.length;
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
 
-    // 模拟导入处理
-    const totalRecords = Math.floor(Math.random() * 50) + 10;
-    const successCount = Math.floor(totalRecords * 0.9);
-    const errorCount = totalRecords - successCount;
+      // 根据不同类型导入到相应数据模型
+      if (activeTab === 'elder') {
+        // 导入老人数据
+        for (const record of mockData) {
+          try {
+            await props.$w.cloud.callDataSource({
+              dataSourceName: 'elders',
+              methodName: 'wedaCreateV2',
+              params: {
+                data: {
+                  name: record.name,
+                  age: record.age,
+                  gender: record.gender,
+                  roomNumber: record.roomNumber,
+                  careLevel: record.careLevel,
+                  healthStatus: record.healthStatus,
+                  admissionDate: record.admissionDate,
+                  emergencyContact: record.emergencyContact,
+                  emergencyPhone: record.emergencyPhone,
+                  primaryNurse: record.primaryNurse,
+                  status: 'active',
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                }
+              }
+            });
+            successCount++;
+          } catch (error) {
+            errorCount++;
+            errors.push({
+              record,
+              error: error.message
+            });
+          }
+        }
+      } else if (activeTab === 'bill') {
+        // 导入账单数据
+        for (const record of mockData) {
+          try {
+            // 根据老人姓名查找老人ID
+            const elderResult = await props.$w.cloud.callDataSource({
+              dataSourceName: 'elders',
+              methodName: 'wedaGetRecordsV2',
+              params: {
+                filter: {
+                  where: {
+                    $and: [{
+                      name: {
+                        $eq: record.name
+                      }
+                    }]
+                  }
+                },
+                select: {
+                  $master: true
+                },
+                pageSize: 1
+              }
+            });
+            const elderId = elderResult.data && elderResult.data.length > 0 ? elderResult.data[0]._id : null;
+            if (!elderId) {
+              throw new Error('找不到对应的老人');
+            }
+            await props.$w.cloud.callDataSource({
+              dataSourceName: 'bills',
+              methodName: 'wedaCreateV2',
+              params: {
+                data: {
+                  elderId: elderId,
+                  elderName: record.name,
+                  type: record.type,
+                  amount: parseFloat(record.amount),
+                  billDate: record.billDate,
+                  dueDate: record.dueDate,
+                  status: record.status || 'pending',
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                }
+              }
+            });
+            successCount++;
+          } catch (error) {
+            errorCount++;
+            errors.push({
+              record,
+              error: error.message
+            });
+          }
+        }
+      } else if (activeTab === 'daily') {
+        // 导入日报数据
+        for (const record of mockData) {
+          try {
+            // 根据老人姓名查找老人ID
+            const elderResult = await props.$w.cloud.callDataSource({
+              dataSourceName: 'elders',
+              methodName: 'wedaGetRecordsV2',
+              params: {
+                filter: {
+                  where: {
+                    $and: [{
+                      name: {
+                        $eq: record.name
+                      }
+                    }]
+                  }
+                },
+                select: {
+                  $master: true
+                },
+                pageSize: 1
+              }
+            });
+            const elderId = elderResult.data && elderResult.data.length > 0 ? elderResult.data[0]._id : null;
+            if (!elderId) {
+              throw new Error('找不到对应的老人');
+            }
+            await props.$w.cloud.callDataSource({
+              dataSourceName: 'daily_reports',
+              methodName: 'wedaCreateV2',
+              params: {
+                data: {
+                  elderId: elderId,
+                  elderName: record.name,
+                  date: record.date,
+                  healthStatus: record.healthStatus,
+                  breakfast: record.breakfast,
+                  lunch: record.lunch,
+                  dinner: record.dinner,
+                  activities: record.activities,
+                  medications: record.medications,
+                  mood: record.mood,
+                  notes: record.notes || '',
+                  status: 'pending',
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                }
+              }
+            });
+            successCount++;
+          } catch (error) {
+            errorCount++;
+            errors.push({
+              record,
+              error: error.message
+            });
+          }
+        }
+      } else if (activeTab === 'leave') {
+        // 导入请假记录
+        for (const record of mockData) {
+          try {
+            // 根据老人姓名查找老人ID
+            const elderResult = await props.$w.cloud.callDataSource({
+              dataSourceName: 'elders',
+              methodName: 'wedaGetRecordsV2',
+              params: {
+                filter: {
+                  where: {
+                    $and: [{
+                      name: {
+                        $eq: record.name
+                      }
+                    }]
+                  }
+                },
+                select: {
+                  $master: true
+                },
+                pageSize: 1
+              }
+            });
+            const elderId = elderResult.data && elderResult.data.length > 0 ? elderResult.data[0]._id : null;
+            if (!elderId) {
+              throw new Error('找不到对应的老人');
+            }
+            await props.$w.cloud.callDataSource({
+              dataSourceName: 'leave_requests',
+              methodName: 'wedaCreateV2',
+              params: {
+                data: {
+                  elderId: elderId,
+                  elderName: record.name,
+                  applicationDate: record.applicationDate,
+                  startDate: record.startDate,
+                  endDate: record.endDate,
+                  reason: record.reason,
+                  applicant: record.applicant,
+                  status: record.status || 'pending',
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                }
+              }
+            });
+            successCount++;
+          } catch (error) {
+            errorCount++;
+            errors.push({
+              record,
+              error: error.message
+            });
+          }
+        }
+      }
 
-    // 创建新的导入记录
-    const newImport = {
-      id: Date.now(),
-      type: activeTab,
-      fileName: file.name,
-      status: errorCount > 0 ? 'partial' : 'completed',
-      totalRecords,
-      successCount,
-      errorCount,
-      createdAt: new Date().toLocaleString('zh-CN'),
-      duration: `${Math.floor(Math.random() * 3) + 1}分${Math.floor(Math.random() * 60)}秒`
-    };
-    setImportHistory(prev => [newImport, ...prev]);
+      // 创建新的导入记录
+      const newImport = {
+        id: Date.now(),
+        type: activeTab,
+        fileName: file.name,
+        status: errorCount > 0 ? 'partial' : 'completed',
+        totalRecords,
+        successCount,
+        errorCount,
+        errors: errorCount > 0 ? errors : undefined,
+        createdAt: new Date().toLocaleString('zh-CN'),
+        duration: `${Math.floor(Math.random() * 3) + 1}分${Math.floor(Math.random() * 60)}秒`
+      };
+      setImportHistory(prev => [newImport, ...prev]);
 
-    // 显示导入结果
-    if (errorCount === 0) {
+      // 显示导入结果
+      if (errorCount === 0) {
+        toast({
+          title: '导入成功',
+          description: `成功导入 ${successCount} 条${importTypes[activeTab].name}记录`
+        });
+      } else {
+        toast({
+          title: '导入完成',
+          description: `成功导入 ${successCount} 条，失败 ${errorCount} 条${importTypes[activeTab].name}记录`,
+          variant: 'default'
+        });
+      }
+      setUploadProgress(0);
+    } catch (error) {
+      console.error('导入失败:', error);
       toast({
-        title: '导入成功',
-        description: `成功导入 ${successCount} 条${importTypes[activeTab].name}记录`
+        title: '导入失败',
+        description: error.message,
+        variant: 'destructive'
       });
-    } else {
-      toast({
-        title: '导入完成',
-        description: `成功导入 ${successCount} 条，失败 ${errorCount} 条${importTypes[activeTab].name}记录`,
-        variant: 'default'
-      });
+      setUploadProgress(0);
     }
-    setUploadProgress(0);
+  };
+
+  // 生成模拟数据（实际项目中需要解析Excel文件）
+  const generateMockData = type => {
+    const elderNames = ['王奶奶', '李爷爷', '张奶奶', '刘爷爷', '赵奶奶', '陈爷爷', '周奶奶', '吴爷爷'];
+    const randomName = () => elderNames[Math.floor(Math.random() * elderNames.length)];
+    const randomId = () => `elder_${Math.floor(Math.random() * 1000)}`;
+    const today = new Date();
+    const formatDate = date => date.toISOString().split('T')[0];
+    const formatDateTime = date => date.toISOString().slice(0, 16).replace('T', ' ');
+    if (type === 'elder') {
+      return [{
+        name: randomName(),
+        age: Math.floor(Math.random() * 20) + 70,
+        gender: '女',
+        roomNumber: `A栋 ${Math.floor(Math.random() * 9) + 1}0${Math.floor(Math.random() * 9) + 1}室`,
+        careLevel: ['一级护理', '二级护理', '三级护理'][Math.floor(Math.random() * 3)],
+        healthStatus: ['良好', '一般', '需关注'][Math.floor(Math.random() * 3)],
+        admissionDate: formatDate(new Date(today.getFullYear() - Math.floor(Math.random() * 2), today.getMonth(), today.getDate())),
+        emergencyContact: '张院长',
+        emergencyPhone: '0551-8888-6666',
+        primaryNurse: '张护士'
+      }];
+    } else if (type === 'bill') {
+      return [{
+        name: randomName(),
+        type: '基础床位费',
+        amount: (Math.floor(Math.random() * 5) + 2) * 600,
+        billDate: formatDate(new Date(today.getFullYear(), today.getMonth(), 1)),
+        dueDate: formatDate(new Date(today.getFullYear(), today.getMonth() + 1, 15)),
+        status: '未缴费'
+      }];
+    } else if (type === 'daily') {
+      return [{
+        name: randomName(),
+        date: formatDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() - Math.floor(Math.random() * 5))),
+        healthStatus: '良好',
+        breakfast: '小米粥、鸡蛋',
+        lunch: '米饭、青菜、鱼肉',
+        dinner: '面条、蔬菜',
+        activities: '晨练太极、看电视',
+        medications: '降压药',
+        mood: '愉快',
+        notes: '食欲良好'
+      }];
+    } else if (type === 'leave') {
+      return [{
+        name: randomName(),
+        applicationDate: formatDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() - Math.floor(Math.random() * 3))),
+        startDate: formatDateTime(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2, 9, 0)),
+        endDate: formatDateTime(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2, 18, 0)),
+        reason: '家属探望',
+        applicant: '家属',
+        status: '待审核'
+      }];
+    }
+    return [];
   };
 
   // 下载模板
