@@ -71,6 +71,11 @@ export default function CareHome(props) {
     moodStatus: '愉快',
     lastUpdate: '2024-04-05 14:30'
   });
+
+  // 将老人信息存储到全局，供其他页面使用
+  useEffect(() => {
+    window.currentElderInfo = elderInfo;
+  }, [elderInfo]);
   const [latestInfo, setLatestInfo] = useState({
     dailyReport: {
       date: '2024-04-05',
@@ -135,7 +140,7 @@ export default function CareHome(props) {
       <div className="container mx-auto px-4 py-6">
         {/* 头部标题 */}
         <div className="mb-6">
-          <NursingHomeBrand showLogo={false} showSlogan={true} size="normal" />
+          <NursingHomeBrand showLogo={true} showSlogan={true} size="normal" />
         </div>
 
         {/* 老人基本信息卡片 */}
@@ -196,21 +201,6 @@ export default function CareHome(props) {
               </div>
               <p className="text-lg font-medium text-gray-800">{elderInfo.primaryNurse}</p>
               <p className="text-sm text-gray-500">{elderInfo.nursePhone}</p>
-            </div>
-
-            <div className="border-t pt-4 mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <Phone className="w-5 h-5 text-rose-600 mr-2" />
-                  <span className="text-gray-700">紧急联系</span>
-                </div>
-                <Button size="sm" variant="outline" onClick={handleEmergencyCall} className="border-rose-200 text-rose-700 hover:bg-rose-50">
-                  <Phone className="w-4 h-4 mr-1" />
-                  拨打
-                </Button>
-              </div>
-              <p className="font-medium text-gray-800 text-[1.125rem]">{elderInfo.emergencyContact}</p>
-              <p className="text-sm text-gray-500">{elderInfo.emergencyPhone}</p>
             </div>
 
             <div className="border-t pt-4 mt-4 flex items-center justify-between">

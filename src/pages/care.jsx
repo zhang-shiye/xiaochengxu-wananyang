@@ -57,12 +57,14 @@ export default function Home(props) {
   }
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   useEffect(() => {
-    // 模拟获取当前用户和日报数据
-    setCurrentUser({
-      name: '张爷爷',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-    });
+    // 从home页面获取老人信息，保持一致性
+    const elderInfo = window.currentElderInfo || {
+      name: '王奶奶',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face'
+    };
+    setCurrentUser(elderInfo);
 
     // 模拟日报数据
     setDailyReports([{
@@ -71,16 +73,13 @@ export default function Home(props) {
       dayOfWeek: '周日',
       meals: [{
         time: '早餐',
-        food: '小米粥、鸡蛋、青菜',
-        image: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=300&h=200&fit=crop'
+        food: '小米粥、鸡蛋、青菜'
       }, {
         time: '午餐',
-        food: '红烧鱼、米饭、冬瓜汤',
-        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=200&fit=crop'
+        food: '红烧鱼、米饭、冬瓜汤'
       }, {
         time: '晚餐',
-        food: '面条、青菜、豆腐',
-        image: 'https://images.unsplash.com/photo-1551782450-a2132b4ba42d?w=300&h=200&fit=crop'
+        food: '面条、青菜、豆腐'
       }],
       medications: [{
         name: '降压药',
@@ -93,8 +92,7 @@ export default function Home(props) {
       }],
       activities: [{
         name: '晨练太极',
-        time: '7:00',
-        image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=200&fit=crop'
+        time: '7:00'
       }, {
         name: '书法练习',
         time: '14:00',
@@ -108,16 +106,13 @@ export default function Home(props) {
       dayOfWeek: '周六',
       meals: [{
         time: '早餐',
-        food: '豆浆、包子、咸菜',
-        image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=300&h=200&fit=crop'
+        food: '豆浆、包子、咸菜'
       }, {
         time: '午餐',
-        food: '鸡肉、米饭、紫菜汤',
-        image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&h=200&fit=crop'
+        food: '鸡肉、米饭、紫菜汤'
       }, {
         time: '晚餐',
-        food: '粥、馒头、青菜',
-        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop'
+        food: '粥、馒头、青菜'
       }],
       medications: [{
         name: '降压药',
@@ -131,8 +126,42 @@ export default function Home(props) {
       }],
       mood: '平静',
       health: '良好'
+    }, {
+      id: 3,
+      date: '2026-04-03',
+      dayOfWeek: '周五',
+      meals: [{
+        time: '早餐',
+        food: '馒头、稀饭、鸡蛋'
+      }, {
+        time: '午餐',
+        food: '排骨、米饭、青菜汤'
+      }, {
+        time: '晚餐',
+        food: '饺子、拌黄瓜'
+      }],
+      medications: [{
+        name: '降压药',
+        time: '8:00',
+        status: '已服用'
+      }],
+      activities: [{
+        name: '散步休息',
+        time: '15:00'
+      }],
+      mood: '愉快',
+      health: '良好'
     }]);
   }, []);
+
+  // 根据选择的日期过滤日报
+  const getFilteredReports = () => {
+    if (!selectedDate) return dailyReports;
+    return dailyReports.filter(report => report.date === selectedDate);
+  };
+  const handleDateChange = e => {
+    setSelectedDate(e.target.value);
+  };
   const getMoodEmoji = mood => {
     const moodMap = {
       '愉快': '😊',
@@ -149,13 +178,13 @@ export default function Home(props) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="w-12 h-12 border-2 border-amber-300">
-                <AvatarImage src={currentUser?.avatar} />
+                <AvatarImage src={currentUser?.avatar} alt={currentUser?.name} />
               </Avatar>
               <div>
                 <h1 className="text-xl font-bold text-amber-900" style={{
                 fontFamily: 'Playfair Display, serif'
               }}>
-                  护理日报
+                  {currentUser?.name || '护理日报'}
                 </h1>
                 <p className="text-sm text-amber-700" style={{
                 fontFamily: 'Nunito Sans, sans-serif'
@@ -165,14 +194,9 @@ export default function Home(props) {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-amber-600">
-                {new Date().getDate()}
-              </p>
-              <p className="text-sm text-amber-700">
-                {new Date().toLocaleDateString('zh-CN', {
-                month: 'short'
-              })}
-              </p>
+              <div className="relative">
+                <input type="date" value={selectedDate} onChange={handleDateChange} className="px-3 py-2 border border-amber-200 rounded-lg text-amber-900 bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-300 font-medium" />
+              </div>
             </div>
           </div>
         </div>
@@ -180,9 +204,12 @@ export default function Home(props) {
 
       {/* 时间轴 */}
       <div className="container mx-auto px-4 py-6">
-        {dailyReports.map((report, index) => <div key={report.id} className="relative">
+        {getFilteredReports().length === 0 && <div className="text-center py-12">
+            <p className="text-gray-500">该日期暂无日报记录</p>
+          </div>}
+        {getFilteredReports().map((report, index) => <div key={report.id} className="relative">
             {/* 时间轴线 */}
-            {index !== dailyReports.length - 1 && <div className="absolute left-6 top-20 w-0.5 h-full bg-gradient-to-b from-amber-300 to-transparent"></div>}
+            {index !== getFilteredReports().length - 1 && <div className="absolute left-6 top-20 w-0.5 h-full bg-gradient-to-b from-amber-300 to-transparent"></div>}
             
             {/* 日期节点 */}
             <div className="flex items-center mb-4">
@@ -225,15 +252,14 @@ export default function Home(props) {
                     <span className="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
                     今日饮食
                   </h4>
-                  <div className="grid grid-cols-3 gap-3">
-                    {report.meals.map((meal, idx) => <div key={idx} className="text-center">
-                        <div className="relative mb-2">
-                          <img src={meal.image} alt={meal.time} className="w-full h-20 object-cover rounded-xl" />
-                          <div className="absolute top-1 left-1 bg-white/90 px-2 py-1 rounded-lg text-xs font-medium">
+                  <div className="space-y-3">
+                    {report.meals.map((meal, idx) => <div key={idx} className="bg-orange-50 p-4 rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-orange-800 bg-orange-100 px-3 py-1 rounded-full">
                             {meal.time}
-                          </div>
+                          </span>
                         </div>
-                        <p className="text-xs text-gray-600">{meal.food}</p>
+                        <p className="text-gray-700 mt-2">{meal.food}</p>
                       </div>)}
                   </div>
                 </div>
@@ -257,20 +283,31 @@ export default function Home(props) {
                   </div>
                 </div>
 
-                {/* 活动记录 */}
+                {/* 状态记录 */}
                 <div>
                   <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
                     <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                    今日活动
+                    今日状态
                   </h4>
                   <div className="grid grid-cols-2 gap-3">
-                    {report.activities.map((activity, idx) => <div key={idx} className="relative">
-                        <img src={activity.image} alt={activity.name} className="w-full h-24 object-cover rounded-xl" />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 rounded-b-xl">
-                          <p className="text-white text-sm font-medium">{activity.name}</p>
-                          <p className="text-white/80 text-xs">{activity.time}</p>
-                        </div>
-                      </div>)}
+                    {report.activities.map((activity, idx) => {
+                  if (activity.image) {
+                    // 有图片的显示图片卡片
+                    return <div key={idx} className="relative">
+                          <img src={activity.image} alt={activity.name} className="w-full h-24 object-cover rounded-xl" />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 rounded-b-xl">
+                            <p className="text-white text-sm font-medium">{activity.name}</p>
+                            <p className="text-white/80 text-xs">{activity.time}</p>
+                          </div>
+                        </div>;
+                  } else {
+                    // 没有图片的只显示文字
+                    return <div key={idx} className="bg-green-50 p-4 rounded-xl">
+                          <p className="font-medium text-gray-800">{activity.name}</p>
+                          <p className="text-sm text-gray-600 mt-1">{activity.time}</p>
+                        </div>;
+                  }
+                })}
                   </div>
                 </div>
               </div>
