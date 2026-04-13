@@ -90,11 +90,32 @@ export default function AdminBill(props) {
         setLoading(false);
         return;
       }
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      const result = await db.collection('bills').orderBy('createdAt', 'desc').get();
-      setBills(result.data);
-      setFilteredBills(result.data);
+
+      // 使用数据模型 API 查询账单
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'bills',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {}
+          },
+          select: {
+            $master: true
+          },
+          orderBy: [{
+            createdAt: 'desc'
+          }],
+          pageSize: 100,
+          pageNumber: 1
+        }
+      });
+      if (result && result.records) {
+        setBills(result.records);
+        setFilteredBills(result.records);
+      } else {
+        setBills([]);
+        setFilteredBills([]);
+      }
       setLoading(false);
     } catch (error) {
       console.error('加载账单数据失败:', error);
@@ -123,11 +144,25 @@ export default function AdminBill(props) {
   };
   const handleApprove = async () => {
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      await db.collection('bills').doc(selectedBill._id).update({
-        status: 'approved',
-        updatedAt: new Date().getTime()
+      // 使用数据模型 API 更新账单状态
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'bills',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: selectedBill._id
+                }
+              }]
+            }
+          },
+          data: {
+            status: 'approved',
+            updatedAt: new Date().toISOString()
+          }
+        }
       });
       toast({
         title: '发布成功',
@@ -146,10 +181,24 @@ export default function AdminBill(props) {
   };
   const handleReject = async reason => {
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      await db.collection('bills').doc(selectedBill._id).update({
-        status: 'rejected',
+      // 使用数据模型 API 更新账单状态为驳回
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'bills',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [
+                {
+                  _id: {
+                    $eq: selectedBill._id
+                  }
+                }
+              ]
+            }
+          },
+          data: {
+            status: 'rejected',
         reviewComment: reason,
         updatedAt: new Date().getTime()
       });

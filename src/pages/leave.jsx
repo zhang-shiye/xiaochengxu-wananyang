@@ -87,59 +87,25 @@ export default function Leave(props) {
 
   // 监听请假事由选择变化
   const selectedReason = form.watch('reason');
-
-  // 加载请假记录
   useEffect(() => {
-    const loadLeaveRequests = async () => {
-      try {
-        const user = props.$w.auth.currentUser;
-        if (user?.userId) {
-          // 获取当前家属绑定的老人信息
-          const bindingResult = await props.$w.cloud.callDataSource({
-            dataSourceName: 'elder_family_bindings',
-            methodName: 'wedaGetV2',
-            params: {
-              filter: {
-                familyId: user.userId,
-                status: 'active'
-              }
-            }
-          });
-          if (bindingResult && bindingResult.data && bindingResult.data.length > 0) {
-            const binding = bindingResult.data[0];
-            // 获取请假记录
-            const leaveResult = await props.$w.cloud.callDataSource({
-              dataSourceName: 'leave_requests',
-              methodName: 'wedaGetV2',
-              params: {
-                filter: {
-                  familyId: user.userId,
-                  elderId: binding.elderId
-                },
-                sort: [{
-                  key: 'createdAt',
-                  direction: -1
-                }]
-              }
-            });
-            if (leaveResult && leaveResult.data) {
-              setLeaveRequests(leaveResult.data.map(leave => ({
-                id: leave._id,
-                reason: leave.reason,
-                startDate: leave.startDate,
-                endDate: leave.endDate,
-                status: leave.status,
-                submitTime: new Date(leave.createdAt).toLocaleString('zh-CN'),
-                approvalTime: leave.approvedAt ? new Date(leave.approvedAt).toLocaleString('zh-CN') : ''
-              })));
-            }
-          }
-        }
-      } catch (error) {
-        console.error('加载请假记录失败:', error);
-      }
-    };
-    loadLeaveRequests();
+    // 模拟获取历史请假记录
+    setLeaveRequests([{
+      id: 1,
+      reason: '家庭聚餐',
+      startDate: '2026-04-10',
+      endDate: '2026-04-10',
+      status: 'approved',
+      submitTime: '2026-04-08 14:30',
+      approvalTime: '2026-04-08 16:45'
+    }, {
+      id: 2,
+      reason: '医院检查',
+      startDate: '2026-04-15',
+      endDate: '2026-04-15',
+      status: 'pending',
+      submitTime: '2026-04-05 10:20',
+      approvalTime: null
+    }]);
   }, []);
   const onSubmit = async data => {
     // 表单验证

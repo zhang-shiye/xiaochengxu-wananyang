@@ -105,18 +105,25 @@ export default function AdminElder(props) {
   // 加载老人数据
   const loadElders = async () => {
     try {
-      const result = await props.$w.cloud.callFunction({
-        name: 'mcp_readNoSqlDatabaseContent',
-        data: {
-          collectionName: 'elders',
-          limit: 100,
-          sort: {
-            createdAt: -1
-          }
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'elders',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {}
+          },
+          select: {
+            $master: true
+          },
+          orderBy: [{
+            createdAt: 'desc'
+          }],
+          pageSize: 100,
+          pageNumber: 1
         }
       });
-      if (result.success) {
-        setElders(result.data);
+      if (result && result.records) {
+        setElders(result.records);
       } else {
         toast({
           title: '加载失败',
@@ -125,9 +132,10 @@ export default function AdminElder(props) {
         });
       }
     } catch (error) {
+      console.error('加载老人数据失败:', error);
       toast({
         title: '加载失败',
-        description: '网络错误，请重试',
+        description: error.message || '网络错误，请重试',
         variant: 'destructive'
       });
     }

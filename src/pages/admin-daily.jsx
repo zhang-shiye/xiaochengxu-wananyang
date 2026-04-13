@@ -85,14 +85,32 @@ export default function AdminDaily(props) {
         setLoading(false);
         return;
       }
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      const _ = db.command;
 
-      // 管理员可以查看所有日报
-      const result = await db.collection('daily_reports').orderBy('createdAt', 'desc').get();
-      setDailyReports(result.data);
-      setFilteredReports(result.data);
+      // 使用数据模型 API 查询日报
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'daily_reports',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {}
+          },
+          select: {
+            $master: true
+          },
+          orderBy: [{
+            createdAt: 'desc'
+          }],
+          pageSize: 100,
+          pageNumber: 1
+        }
+      });
+      if (result && result.records) {
+        setDailyReports(result.records);
+        setFilteredReports(result.records);
+      } else {
+        setDailyReports([]);
+        setFilteredReports([]);
+      }
       setLoading(false);
     } catch (error) {
       console.error('加载日报数据失败:', error);
@@ -121,11 +139,25 @@ export default function AdminDaily(props) {
   };
   const handleApprove = async () => {
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      await db.collection('daily_reports').doc(selectedReport._id).update({
-        status: 'completed',
-        updatedAt: new Date().getTime()
+      // 使用数据模型 API 更新日报状态
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'daily_reports',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: selectedReport._id
+                }
+              }]
+            }
+          },
+          data: {
+            status: 'completed',
+            updatedAt: new Date().toISOString()
+          }
+        }
       });
       toast({
         title: '审核通过',
@@ -144,12 +176,26 @@ export default function AdminDaily(props) {
   };
   const handleReject = async reason => {
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      await db.collection('daily_reports').doc(selectedReport._id).update({
-        status: 'rejected',
-        reviewComment: reason,
-        updatedAt: new Date().getTime()
+      // 使用数据模型 API 更新日报状态为驳回
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'daily_reports',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: selectedReport._id
+                }
+              }]
+            }
+          },
+          data: {
+            status: 'rejected',
+            reviewComment: reason,
+            updatedAt: new Date().toISOString()
+          }
+        }
       });
       toast({
         title: '已驳回',

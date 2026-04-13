@@ -80,35 +80,103 @@ export default function AdminHome(props) {
   }, []);
   const loadPendingData = async () => {
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      const _ = db.command;
-
       // 统计待审核日报
-      const dailyResult = await db.collection('daily_reports').where({
-        status: 'pending'
-      }).count();
+      const dailyResult = await props.$w.cloud.callDataSource({
+        dataSourceName: 'daily_reports',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                status: {
+                  $eq: 'pending'
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          getCount: true,
+          pageSize: 1,
+          pageNumber: 1
+        }
+      });
 
       // 统计待审核请假
-      const leaveResult = await db.collection('leave_requests').where({
-        status: 'pending'
-      }).count();
+      const leaveResult = await props.$w.cloud.callDataSource({
+        dataSourceName: 'leave_requests',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                status: {
+                  $eq: 'pending'
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          getCount: true,
+          pageSize: 1,
+          pageNumber: 1
+        }
+      });
 
       // 统计待审核账单
-      const billResult = await db.collection('bills').where({
-        status: 'pending'
-      }).count();
+      const billResult = await props.$w.cloud.callDataSource({
+        dataSourceName: 'bills',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                status: {
+                  $eq: 'pending'
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          getCount: true,
+          pageSize: 1,
+          pageNumber: 1
+        }
+      });
 
       // 统计老人数量
-      const elderResult = await db.collection('elders').where({
-        status: 'active'
-      }).count();
-      setPendingCounts({
-        dailyReports: dailyResult.total,
-        leaveRequests: leaveResult.total,
-        billApprovals: billResult.total
+      const elderResult = await props.$w.cloud.callDataSource({
+        dataSourceName: 'elders',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                status: {
+                  $eq: 'active'
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          getCount: true,
+          pageSize: 1,
+          pageNumber: 1
+        }
       });
-      setElderCount(elderResult.total);
+      setPendingCounts({
+        dailyReports: dailyResult.total || 0,
+        leaveRequests: leaveResult.total || 0,
+        billApprovals: billResult.total || 0
+      });
+      setElderCount(elderResult.total || 0);
 
       // 计算今日统计（已审核和待审核总数）
       const today = new Date();
@@ -117,24 +185,90 @@ export default function AdminHome(props) {
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       // 今日已审核的日报
-      const todayDailyApproved = await db.collection('daily_reports').where({
-        status: 'approved',
-        updatedAt: _.gte(today).and(_.lt(tomorrow))
-      }).count();
+      const todayDailyApproved = await props.$w.cloud.callDataSource({
+        dataSourceName: 'daily_reports',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                status: {
+                  $eq: 'approved'
+                }
+              }, {
+                updatedAt: {
+                  $gte: today.toISOString(),
+                  $lt: tomorrow.toISOString()
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          getCount: true,
+          pageSize: 1,
+          pageNumber: 1
+        }
+      });
 
       // 今日已审核的请假
-      const todayLeaveApproved = await db.collection('leave_requests').where({
-        status: 'approved',
-        updatedAt: _.gte(today).and(_.lt(tomorrow))
-      }).count();
+      const todayLeaveApproved = await props.$w.cloud.callDataSource({
+        dataSourceName: 'leave_requests',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                status: {
+                  $eq: 'approved'
+                }
+              }, {
+                updatedAt: {
+                  $gte: today.toISOString(),
+                  $lt: tomorrow.toISOString()
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          getCount: true,
+          pageSize: 1,
+          pageNumber: 1
+        }
+      });
 
       // 今日已审核的账单
-      const todayBillApproved = await db.collection('bills').where({
-        status: 'approved',
-        updatedAt: _.gte(today).and(_.lt(tomorrow))
-      }).count();
-      const totalApproved = todayDailyApproved.total + todayLeaveApproved.total + todayBillApproved.total;
-      const totalPending = dailyResult.total + leaveResult.total + billResult.total;
+      const todayBillApproved = await props.$w.cloud.callDataSource({
+        dataSourceName: 'bills',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                status: {
+                  $eq: 'approved'
+                }
+              }, {
+                updatedAt: {
+                  $gte: today.toISOString(),
+                  $lt: tomorrow.toISOString()
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          getCount: true,
+          pageSize: 1,
+          pageNumber: 1
+        }
+      });
+      const totalApproved = (todayDailyApproved.total || 0) + (todayLeaveApproved.total || 0) + (todayBillApproved.total || 0);
+      const totalPending = (dailyResult.total || 0) + (leaveResult.total || 0) + (billResult.total || 0);
       setTodayStats({
         approved: totalApproved,
         pending: totalPending
