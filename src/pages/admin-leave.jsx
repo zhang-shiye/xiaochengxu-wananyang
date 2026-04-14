@@ -345,7 +345,7 @@ export default function AdminLeave(props) {
               </div>
 
               {/* 附件图片 */}
-              {selectedRequest.attachments && selectedRequest.attachments.length > 0 && <div>
+              {selectedRequest?.attachments && selectedRequest.attachments.length > 0 && <div>
                   <p className="text-sm font-semibold text-gray-700 mb-2">附件图片</p>
                   <div className="grid grid-cols-2 gap-2">
                     {selectedRequest.attachments.map((image, index) => <img key={index} src={image} alt={`附件 ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />)}

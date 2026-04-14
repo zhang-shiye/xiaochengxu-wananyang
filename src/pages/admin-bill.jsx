@@ -471,7 +471,7 @@ export default function AdminBill(props) {
               </div>}
 
             {/* 附件图片 */}
-            {selectedBill.images && selectedBill.images.length > 0 && <div className="mb-4">
+            {selectedBill?.images && selectedBill.images.length > 0 && <div className="mb-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">附件图片</p>
                 <div className="grid grid-cols-2 gap-2">
                   {selectedBill.images.map((image, index) => <div key={index} className="relative">

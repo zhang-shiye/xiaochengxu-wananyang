@@ -356,7 +356,7 @@ export default function AdminDaily(props) {
             </div>
 
             {/* 图片展示 */}
-            {selectedReport.images && selectedReport.images.length > 0 && <div className="mb-4">
+            {selectedReport?.images && selectedReport.images.length > 0 && <div className="mb-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">今日图片</p>
                 <div className="grid grid-cols-2 gap-2">
                   {selectedReport.images.map((image, index) => <div key={index} className="relative">

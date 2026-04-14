@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Card, Button, Badge, useToast } from '@/components/ui';
 // @ts-ignore;
-import { Calendar, DollarSign, UserCheck, AlertCircle, CheckCircle, Clock, ArrowRight, Bell, Users } from 'lucide-react';
+import { Calendar, DollarSign, UserCheck, AlertCircle, CheckCircle, Clock, ArrowRight, Bell, Users, Database, Palette, Settings } from 'lucide-react';
 
 import AdminTabBar from '@/components/AdminTabBar';
 export default function AdminHome(props) {
@@ -61,10 +61,6 @@ export default function AdminHome(props) {
     dailyReports: 0,
     leaveRequests: 0,
     billApprovals: 0
-  });
-  const [todayStats, setTodayStats] = useState({
-    approved: 0,
-    pending: 0
   });
   const [elderCount, setElderCount] = useState(0);
   const [todayDate, setTodayDate] = useState('');
@@ -177,102 +173,6 @@ export default function AdminHome(props) {
         billApprovals: billResult.total || 0
       });
       setElderCount(elderResult.total || 0);
-
-      // 计算今日统计（已审核和待审核总数）
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      // 今日已审核的日报
-      const todayDailyApproved = await props.$w.cloud.callDataSource({
-        dataSourceName: 'daily_reports',
-        methodName: 'wedaGetRecordsV2',
-        params: {
-          filter: {
-            where: {
-              $and: [{
-                status: {
-                  $eq: 'approved'
-                }
-              }, {
-                updatedAt: {
-                  $gte: today.toISOString(),
-                  $lt: tomorrow.toISOString()
-                }
-              }]
-            }
-          },
-          select: {
-            $master: true
-          },
-          getCount: true,
-          pageSize: 1,
-          pageNumber: 1
-        }
-      });
-
-      // 今日已审核的请假
-      const todayLeaveApproved = await props.$w.cloud.callDataSource({
-        dataSourceName: 'leave_requests',
-        methodName: 'wedaGetRecordsV2',
-        params: {
-          filter: {
-            where: {
-              $and: [{
-                status: {
-                  $eq: 'approved'
-                }
-              }, {
-                updatedAt: {
-                  $gte: today.toISOString(),
-                  $lt: tomorrow.toISOString()
-                }
-              }]
-            }
-          },
-          select: {
-            $master: true
-          },
-          getCount: true,
-          pageSize: 1,
-          pageNumber: 1
-        }
-      });
-
-      // 今日已审核的账单
-      const todayBillApproved = await props.$w.cloud.callDataSource({
-        dataSourceName: 'bills',
-        methodName: 'wedaGetRecordsV2',
-        params: {
-          filter: {
-            where: {
-              $and: [{
-                status: {
-                  $eq: 'approved'
-                }
-              }, {
-                updatedAt: {
-                  $gte: today.toISOString(),
-                  $lt: tomorrow.toISOString()
-                }
-              }]
-            }
-          },
-          select: {
-            $master: true
-          },
-          getCount: true,
-          pageSize: 1,
-          pageNumber: 1
-        }
-      });
-      const totalApproved = (todayDailyApproved.total || 0) + (todayLeaveApproved.total || 0) + (todayBillApproved.total || 0);
-      const totalPending = (dailyResult.total || 0) + (leaveResult.total || 0) + (billResult.total || 0);
-      setTodayStats({
-        approved: totalApproved,
-        pending: totalPending
-      });
     } catch (error) {
       console.error('加载待办数据失败:', error);
       toast({
@@ -421,49 +321,67 @@ export default function AdminHome(props) {
           </div>
         </div>
 
-        {/* 系统状态 */}
+        {/* 后台管理 */}
         <div>
           <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-amber-600" />
-            系统状态
+            <Settings className="w-5 h-5 text-amber-600" />
+            后台管理
           </h2>
           <div className="space-y-3">
-            {/* 今日统计 */}
-            <Card className="bg-white p-4 shadow-md">
+            {/* 老人管理 */}
+            <Card className="bg-white p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow" onClick={() => props.$w.utils.navigateTo({
+            pageId: 'admin-elder',
+            params: {}
+          })}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-indigo-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">今日统计</h3>
-                    <p className="text-xs text-gray-500">今日系统操作概览</p>
+                    <h3 className="font-semibold text-gray-800">老人管理</h3>
+                    <p className="text-xs text-gray-500">管理在院老人信息</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm text-gray-600">已审核 {todayStats.approved} 项</div>
-                  <div className="text-sm text-gray-600">待审核 {todayStats.pending} 项</div>
-                </div>
+                <ArrowRight className="w-4 h-4 text-gray-400" />
               </div>
             </Card>
 
-            {/* 系统通知 */}
-            <Card className="bg-white p-4 shadow-md">
+            {/* 数据导入 */}
+            <Card className="bg-white p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow" onClick={() => props.$w.utils.navigateTo({
+            pageId: 'admin-data',
+            params: {}
+          })}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Bell className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                    <Database className="w-5 h-5 text-teal-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">系统通知</h3>
-                    <p className="text-xs text-gray-500">重要系统消息提醒</p>
+                    <h3 className="font-semibold text-gray-800">数据导入</h3>
+                    <p className="text-xs text-gray-500">批量导入系统数据</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    系统正常
-                  </Badge>
+                <ArrowRight className="w-4 h-4 text-gray-400" />
+              </div>
+            </Card>
+
+            {/* 品牌建设 */}
+            <Card className="bg-white p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow" onClick={() => props.$w.utils.navigateTo({
+            pageId: 'admin-brand',
+            params: {}
+          })}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
+                    <Palette className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-800">品牌建设</h3>
+                    <p className="text-xs text-gray-500">定制养老院品牌形象</p>
+                  </div>
                 </div>
+                <ArrowRight className="w-4 h-4 text-gray-400" />
               </div>
             </Card>
           </div>
