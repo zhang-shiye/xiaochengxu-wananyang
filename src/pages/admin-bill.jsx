@@ -6,6 +6,7 @@ import { Card, Button, Badge, useToast, Input, Select, SelectTrigger, SelectValu
 import { DollarSign, Search, Filter, ArrowLeft, ArrowRight, Edit3, Receipt, Trash2, Plus } from 'lucide-react';
 
 import AdminTabBar from '@/components/AdminTabBar';
+import DataPermissionHelper from '@/components/PermissionCheck';
 export default function AdminBill(props) {
   const {
     toast
@@ -183,6 +184,14 @@ export default function AdminBill(props) {
     setIsEditMode(false);
   };
   const handleApprove = async () => {
+    if (!selectedBill) {
+      toast({
+        title: '操作失败',
+        description: '请选择一条账单记录',
+        variant: 'destructive'
+      });
+      return;
+    }
     try {
       // 使用数据模型 API 更新账单状态
       await props.$w.cloud.callDataSource({
@@ -193,7 +202,7 @@ export default function AdminBill(props) {
             where: {
               $and: [{
                 _id: {
-                  $eq: selectedBill._id
+                  $eq: selectedBill?._id || ''
                 }
               }]
             }
@@ -230,7 +239,7 @@ export default function AdminBill(props) {
             where: {
               $and: [{
                 _id: {
-                  $eq: selectedBill._id
+                  $eq: selectedBill?._id || ''
                 }
               }]
             }
@@ -378,14 +387,14 @@ export default function AdminBill(props) {
               <ArrowLeft className="w-4 h-4 mr-1" />
               返回
             </Button>
-            {getStatusBadge(selectedBill.status)}
+            {getStatusBadge(selectedBill?.status || 'pending')}
           </div>
 
           <Card className="bg-white p-4 shadow-md">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold text-gray-800">{selectedBill.elderName}</h2>
-                <p className="text-sm text-gray-500">{selectedBill.month}</p>
+                <h2 className="text-lg font-bold text-gray-800">{selectedBill?.elderName || '未知老人'}</h2>
+                <p className="text-sm text-gray-500">{selectedBill?.month || '未设置'}</p>
               </div>
               {!isEditMode && <Button size="sm" variant="outline" onClick={() => setIsEditMode(true)} className="text-blue-600 border-blue-600">
                   <Edit3 className="w-4 h-4 mr-1" />
@@ -471,7 +480,7 @@ export default function AdminBill(props) {
               </div>}
 
             {/* 附件图片 */}
-            {selectedBill?.images && selectedBill.images.length > 0 && <div className="mb-4">
+            {selectedBill.images && selectedBill.images.length > 0 && <div className="mb-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">附件图片</p>
                 <div className="grid grid-cols-2 gap-2">
                   {selectedBill.images.map((image, index) => <div key={index} className="relative">

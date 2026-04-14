@@ -6,6 +6,7 @@ import { Card, Button, Badge, useToast, Input, Select, SelectTrigger, SelectValu
 import { Clock, Check, X, Search, Filter, ArrowLeft, ArrowRight, Calendar, AlertCircle, User } from 'lucide-react';
 
 import AdminTabBar from '@/components/AdminTabBar';
+import DataPermissionHelper from '@/components/PermissionCheck';
 export default function AdminLeave(props) {
   const {
     toast
@@ -171,6 +172,14 @@ export default function AdminLeave(props) {
     setRejectReason('');
   };
   const handleApprove = async () => {
+    if (!selectedRequest) {
+      toast({
+        title: '操作失败',
+        description: '请选择一条请假记录',
+        variant: 'destructive'
+      });
+      return;
+    }
     try {
       // 使用数据模型 API 更新请假状态
       await props.$w.cloud.callDataSource({
@@ -181,7 +190,7 @@ export default function AdminLeave(props) {
             where: {
               $and: [{
                 _id: {
-                  $eq: selectedRequest._id
+                  $eq: selectedRequest?._id || ''
                 }
               }]
             }
@@ -216,10 +225,18 @@ export default function AdminLeave(props) {
       });
       return;
     }
+    if (!selectedRequest) {
+      toast({
+        title: '操作失败',
+        description: '请选择一条请假记录',
+        variant: 'destructive'
+      });
+      return;
+    }
     try {
       const tcb = await props.$w.cloud.getCloudInstance();
       const db = tcb.database();
-      await db.collection('leave_requests').doc(selectedRequest._id).update({
+      await db.collection('leave_requests').doc(selectedRequest?._id || '').update({
         status: 'rejected',
         reviewComment: rejectReason,
         updatedAt: new Date().getTime()
@@ -310,7 +327,7 @@ export default function AdminLeave(props) {
               <ArrowLeft className="w-4 h-4 mr-1" />
               返回
             </Button>
-            {getStatusBadge(selectedRequest.status)}
+            {getStatusBadge(selectedRequest?.status || 'pending')}
           </div>
 
           <Card className="bg-white p-4 shadow-md">
@@ -318,21 +335,21 @@ export default function AdminLeave(props) {
               {/* 基本信息 */}
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-800">{selectedRequest.elderName}</h2>
-                  <p className="text-sm text-gray-500">申请人: {selectedRequest.applicantName}</p>
+                  <h2 className="text-lg font-bold text-gray-800">{selectedRequest?.elderName || '未知老人'}</h2>
+                  <p className="text-sm text-gray-500">申请人: {selectedRequest?.applicantName || '未知'}</p>
                 </div>
-                {selectedRequest.urgency && getUrgencyBadge(selectedRequest.urgency)}
+                {selectedRequest?.urgency && getUrgencyBadge(selectedRequest.urgency)}
               </div>
 
               {/* 时间信息 */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3">
                 <div className="flex items-center gap-2 text-sm text-gray-700">
                   <Calendar className="w-4 h-4 text-green-600" />
-                  <span>{selectedRequest.startDate} 至 {selectedRequest.endDate}</span>
+                  <span>{selectedRequest?.startDate || '未设置'} 至 {selectedRequest?.endDate || '未设置'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                   <Clock className="w-4 h-4 text-gray-400" />
-                  <span>共 {calculateDays(selectedRequest.startDate, selectedRequest.endDate)} 天</span>
+                  <span>共 {selectedRequest?.startDate && selectedRequest?.endDate ? calculateDays(selectedRequest.startDate, selectedRequest.endDate) : 0} 天</span>
                 </div>
               </div>
 
@@ -340,15 +357,15 @@ export default function AdminLeave(props) {
               <div>
                 <p className="text-sm font-semibold text-gray-700 mb-2">请假事由</p>
                 <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
-                  {selectedRequest.reason}
+                  {selectedRequest?.reason || '未说明'}
                 </p>
               </div>
 
               {/* 附件图片 */}
-              {selectedRequest?.attachments && selectedRequest.attachments.length > 0 && <div>
+              {selectedRequest.attachments && selectedRequest.attachments.length > 0 && <div>
                   <p className="text-sm font-semibold text-gray-700 mb-2">附件图片</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {selectedRequest.attachments.map((image, index) => <img key={index} src={image} alt={`附件 ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />)}
+                    {selectedRequest?.attachments?.map((image, index) => <img key={index} src={image} alt={`附件 ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />)}
                   </div>
                 </div>}
 
@@ -356,7 +373,7 @@ export default function AdminLeave(props) {
               {selectedRequest.reviewComment && <div>
                   <p className="text-sm font-semibold text-gray-700 mb-2">审核意见</p>
                   <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
-                    {selectedRequest.reviewComment}
+                    {selectedRequest?.reviewComment || ''}
                   </p>
                 </div>}
 

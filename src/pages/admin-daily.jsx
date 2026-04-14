@@ -6,6 +6,7 @@ import { Card, Button, Badge, useToast, Input, Select, SelectTrigger, SelectValu
 import { Calendar, Eye, Check, X, Search, Filter, ArrowLeft, ArrowRight, Image as ImageIcon, Edit3, Clock } from 'lucide-react';
 
 import AdminTabBar from '@/components/AdminTabBar';
+import DataPermissionHelper from '@/components/PermissionCheck';
 export default function AdminDaily(props) {
   const {
     toast
@@ -178,6 +179,14 @@ export default function AdminDaily(props) {
     setIsEditMode(false);
   };
   const handleApprove = async () => {
+    if (!selectedReport) {
+      toast({
+        title: '操作失败',
+        description: '请选择一条日报记录',
+        variant: 'destructive'
+      });
+      return;
+    }
     try {
       // 使用数据模型 API 更新日报状态
       await props.$w.cloud.callDataSource({
@@ -280,7 +289,10 @@ export default function AdminDaily(props) {
     }
   };
   const handleDeleteImage = index => {
-    const newImages = [...selectedReport.images];
+    if (!selectedReport || !selectedReport.images) {
+      return;
+    }
+    const newImages = [...(selectedReport.images || [])];
     newImages.splice(index, 1);
     setSelectedReport({
       ...selectedReport,
@@ -356,7 +368,7 @@ export default function AdminDaily(props) {
             </div>
 
             {/* 图片展示 */}
-            {selectedReport?.images && selectedReport.images.length > 0 && <div className="mb-4">
+            {selectedReport.images && selectedReport.images.length > 0 && <div className="mb-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">今日图片</p>
                 <div className="grid grid-cols-2 gap-2">
                   {selectedReport.images.map((image, index) => <div key={index} className="relative">
@@ -395,40 +407,40 @@ export default function AdminDaily(props) {
                 </> : <>
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">早餐</p>
-                    <p className="text-sm text-gray-600">{selectedReport.breakfast}</p>
+                    <p className="text-sm text-gray-600">{selectedReport?.breakfast || '未记录'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">午餐</p>
-                    <p className="text-sm text-gray-600">{selectedReport.lunch}</p>
+                    <p className="text-sm text-gray-600">{selectedReport?.lunch || '未记录'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">晚餐</p>
-                    <p className="text-sm text-gray-600">{selectedReport.dinner}</p>
+                    <p className="text-sm text-gray-600">{selectedReport?.dinner || '未记录'}</p>
                   </div>
                 </>}
 
               {/* 活动 */}
               <div>
                 <p className="text-sm font-semibold text-gray-700 mb-1">今日活动</p>
-                {isEditMode ? <textarea className="w-full p-2 border rounded-lg text-sm" value={selectedReport.activities || ''} onChange={e => setSelectedReport({
+                {isEditMode ? <textarea className="w-full p-2 border rounded-lg text-sm" value={selectedReport?.activities || ''} onChange={e => setSelectedReport({
               ...selectedReport,
               activities: e.target.value
-            })} rows={2} /> : <p className="text-sm text-gray-600">{selectedReport.activities}</p>}
+            })} rows={2} /> : <p className="text-sm text-gray-600">{selectedReport?.activities || '无'}</p>}
               </div>
 
               {/* 备注 */}
               <div>
                 <p className="text-sm font-semibold text-gray-700 mb-1">备注</p>
-                {isEditMode ? <textarea className="w-full p-2 border rounded-lg text-sm" value={selectedReport.notes || ''} onChange={e => setSelectedReport({
+                {isEditMode ? <textarea className="w-full p-2 border rounded-lg text-sm" value={selectedReport?.notes || ''} onChange={e => setSelectedReport({
               ...selectedReport,
               notes: e.target.value
-            })} rows={2} /> : <p className="text-sm text-gray-600">{selectedReport.notes || '无'}</p>}
+            })} rows={2} /> : <p className="text-sm text-gray-600">{selectedReport?.notes || '无'}</p>}
               </div>
 
               {/* 健康状况 */}
               <div>
                 <p className="text-sm font-semibold text-gray-700 mb-1">健康状况</p>
-                <p className="text-sm text-gray-600">{selectedReport.healthStatus || '良好'}</p>
+                <p className="text-sm text-gray-600">{selectedReport?.healthStatus || '良好'}</p>
               </div>
             </div>
 

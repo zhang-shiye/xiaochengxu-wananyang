@@ -265,7 +265,7 @@ export default function AdminBrand(props) {
             description: e.target.value
           }))} maxLength={500} />
               <p className="text-xs text-gray-500 mt-1">
-                {(brandConfig.description || '').length}/500 字符
+                {brandConfig.description.length}/500 字符
               </p>
             </div>
             
