@@ -202,7 +202,9 @@ export default function AdminHome(props) {
     setTimeout(() => {
       props.$w.utils.navigateTo({
         pageId: pageMap[action],
-        params: {}
+        params: isDemo ? {
+          demo: 'admin'
+        } : {}
       });
     }, 300);
   };
@@ -407,6 +409,6 @@ export default function AdminHome(props) {
         </div>
       </div>
 
-      <AdminTabBar currentPage="admin-home" isDemo={isDemo} />
+      <AdminTabBar currentPage="admin-home" isDemo={isDemo} $w={props.$w} />
     </div>;
 }

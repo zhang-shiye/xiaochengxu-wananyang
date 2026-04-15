@@ -384,6 +384,6 @@ export default function Leave(props) {
       </div>
 
       {/* 底部导航 */}
-      <TabBar currentPage="leave" isDemo={isDemo} />
+      <TabBar currentPage="leave" isDemo={isDemo} $w={props.$w} />
     </div>;
 }

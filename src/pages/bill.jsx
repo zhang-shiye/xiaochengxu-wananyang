@@ -310,6 +310,6 @@ export default function Bill(props) {
       </div>
 
       {/* 底部导航 */}
-      <TabBar currentPage="bill" isDemo={isDemo} />
+      <TabBar currentPage="bill" isDemo={isDemo} $w={props.$w} />
     </div>;
 }

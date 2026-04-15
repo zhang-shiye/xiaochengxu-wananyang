@@ -302,6 +302,6 @@ export default function CareHome(props) {
       </div>
       
       {/* 底部导航 */}
-      <TabBar currentPage="home" isDemo={isDemo} />
+      <TabBar currentPage="home" isDemo={isDemo} $w={props.$w} />
     </div>;
 }

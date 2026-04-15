@@ -342,6 +342,6 @@ export default function Home(props) {
       </div>
 
       {/* 底部导航 */}
-      <TabBar currentPage="care" isDemo={isDemo} />
+      <TabBar currentPage="care" isDemo={isDemo} $w={props.$w} />
     </div>;
 }

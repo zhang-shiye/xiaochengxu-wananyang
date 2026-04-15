@@ -443,6 +443,6 @@ export default function AdminLeave(props) {
               </Card>)}
         </div>)}
 
-      <AdminTabBar currentPage="admin-leave" isDemo={isDemo} />
+      <AdminTabBar currentPage="admin-leave" isDemo={isDemo} $w={props.$w} />
     </div>;
 }
