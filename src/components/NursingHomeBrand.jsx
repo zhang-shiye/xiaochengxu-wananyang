@@ -203,20 +203,20 @@ export function NursingHomeBrand({
     const sloganSizeClasses = size === 'large' ? 'text-base' : size === 'small' ? 'text-xs' : 'text-sm';
     const logoSizeClasses = size === 'large' ? 'h-16 w-16' : size === 'small' ? 'h-8 w-8' : 'h-12 w-12';
     if (loading) {
-      return <div className={`flex items-center space-x-3 ${className}`}>
+      return <div className={`flex flex-col items-center justify-center space-y-2 ${className}`}>
           <div className={`${logoSizeClasses} rounded-full bg-gray-200 animate-pulse`}></div>
-          <div className="space-y-2">
+          <div className="flex flex-col items-center space-y-2">
             <div className={`h-4 bg-gray-200 rounded animate-pulse ${sizeClasses}`}></div>
             <div className={`h-3 bg-gray-200 rounded animate-pulse ${sloganSizeClasses}`}></div>
           </div>
         </div>;
     }
-    return <div className={`flex items-center space-x-3 ${className}`}>
-        {showLogo && brandConfig.logoUrl && <div className={`${logoSizeClasses} rounded-full overflow-hidden`}>
+    return <div className={`flex flex-col items-center justify-center text-center ${className}`}>
+        {showLogo && brandConfig.logoUrl && <div className={`${logoSizeClasses} rounded-full overflow-hidden mb-2`}>
             <img src={brandConfig.logoUrl} alt="养老院Logo" className="w-full h-full object-cover" />
           </div>}
         
-        <div className="flex flex-col">
+        <div className="flex flex-col items-center">
           <h3 className={`font-bold ${sizeClasses}`} style={{
           color: brandConfig.primaryColor
         }}>
