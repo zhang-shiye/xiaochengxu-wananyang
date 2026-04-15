@@ -344,7 +344,9 @@ export default function AdminHome(props) {
             {/* 老人管理 */}
             <Card className="bg-white p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow" onClick={() => props.$w.utils.navigateTo({
             pageId: 'admin-elder',
-            params: {}
+            params: isDemo ? {
+              demo: 'admin'
+            } : {}
           })}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -363,7 +365,9 @@ export default function AdminHome(props) {
             {/* 数据导入 */}
             <Card className="bg-white p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow" onClick={() => props.$w.utils.navigateTo({
             pageId: 'admin-data',
-            params: {}
+            params: isDemo ? {
+              demo: 'admin'
+            } : {}
           })}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -382,7 +386,9 @@ export default function AdminHome(props) {
             {/* 品牌建设 */}
             <Card className="bg-white p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow" onClick={() => props.$w.utils.navigateTo({
             pageId: 'admin-brand',
-            params: {}
+            params: isDemo ? {
+              demo: 'admin'
+            } : {}
           })}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -401,6 +407,6 @@ export default function AdminHome(props) {
         </div>
       </div>
 
-      <AdminTabBar />
+      <AdminTabBar currentPage="admin-home" isDemo={isDemo} />
     </div>;
 }

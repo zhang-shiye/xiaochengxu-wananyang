@@ -176,7 +176,9 @@ export default function BindSenior(props) {
       setTimeout(() => {
         props.$w.utils.navigateTo({
           pageId: 'home',
-          params: {}
+          params: isDemo ? {
+            demo: 'family'
+          } : {}
         });
       }, 2000);
     } catch (error) {

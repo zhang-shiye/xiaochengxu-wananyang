@@ -551,6 +551,6 @@ export default function AdminBill(props) {
               </Card>)}
         </div>)}
 
-      <AdminTabBar />
+      <AdminTabBar currentPage="admin-bill" isDemo={isDemo} />
     </div>;
 }

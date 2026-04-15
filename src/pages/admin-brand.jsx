@@ -14,6 +14,54 @@ export default function AdminBrand(props) {
   // 演示模式检测
   const demoMode = props.$w.page.dataset.params.demo;
   const isDemo = demoMode === 'admin';
+
+  // 检查用户角色权限（演示模式跳过权限检查）
+  useEffect(() => {
+    if (isDemo) return;
+    const user = props.$w.auth.currentUser;
+    const allowedTypes = ['nurse', 'staff', 'admin'];
+    if (user?.type && !allowedTypes.includes(user.type)) {
+      toast({
+        title: '权限限制',
+        description: '此页面仅管理员、护工、文员可以访问',
+        variant: 'destructive'
+      });
+      props.$w.utils.redirectTo({
+        pageId: 'login',
+        params: {}
+      });
+    }
+  }, []);
+
+  // 如果非演示模式且用户未登录或角色不匹配，显示提示
+  const user = props.$w.auth.currentUser;
+  const allowedTypes = ['nurse', 'staff', 'admin'];
+  if (!isDemo && (!user?.userId || user?.type && !allowedTypes.includes(user.type))) {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-8">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-3xl p-12 max-w-md">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              权限验证中...
+            </h2>
+            <p className="text-gray-600 mb-6" style={{
+            fontFamily: 'Nunito Sans, sans-serif'
+          }}>
+              此页面仅管理员、护工、文员可以访问
+            </p>
+            <Button onClick={() => {
+            props.$w.utils.redirectTo({
+              pageId: 'login',
+              params: {}
+            });
+          }} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300">
+              前往登录
+            </Button>
+          </div>
+        </Card>
+      </div>;
+  }
   const [brandConfig, setBrandConfig] = useState({
     name: '',
     slogan: '',

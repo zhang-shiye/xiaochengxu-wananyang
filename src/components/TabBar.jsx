@@ -7,7 +7,8 @@ import { Home, BookOpen, FileText, DollarSign } from 'lucide-react';
 
 export default function TabBar({
   currentPage,
-  isDemo
+  isDemo,
+  $w
 }) {
   const tabs = [{
     id: 'home',
@@ -30,11 +31,12 @@ export default function TabBar({
     const params = isDemo ? {
       demo: 'family'
     } : {};
-    // 使用应用内导航
-    window.$w?.utils?.navigateTo({
-      pageId: pageId,
-      params: params
-    }) || (window.location.href = `/${pageId}`);
+    if ($w) {
+      $w.utils.navigateTo({
+        pageId: pageId,
+        params: params
+      });
+    }
   };
   return <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-amber-200">
       <div className="container mx-auto px-4">

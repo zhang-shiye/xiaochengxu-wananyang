@@ -105,19 +105,25 @@ export default function CareHome(props) {
   const handleNavigateToDaily = () => {
     props.$w.utils.navigateTo({
       pageId: 'care',
-      params: {}
+      params: isDemo ? {
+        demo: 'family'
+      } : {}
     });
   };
   const handleNavigateToLeave = () => {
     props.$w.utils.navigateTo({
       pageId: 'leave',
-      params: {}
+      params: isDemo ? {
+        demo: 'family'
+      } : {}
     });
   };
   const handleNavigateToBill = () => {
     props.$w.utils.navigateTo({
       pageId: 'bill',
-      params: {}
+      params: isDemo ? {
+        demo: 'family'
+      } : {}
     });
   };
   const handleCallNurse = () => {
@@ -296,6 +302,6 @@ export default function CareHome(props) {
       </div>
       
       {/* 底部导航 */}
-      <TabBar currentPage="home" />
+      <TabBar currentPage="home" isDemo={isDemo} />
     </div>;
 }

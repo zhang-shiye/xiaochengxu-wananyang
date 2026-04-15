@@ -500,6 +500,6 @@ export default function AdminDaily(props) {
               </Card>)}
         </div>)}
 
-      <AdminTabBar />
+      <AdminTabBar currentPage="admin-daily" isDemo={isDemo} />
     </div>;
 }
