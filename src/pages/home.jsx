@@ -140,7 +140,7 @@ export default function CareHome(props) {
       <div className="container mx-auto px-4 py-6">
         {/* 头部标题 */}
         <div className="mb-6">
-          <NursingHomeBrand showLogo={true} showSlogan={true} size="normal" />
+          <NursingHomeBrand showLogo={false} showSlogan={true} size="normal" />
         </div>
 
         {/* 老人基本信息卡片 */}
