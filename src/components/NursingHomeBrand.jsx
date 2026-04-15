@@ -35,11 +35,17 @@ export function NursingHomeBrand({
       setLoading(true);
       const result = await $w.cloud.callDataSource({
         dataSourceName: 'branding',
-        methodName: 'wedaGetV2',
-        params: {}
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          select: {
+            $master: true
+          },
+          pageSize: 1,
+          pageNumber: 1
+        }
       });
-      if (result && result.data && result.data.length > 0) {
-        const config = result.data[0];
+      if (result && result.records && result.records.length > 0) {
+        const config = result.records[0];
         setBrandConfig({
           _id: config._id,
           name: config.name || '皖安养',
@@ -87,8 +93,14 @@ export function NursingHomeBrand({
           dataSourceName: 'branding',
           methodName: 'wedaUpdateV2',
           params: {
-            where: {
-              _id: tempConfig._id
+            filter: {
+              where: {
+                $and: [{
+                  _id: {
+                    $eq: tempConfig._id
+                  }
+                }]
+              }
             },
             data: updateData
           }
