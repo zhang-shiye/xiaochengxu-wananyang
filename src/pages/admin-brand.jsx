@@ -5,10 +5,15 @@ import { Card, Button, Input, useToast } from '@/components/ui';
 // @ts-ignore;
 import { Save, RotateCcw, Image as ImageIcon, CheckCircle, Loader2 } from 'lucide-react';
 
+import { DemoBanner } from '@/components/DemoBanner';
 export default function AdminBrand(props) {
   const {
     toast
   } = useToast();
+
+  // 演示模式检测
+  const demoMode = props.$w.page.dataset.params.demo;
+  const isDemo = demoMode === 'admin';
   const [brandConfig, setBrandConfig] = useState({
     name: '',
     slogan: '',
@@ -193,7 +198,14 @@ export default function AdminBrand(props) {
       description: '已恢复到上次保存的配置'
     });
   };
+  const handleExitDemo = () => {
+    props.$w.utils.redirectTo({
+      pageId: 'login',
+      params: {}
+    });
+  };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-24">
+      {isDemo && <DemoBanner role="admin" onBack={handleExitDemo} />}
       {/* 顶部导航栏 */}
       <div className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">

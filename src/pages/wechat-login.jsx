@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Button, Card, useToast } from '@/components/ui';
 // @ts-ignore;
-import { MessageCircle, ArrowLeft } from 'lucide-react';
+import { MessageCircle, ArrowLeft, Shield } from 'lucide-react';
 
 // @ts-ignore;
 import { NursingHomeBrand } from '@/components/NursingHomeBrand.jsx';
@@ -13,6 +13,10 @@ export default function WechatLogin(props) {
   } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+
+  // 判断是家属端还是管理端登录
+  const loginRole = props.$w.page.dataset.params.role || 'family';
+  const isAdmin = loginRole === 'admin';
 
   // 检查登录状态（仅在页面加载时执行一次）
   useEffect(() => {
@@ -27,15 +31,22 @@ export default function WechatLogin(props) {
       const user = props.$w.auth.currentUser;
       console.log('当前用户信息:', user);
 
-      // 检查用户是否已登录（不依赖 openid，因为不同登录方式字段可能不同）
+      // 检查用户是否已登录
       if (user?.userId) {
         setIsNavigating(true);
         await saveUserInfo(user);
         setTimeout(() => {
-          props.$w.utils.navigateTo({
-            pageId: 'bind-senior',
-            params: {}
-          });
+          if (isAdmin) {
+            props.$w.utils.navigateTo({
+              pageId: 'admin-home',
+              params: {}
+            });
+          } else {
+            props.$w.utils.navigateTo({
+              pageId: 'bind-senior',
+              params: {}
+            });
+          }
         }, 1000);
       }
     } catch (error) {
@@ -77,14 +88,15 @@ export default function WechatLogin(props) {
       // 从微信登录用户信息中获取手机号（如果有的话）
       const phone = user.phone || user.phoneNumber || null;
       const openid = user.openid || user.uid || user.userId || null;
-      const name = user.nickname || user.name || user.nickName || '微信用户';
+      const name = user.nickname || user.name || user.nickName || (isAdmin ? '管理员' : '微信用户');
       const avatar = user.avatarUrl || user.avatar || null;
       console.log('保存用户信息:', {
         userId: user.userId,
         openid,
         name,
         phone,
-        avatar
+        avatar,
+        role: isAdmin ? '管理员' : '家属'
       });
 
       // 保存或更新用户信息到 employee 数据模型
@@ -109,7 +121,7 @@ export default function WechatLogin(props) {
               name: name,
               phone: phone,
               avatar: avatar,
-              role: '家属',
+              role: isAdmin ? '管理员' : '家属',
               status: '在职',
               updatedAt: new Date().toISOString()
             }
@@ -127,7 +139,7 @@ export default function WechatLogin(props) {
                 name: name,
                 phone: phone,
                 avatar: avatar,
-                role: '家属',
+                role: isAdmin ? '管理员' : '家属',
                 status: '在职',
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
@@ -162,7 +174,7 @@ export default function WechatLogin(props) {
             animationDelay: '0.2s'
           }}></div>
           </div>
-          <p className="text-amber-700 font-medium">正在跳转至绑定长者页面...</p>
+          <p className="text-amber-700 font-medium">正在跳转至{isAdmin ? '管理端' : '绑定长者'}页面...</p>
         </div>
       </div>;
   }
@@ -193,18 +205,18 @@ export default function WechatLogin(props) {
             <NursingHomeBrand showLogo={true} showSlogan={true} size="large" $w={props.$w} />
           </div>
 
-          {/* 中部微信图标和提示文案 */}
+          {/* 中部图标和提示文案 */}
           <div className="text-center mb-12">
-            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <MessageCircle className="w-12 h-12 text-green-600" strokeWidth={2} />
+            <div className={`w-24 h-24 ${isAdmin ? 'bg-blue-100' : 'bg-green-100'} rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg`}>
+              {isAdmin ? <Shield className="w-12 h-12 text-blue-600" strokeWidth={2} /> : <MessageCircle className="w-12 h-12 text-green-600" strokeWidth={2} />}
             </div>
             <h2 className="text-2xl font-bold text-amber-900 mb-3" style={{
             fontFamily: 'Nunito Sans, sans-serif'
           }}>
-              微信授权登录
+              {isAdmin ? '管理端登录' : '微信授权登录'}
             </h2>
             <p className="text-amber-700 text-lg mb-2">
-              授权登录即可绑定长者信息
+              {isAdmin ? '授权登录进入管理后台' : '授权登录即可绑定长者信息'}
             </p>
             <p className="text-sm text-gray-600">
               安全快捷，一键完成身份验证
@@ -213,7 +225,7 @@ export default function WechatLogin(props) {
 
           {/* 底部授权按钮 */}
           <div className="w-full max-w-xs">
-            <Button onClick={handleWeChatLogin} disabled={isLoading} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-3xl py-5 font-semibold text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" style={{
+            <Button onClick={handleWeChatLogin} disabled={isLoading} className={`w-full ${isAdmin ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'} text-white rounded-3xl py-5 font-semibold text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105`} style={{
             fontFamily: 'Nunito Sans, sans-serif'
           }}>
               {isLoading ? <div className="flex items-center justify-center">
@@ -226,7 +238,7 @@ export default function WechatLogin(props) {
                   <svg className="w-6 h-6 mr-3 inline-block" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
                   </svg>
-                  微信授权登录
+                  {isAdmin ? '微信授权登录（管理端）' : '微信授权登录'}
                 </>}
             </Button>
 

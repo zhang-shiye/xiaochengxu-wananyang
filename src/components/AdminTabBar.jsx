@@ -6,7 +6,8 @@ import { Button } from '@/components/ui';
 import { Home, FileCheck, UserCheck, DollarSign } from 'lucide-react';
 
 export default function AdminTabBar({
-  currentPage
+  currentPage,
+  isDemo
 }) {
   const tabs = [{
     id: 'admin-home',
@@ -26,10 +27,12 @@ export default function AdminTabBar({
     icon: DollarSign
   }];
   const handleTabClick = pageId => {
-    // 使用应用内导航
+    const params = isDemo ? {
+      demo: 'admin'
+    } : {};
     window.$w?.utils?.navigateTo({
       pageId,
-      params: {}
+      params: params
     });
   };
   return <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">

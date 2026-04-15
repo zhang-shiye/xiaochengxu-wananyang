@@ -7,13 +7,19 @@ import { Heart, Calendar, User, Phone, MapPin, Clock, ChevronRight, Bell, FileTe
 
 import TabBar from '@/components/TabBar';
 import { NursingHomeBrand } from '@/components/NursingHomeBrand';
+import { DemoBanner } from '@/components/DemoBanner';
 export default function CareHome(props) {
   const {
     toast
   } = useToast();
 
-  // 检查用户角色权限
+  // 演示模式检测
+  const demoMode = props.$w.page.dataset.params.demo;
+  const isDemo = demoMode === 'family';
+
+  // 检查用户角色权限（演示模式跳过权限检查）
   useEffect(() => {
+    if (isDemo) return;
     const user = props.$w.auth.currentUser;
     if (user?.type && user.type !== 'family') {
       toast({
@@ -28,9 +34,9 @@ export default function CareHome(props) {
     }
   }, []);
 
-  // 如果用户未登录或角色不匹配，显示提示
+  // 如果非演示模式且用户未登录或角色不匹配，显示提示
   const user = props.$w.auth.currentUser;
-  if (!user?.userId || user?.type && user.type !== 'family') {
+  if (!isDemo && (!user?.userId || user?.type && user.type !== 'family')) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-8">
         <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-3xl p-12 max-w-md">
           <div className="text-center">
@@ -136,7 +142,14 @@ export default function CareHome(props) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
+  const handleExitDemo = () => {
+    props.$w.utils.redirectTo({
+      pageId: 'login',
+      params: {}
+    });
+  };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
+      {isDemo && <DemoBanner role="family" onBack={handleExitDemo} />}
       <div className="container mx-auto px-4 py-6">
         {/* 头部标题 */}
         <div className="mb-6">

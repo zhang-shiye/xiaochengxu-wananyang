@@ -8,14 +8,19 @@ import { CheckCircle2 } from 'lucide-react';
 // @ts-ignore;
 import { useForm } from 'react-hook-form';
 // @ts-ignore;
-
+import { DemoBanner } from '@/components/DemoBanner';
 export default function BindSenior(props) {
   const {
     toast
   } = useToast();
 
-  // 检查用户角色权限
+  // 演示模式检测
+  const demoMode = props.$w.page.dataset.params.demo;
+  const isDemo = demoMode === 'family';
+
+  // 检查用户角色权限（演示模式跳过权限检查）
   useEffect(() => {
+    if (isDemo) return;
     const user = props.$w.auth.currentUser;
     if (user?.type && user.type !== 'family') {
       toast({
@@ -30,9 +35,9 @@ export default function BindSenior(props) {
     }
   }, []);
 
-  // 如果用户未登录或角色不匹配，显示提示
+  // 如果非演示模式且用户未登录或角色不匹配，显示提示
   const user = props.$w.auth.currentUser;
-  if (!user?.userId || user?.type && user.type !== 'family') {
+  if (!isDemo && (!user?.userId || user?.type && user.type !== 'family')) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-8">
         <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-3xl p-12 max-w-md">
           <div className="text-center">
@@ -73,12 +78,22 @@ export default function BindSenior(props) {
       // 查询长者信息验证验证码
       const elderResult = await props.$w.cloud.callDataSource({
         dataSourceName: 'elders',
-        methodName: 'wedaGetV2',
+        methodName: 'wedaGetRecordsV2',
         params: {
-          where: {
-            name: data.elderName,
-            _openid: user.userId
-          }
+          filter: {
+            where: {
+              $and: [{
+                name: {
+                  $eq: data.elderName
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          pageSize: 10,
+          pageNumber: 1
         }
       });
       if (!elderResult || !elderResult.data || elderResult.data.length === 0) {
@@ -105,12 +120,26 @@ export default function BindSenior(props) {
       // 检查是否已经绑定过
       const existingRelation = await props.$w.cloud.callDataSource({
         dataSourceName: 'family_members',
-        methodName: 'wedaGetV2',
+        methodName: 'wedaGetRecordsV2',
         params: {
-          where: {
-            _openid: user.userId,
-            elderId: elder._id
-          }
+          filter: {
+            where: {
+              $and: [{
+                _openid: {
+                  $eq: user.userId
+                }
+              }, {
+                elderId: {
+                  $eq: elder._id
+                }
+              }]
+            }
+          },
+          select: {
+            $master: true
+          },
+          pageSize: 10,
+          pageNumber: 1
         }
       });
       if (existingRelation && existingRelation.data && existingRelation.data.length > 0) {
@@ -164,7 +193,14 @@ export default function BindSenior(props) {
   const handleBack = () => {
     props.$w.utils.navigateBack();
   };
+  const handleExitDemo = () => {
+    props.$w.utils.redirectTo({
+      pageId: 'login',
+      params: {}
+    });
+  };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      {isDemo && <DemoBanner role="family" onBack={handleExitDemo} />}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto">
           {/* 返回按钮 */}

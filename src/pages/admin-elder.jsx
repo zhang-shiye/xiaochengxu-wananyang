@@ -5,13 +5,19 @@ import { Search, Plus, Edit, Trash2, User, Phone, MapPin, Heart, Calendar, Shiel
 // @ts-ignore;
 import { Button, Input, Card, CardContent, Badge, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useToast } from '@/components/ui';
 
+import { DemoBanner } from '@/components/DemoBanner';
 export default function AdminElder(props) {
   const {
     toast
   } = useToast();
 
-  // 检查用户角色权限
+  // 演示模式检测
+  const demoMode = props.$w.page.dataset.params.demo;
+  const isDemo = demoMode === 'admin';
+
+  // 检查用户角色权限（演示模式跳过权限检查）
   useEffect(() => {
+    if (isDemo) return;
     const user = props.$w.auth.currentUser;
     const allowedTypes = ['nurse', 'staff', 'admin'];
     if (user?.type && !allowedTypes.includes(user.type)) {
@@ -27,10 +33,10 @@ export default function AdminElder(props) {
     }
   }, []);
 
-  // 如果用户未登录或角色不匹配，显示提示
+  // 如果非演示模式且用户未登录或角色不匹配，显示提示
   const user = props.$w.auth.currentUser;
   const allowedTypes = ['nurse', 'staff', 'admin'];
-  if (!user?.userId || user?.type && !allowedTypes.includes(user.type)) {
+  if (!isDemo && (!user?.userId || user?.type && !allowedTypes.includes(user.type))) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-8">
         <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-3xl p-12 max-w-md">
           <div className="text-center">
@@ -378,7 +384,14 @@ export default function AdminElder(props) {
         {statusConfig.label}
       </Badge> : null;
   };
+  const handleExitDemo = () => {
+    props.$w.utils.redirectTo({
+      pageId: 'login',
+      params: {}
+    });
+  };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      {isDemo && <DemoBanner role="admin" onBack={handleExitDemo} />}
       {/* 头部 */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
