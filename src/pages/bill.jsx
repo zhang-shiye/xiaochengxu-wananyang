@@ -32,8 +32,8 @@ export default function Bill(props) {
             pageNumber: 1
           }
         });
-        if (result && result.data && result.data.length > 0) {
-          setBrandName(result.data[0].name || '皖安养老院');
+        if (result && result.records && result.records.length > 0) {
+          setBrandName(result.records[0].name || '皖安养老院');
         }
       } catch (error) {
         console.error('加载品牌配置失败:', error);
@@ -104,13 +104,19 @@ export default function Bill(props) {
           dataSourceName: 'elder_family_bindings',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'familyId',
-              val: familyId
-            }, {
-              key: 'status',
-              val: 'active'
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  familyId: {
+                    $eq: familyId
+                  }
+                }, {
+                  status: {
+                    $eq: 'active'
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
@@ -118,7 +124,7 @@ export default function Bill(props) {
             pageNumber: 1
           }
         });
-        const bindings = bindingResult?.data || [];
+        const bindings = bindingResult?.records || [];
         if (bindings.length === 0) {
           setLoading(false);
           return;
@@ -131,22 +137,26 @@ export default function Bill(props) {
           dataSourceName: 'bills',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'elderId',
-              val: elderId
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  elderId: {
+                    $eq: elderId
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
             orderBy: [{
-              field: 'createdAt',
-              order: 'desc'
+              createdAt: 'desc'
             }],
             pageSize: 12,
             pageNumber: 1
           }
         });
-        const billData = billResult?.data || [];
+        const billData = billResult?.records || [];
         const formattedBills = billData.map(bill => ({
           id: bill._id,
           month: bill.month,

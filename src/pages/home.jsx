@@ -84,13 +84,19 @@ export default function CareHome(props) {
           dataSourceName: 'elder_family_bindings',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'familyId',
-              val: familyId
-            }, {
-              key: 'status',
-              val: 'active'
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  familyId: {
+                    $eq: familyId
+                  }
+                }, {
+                  status: {
+                    $eq: 'active'
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
@@ -98,7 +104,7 @@ export default function CareHome(props) {
             pageNumber: 1
           }
         });
-        const bindings = bindingResult?.data || [];
+        const bindings = bindingResult?.records || [];
         if (bindings.length === 0) {
           setLoading(false);
           return;
@@ -111,10 +117,15 @@ export default function CareHome(props) {
           dataSourceName: 'elders',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: '_id',
-              val: elderId
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  _id: {
+                    $eq: elderId
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
@@ -122,7 +133,7 @@ export default function CareHome(props) {
             pageNumber: 1
           }
         });
-        const elder = elderResult?.data?.[0];
+        const elder = elderResult?.records?.[0];
         if (elder) {
           setElderInfo({
             name: elder.name,
@@ -146,66 +157,78 @@ export default function CareHome(props) {
           dataSourceName: 'daily_reports',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'elderId',
-              val: elderId
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  elderId: {
+                    $eq: elderId
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
             orderBy: [{
-              field: 'date',
-              order: 'desc'
+              date: 'desc'
             }],
             pageSize: 1,
             pageNumber: 1
           }
         });
-        const dailyReport = dailyResult?.data?.[0];
+        const dailyReport = dailyResult?.records?.[0];
 
         // 4. 获取最新请假申请
         const leaveResult = await props.$w.cloud.callDataSource({
           dataSourceName: 'leave_requests',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'elderId',
-              val: elderId
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  elderId: {
+                    $eq: elderId
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
             orderBy: [{
-              field: 'createdAt',
-              order: 'desc'
+              createdAt: 'desc'
             }],
             pageSize: 1,
             pageNumber: 1
           }
         });
-        const leaveRequest = leaveResult?.data?.[0];
+        const leaveRequest = leaveResult?.records?.[0];
 
         // 5. 获取最新账单
         const billResult = await props.$w.cloud.callDataSource({
           dataSourceName: 'bills',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'elderId',
-              val: elderId
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  elderId: {
+                    $eq: elderId
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
             orderBy: [{
-              field: 'createdAt',
-              order: 'desc'
+              createdAt: 'desc'
             }],
             pageSize: 1,
             pageNumber: 1
           }
         });
-        const bill = billResult?.data?.[0];
+        const bill = billResult?.records?.[0];
         setLatestInfo({
           dailyReport: dailyReport ? {
             date: dailyReport.date,

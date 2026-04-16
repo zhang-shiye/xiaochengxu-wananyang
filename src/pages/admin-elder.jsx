@@ -119,16 +119,15 @@ export default function AdminElder(props) {
             $master: true
           },
           orderBy: [{
-            key: 'createdAt',
-            order: 'desc'
+            createdAt: 'desc'
           }],
           pageSize: 100,
           pageNumber: 1
         }
       });
-      if (result && result.data) {
+      if (result && result.records) {
         // 为没有验证码的老人自动生成验证码
-        const eldersWithoutCode = result.data.filter(e => !e.verificationCode);
+        const eldersWithoutCode = result.records.filter(e => !e.verificationCode);
         if (eldersWithoutCode.length > 0) {
           for (const elder of eldersWithoutCode) {
             try {
@@ -136,10 +135,15 @@ export default function AdminElder(props) {
                 dataSourceName: 'elders',
                 methodName: 'wedaUpdateV2',
                 params: {
-                  where: [{
-                    key: '_id',
-                    val: elder._id
-                  }],
+                  filter: {
+                    where: {
+                      $and: [{
+                        _id: {
+                          $eq: elder._id
+                        }
+                      }]
+                    }
+                  },
                   data: {
                     verificationCode: generateVerificationCode(),
                     updatedAt: Date.now()
@@ -159,16 +163,15 @@ export default function AdminElder(props) {
                 $master: true
               },
               orderBy: [{
-                key: 'createdAt',
-                order: 'desc'
+                createdAt: 'desc'
               }],
               pageSize: 100,
               pageNumber: 1
             }
           });
-          setElders(refreshedResult?.data || result.data);
+          setElders(refreshedResult?.records || result.records);
         } else {
-          setElders(result.data);
+          setElders(result.records);
         }
       } else {
         setElders([]);
@@ -219,7 +222,7 @@ export default function AdminElder(props) {
           data: newElder
         }
       });
-      if (result.success) {
+      if (result) {
         toast({
           title: '添加成功',
           description: '老人信息已添加，验证码已生成'
@@ -263,10 +266,15 @@ export default function AdminElder(props) {
         dataSourceName: 'elders',
         methodName: 'wedaUpdateV2',
         params: {
-          where: [{
-            key: '_id',
-            val: editingElder._id
-          }],
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: editingElder._id
+                }
+              }]
+            }
+          },
           data: updatedElder
         }
       });
@@ -305,10 +313,15 @@ export default function AdminElder(props) {
         dataSourceName: 'elders',
         methodName: 'wedaDeleteV2',
         params: {
-          where: [{
-            key: '_id',
-            val: elderId
-          }]
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: elderId
+                }
+              }]
+            }
+          }
         }
       });
       if (result.success) {
@@ -341,10 +354,15 @@ export default function AdminElder(props) {
         dataSourceName: 'elders',
         methodName: 'wedaUpdateV2',
         params: {
-          where: [{
-            key: '_id',
-            val: elderId
-          }],
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: elderId
+                }
+              }]
+            }
+          },
           data: {
             verificationCode: newCode,
             updatedAt: Date.now()

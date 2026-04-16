@@ -80,10 +80,15 @@ export default function BindSenior(props) {
         dataSourceName: 'elders',
         methodName: 'wedaGetRecordsV2',
         params: {
-          where: [{
-            key: 'name',
-            val: data.elderName
-          }],
+          filter: {
+            where: {
+              $and: [{
+                name: {
+                  $eq: data.elderName
+                }
+              }]
+            }
+          },
           select: {
             $master: true
           },
@@ -91,7 +96,7 @@ export default function BindSenior(props) {
           pageNumber: 1
         }
       });
-      if (!elderResult || !elderResult.data || elderResult.data.length === 0) {
+      if (!elderResult || !elderResult.records || elderResult.records.length === 0) {
         toast({
           title: '验证失败',
           description: '长者姓名不存在或验证码错误',
@@ -99,7 +104,7 @@ export default function BindSenior(props) {
         });
         return;
       }
-      const elder = elderResult.data[0];
+      const elder = elderResult.records[0];
 
       // 验证码校验：与 elders 数据模型中的 verificationCode 字段比对
       if (!elder.verificationCode || data.verificationCode !== elder.verificationCode) {
@@ -116,13 +121,19 @@ export default function BindSenior(props) {
         dataSourceName: 'family_members',
         methodName: 'wedaGetRecordsV2',
         params: {
-          where: [{
-            key: 'familyId',
-            val: user.userId
-          }, {
-            key: 'elderId',
-            val: elder._id
-          }],
+          filter: {
+            where: {
+              $and: [{
+                familyId: {
+                  $eq: user.userId
+                }
+              }, {
+                elderId: {
+                  $eq: elder._id
+                }
+              }]
+            }
+          },
           select: {
             $master: true
           },
@@ -130,7 +141,7 @@ export default function BindSenior(props) {
           pageNumber: 1
         }
       });
-      if (existingRelation && existingRelation.data && existingRelation.data.length > 0) {
+      if (existingRelation && existingRelation.records && existingRelation.records.length > 0) {
         toast({
           title: '绑定失败',
           description: '您已经绑定了该长者，请勿重复绑定',

@@ -81,13 +81,19 @@ export default function Home(props) {
           dataSourceName: 'elder_family_bindings',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'familyId',
-              val: familyId
-            }, {
-              key: 'status',
-              val: 'active'
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  familyId: {
+                    $eq: familyId
+                  }
+                }, {
+                  status: {
+                    $eq: 'active'
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
@@ -95,7 +101,7 @@ export default function Home(props) {
             pageNumber: 1
           }
         });
-        const bindings = bindingResult?.data || [];
+        const bindings = bindingResult?.records || [];
         if (bindings.length === 0) {
           setLoading(false);
           return;
@@ -115,22 +121,26 @@ export default function Home(props) {
           dataSourceName: 'daily_reports',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'elderId',
-              val: elderId
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  elderId: {
+                    $eq: elderId
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
             orderBy: [{
-              field: 'date',
-              order: 'desc'
+              date: 'desc'
             }],
             pageSize: 30,
             pageNumber: 1
           }
         });
-        const reports = dailyResult?.data || [];
+        const reports = dailyResult?.records || [];
         const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
         // 转换数据格式

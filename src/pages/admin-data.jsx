@@ -258,7 +258,7 @@ export default function AdminDataImport(props) {
                 pageSize: 1
               }
             });
-            const elderId = elderResult.data && elderResult.data.length > 0 ? elderResult.data[0]._id : null;
+            const elderId = elderResult.records && elderResult.records.length > 0 ? elderResult.records[0]._id : null;
             if (!elderId) {
               throw new Error('找不到对应的老人');
             }
@@ -312,7 +312,7 @@ export default function AdminDataImport(props) {
                 pageSize: 1
               }
             });
-            const elderId = elderResult.data && elderResult.data.length > 0 ? elderResult.data[0]._id : null;
+            const elderId = elderResult.records && elderResult.records.length > 0 ? elderResult.records[0]._id : null;
             if (!elderId) {
               throw new Error('找不到对应的老人');
             }
@@ -371,7 +371,7 @@ export default function AdminDataImport(props) {
                 pageSize: 1
               }
             });
-            const elderId = elderResult.data && elderResult.data.length > 0 ? elderResult.data[0]._id : null;
+            const elderId = elderResult.records && elderResult.records.length > 0 ? elderResult.records[0]._id : null;
             if (!elderId) {
               throw new Error('找不到对应的老人');
             }

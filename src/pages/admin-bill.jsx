@@ -123,7 +123,7 @@ export default function AdminBill(props) {
           pageNumber: 1
         }
       });
-      const bills = result.data || [];
+      const bills = result.records || [];
 
       // 获取关联的老人信息
       const elderIds = bills.map(bill => bill.elderId);
@@ -147,7 +147,7 @@ export default function AdminBill(props) {
           }
         });
         const elderMap = {};
-        elderResult.data.forEach(elder => {
+        elderResult.records.forEach(elder => {
           elderMap[elder._id] = elder;
         });
 

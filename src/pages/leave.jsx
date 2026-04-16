@@ -112,13 +112,19 @@ export default function Leave(props) {
           dataSourceName: 'elder_family_bindings',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'familyId',
-              val: familyId
-            }, {
-              key: 'status',
-              val: 'active'
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  familyId: {
+                    $eq: familyId
+                  }
+                }, {
+                  status: {
+                    $eq: 'active'
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
@@ -126,7 +132,7 @@ export default function Leave(props) {
             pageNumber: 1
           }
         });
-        const bindings = bindingResult?.data || [];
+        const bindings = bindingResult?.records || [];
         if (bindings.length === 0) {
           setLoading(false);
           return;
@@ -144,22 +150,26 @@ export default function Leave(props) {
           dataSourceName: 'leave_requests',
           methodName: 'wedaGetRecordsV2',
           params: {
-            where: [{
-              key: 'elderId',
-              val: elderId
-            }],
+            filter: {
+              where: {
+                $and: [{
+                  elderId: {
+                    $eq: elderId
+                  }
+                }]
+              }
+            },
             select: {
               $master: true
             },
             orderBy: [{
-              field: 'createdAt',
-              order: 'desc'
+              createdAt: 'desc'
             }],
             pageSize: 20,
             pageNumber: 1
           }
         });
-        const requests = leaveResult?.data || [];
+        const requests = leaveResult?.records || [];
         const formattedRequests = requests.map(req => ({
           id: req._id,
           reason: req.reason,
@@ -216,16 +226,18 @@ export default function Leave(props) {
         dataSourceName: 'leave_requests',
         methodName: 'wedaAddV2',
         params: {
-          elderId: elderInfo?.elderId,
-          elderName: elderInfo?.elderName,
-          familyId: familyId,
-          familyName: familyName,
-          reason: reasonText,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          status: 'pending',
-          createdAt: Date.now(),
-          updatedAt: Date.now()
+          data: {
+            elderId: elderInfo?.elderId,
+            elderName: elderInfo?.elderName,
+            familyId: familyId,
+            familyName: familyName,
+            reason: reasonText,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            status: 'pending',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          }
         }
       });
 
@@ -234,22 +246,26 @@ export default function Leave(props) {
         dataSourceName: 'leave_requests',
         methodName: 'wedaGetRecordsV2',
         params: {
-          where: [{
-            key: 'elderId',
-            val: elderInfo?.elderId
-          }],
+          filter: {
+            where: {
+              $and: [{
+                elderId: {
+                  $eq: elderInfo?.elderId
+                }
+              }]
+            }
+          },
           select: {
             $master: true
           },
           orderBy: [{
-            field: 'createdAt',
-            order: 'desc'
+            createdAt: 'desc'
           }],
           pageSize: 20,
           pageNumber: 1
         }
       });
-      const requests = leaveResult?.data || [];
+      const requests = leaveResult?.records || [];
       const formattedRequests = requests.map(req => ({
         id: req._id,
         reason: req.reason,

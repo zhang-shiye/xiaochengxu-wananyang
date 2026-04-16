@@ -111,7 +111,7 @@ export default function AdminLeave(props) {
           pageNumber: 1
         }
       });
-      const leaveRequests = result.data || [];
+      const leaveRequests = result.records || [];
 
       // 获取关联的老人信息
       const elderIds = leaveRequests.map(request => request.elderId);
@@ -135,7 +135,7 @@ export default function AdminLeave(props) {
           }
         });
         const elderMap = {};
-        elderResult.data.forEach(elder => {
+        elderResult.records.forEach(elder => {
           elderMap[elder._id] = elder;
         });
 
