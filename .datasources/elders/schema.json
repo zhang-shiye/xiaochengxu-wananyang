@@ -1,6 +1,6 @@
 {
   "name": "elders",
-  "title": "老人信息",
+  "title": "长者信息",
   "schemas": [
     {
       "name": "name",
@@ -11,6 +11,11 @@
       "name": "age",
       "title": "年龄",
       "type": "Number"
+    },
+    {
+      "name": "admissionDate",
+      "title": "入住日期",
+      "type": "String"
     },
     {
       "name": "roomNumber",
@@ -24,7 +29,7 @@
     },
     {
       "name": "primaryNurse",
-      "title": "主管护工",
+      "title": "责任护士",
       "type": "String"
     },
     {
@@ -38,14 +43,13 @@
       "type": "String"
     },
     {
-      "name": "admissionDate",
-      "title": "入院日期",
-      "type": "Date",
-      "format": "date"
-    },
-    {
       "name": "healthStatus",
       "title": "健康状况",
+      "type": "String"
+    },
+    {
+      "name": "verificationCode",
+      "title": "验证码",
       "type": "String"
     },
     {

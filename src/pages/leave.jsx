@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Button, Card, Textarea, useToast, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
+// @ts-ignore;
+import { Calendar } from 'lucide-react';
 
 import { useForm } from 'react-hook-form';
 import TabBar from '@/components/TabBar';
@@ -300,6 +302,43 @@ export default function Leave(props) {
       params: {}
     });
   };
+
+  // 加载中显示
+  if (loading) {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">加载请假记录...</p>
+      </div>
+    </div>;
+  }
+
+  // 没有绑定老人时显示
+  if (!elderInfo) {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
+      {isDemo && <DemoBanner role="family" onBack={handleExitDemo} />}
+      <div className="container mx-auto px-4 py-6">
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl rounded-3xl p-8">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-amber-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">尚未绑定老人</h2>
+            <p className="text-gray-600 mb-6">请先绑定老人信息，以便提交请假申请</p>
+            <Button onClick={() => props.$w.utils.navigateTo({
+              pageId: 'bind-senior',
+              params: isDemo ? {
+                demo: 'family'
+              } : {}
+            })} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full px-6 py-2">
+              立即绑定
+            </Button>
+          </div>
+        </Card>
+      </div>
+      <TabBar currentPage="leave" isDemo={isDemo} $w={props.$w} />
+    </div>;
+  }
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
       {isDemo && <DemoBanner role="family" onBack={handleExitDemo} />}
       {/* 头部 */}

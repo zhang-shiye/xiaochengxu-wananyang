@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Card, Avatar, AvatarImage, Button, useToast, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
+// @ts-ignore;
+import { FileText } from 'lucide-react';
 
 import DataPermissionHelper from '@/components/PermissionCheck';
 import TabBar from '@/components/TabBar';
@@ -205,6 +207,35 @@ export default function Home(props) {
       params: {}
     });
   };
+
+  // 加载中显示
+  if (loading) {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">加载护理日报...</p>
+      </div>
+    </div>;
+  }
+
+  // 没有数据时显示
+  if (!currentUser || dailyReports.length === 0) {
+    return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
+      {isDemo && <DemoBanner role="family" onBack={handleExitDemo} />}
+      <div className="container mx-auto px-4 py-6">
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl rounded-3xl p-8">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-amber-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">暂无护理日报</h2>
+            <p className="text-gray-600">当前没有护理日报记录</p>
+          </div>
+        </Card>
+      </div>
+      <TabBar currentPage="care" isDemo={isDemo} $w={props.$w} />
+    </div>;
+  }
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 pb-20">
       {isDemo && <DemoBanner role="family" onBack={handleExitDemo} />}
       {/* 头部 */}

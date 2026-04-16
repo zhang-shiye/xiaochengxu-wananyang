@@ -1,38 +1,32 @@
 [
   {
     "_id": "family_001",
-    "name": "王先生",
-    "phone": "138-0000-1234",
-    "relationship": "儿子",
+    "createdAt": 1713120000000,
     "elderId": "elder_001",
     "elderName": "王奶奶",
-    "verificationCode": "123456",
-    "status": "bound",
-    "createdAt": 1712390400000,
-    "updatedAt": 1712390400000
+    "familyId": "family_001",
+    "relationship": "儿子",
+    "status": "active",
+    "updatedAt": 1713120000000
   },
   {
     "_id": "family_002",
-    "name": "李女士",
-    "phone": "139-0000-5678",
-    "relationship": "女儿",
+    "createdAt": 1713206400000,
     "elderId": "elder_002",
     "elderName": "李爷爷",
-    "verificationCode": "234567",
-    "status": "bound",
-    "createdAt": 1712390400000,
-    "updatedAt": 1712390400000
+    "familyId": "family_002",
+    "relationship": "女儿",
+    "status": "active",
+    "updatedAt": 1713206400000
   },
   {
     "_id": "family_003",
-    "name": "陈先生",
-    "phone": "136-0000-9876",
-    "relationship": "儿子",
+    "createdAt": 1713292800000,
     "elderId": "elder_003",
-    "elderName": "陈奶奶",
-    "verificationCode": "345678",
-    "status": "bound",
-    "createdAt": 1712390400000,
-    "updatedAt": 1712390400000
+    "elderName": "张奶奶",
+    "familyId": "family_003",
+    "relationship": "儿媳",
+    "status": "active",
+    "updatedAt": 1713292800000
   }
 ]

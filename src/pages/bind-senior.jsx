@@ -101,12 +101,11 @@ export default function BindSenior(props) {
       }
       const elder = elderResult.data[0];
 
-      // 简化验证：使用长者名称的哈希值模拟验证码验证
-      const expectedCode = String(elder.name.length * 12345).slice(-6);
-      if (data.verificationCode !== expectedCode) {
+      // 验证码校验：与 elders 数据模型中的 verificationCode 字段比对
+      if (!elder.verificationCode || data.verificationCode !== elder.verificationCode) {
         toast({
           title: '验证失败',
-          description: '专属验证码不正确',
+          description: '专属验证码不正确，请联系养老院工作人员获取正确验证码',
           variant: 'destructive'
         });
         return;
@@ -117,19 +116,13 @@ export default function BindSenior(props) {
         dataSourceName: 'family_members',
         methodName: 'wedaGetRecordsV2',
         params: {
-          filter: {
-            where: {
-              $and: [{
-                _openid: {
-                  $eq: user.userId
-                }
-              }, {
-                elderId: {
-                  $eq: elder._id
-                }
-              }]
-            }
-          },
+          where: [{
+            key: 'familyId',
+            val: user.userId
+          }, {
+            key: 'elderId',
+            val: elder._id
+          }],
           select: {
             $master: true
           },
@@ -152,14 +145,14 @@ export default function BindSenior(props) {
         methodName: 'wedaCreateV2',
         params: {
           data: {
-            _openid: user.userId,
             elderId: elder._id,
             elderName: elder.name,
             familyId: user.userId,
+            familyName: user.name || user.nickName || '家属',
             relationship: data.relationship,
             status: 'active',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            createdAt: Date.now(),
+            updatedAt: Date.now()
           }
         }
       });
@@ -323,7 +316,7 @@ export default function BindSenior(props) {
                   <div>
                     <h4 className="text-sm font-medium text-amber-800 mb-1">如何获取验证码？</h4>
                     <p className="text-xs text-amber-700">
-                      请联系养老院工作人员获取专属验证码，或查看长者入住时提供的资料。
+                      请联系养老院工作人员获取专属验证码。工作人员可在管理端「老人管理」页面查看或生成验证码。
                     </p>
                   </div>
                 </div>

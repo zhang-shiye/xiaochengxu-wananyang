@@ -115,21 +115,61 @@ export default function AdminElder(props) {
         dataSourceName: 'elders',
         methodName: 'wedaGetRecordsV2',
         params: {
-          filter: {
-            where: {}
-          },
           select: {
             $master: true
           },
           orderBy: [{
-            createdAt: 'desc'
+            key: 'createdAt',
+            order: 'desc'
           }],
           pageSize: 100,
           pageNumber: 1
         }
       });
       if (result && result.data) {
-        setElders(result.data);
+        // 为没有验证码的老人自动生成验证码
+        const eldersWithoutCode = result.data.filter(e => !e.verificationCode);
+        if (eldersWithoutCode.length > 0) {
+          for (const elder of eldersWithoutCode) {
+            try {
+              await props.$w.cloud.callDataSource({
+                dataSourceName: 'elders',
+                methodName: 'wedaUpdateV2',
+                params: {
+                  where: [{
+                    key: '_id',
+                    val: elder._id
+                  }],
+                  data: {
+                    verificationCode: generateVerificationCode(),
+                    updatedAt: Date.now()
+                  }
+                }
+              });
+            } catch (e) {
+              console.error('为老人生成验证码失败:', elder.name, e);
+            }
+          }
+          // 重新加载以获取更新后的验证码
+          const refreshedResult = await props.$w.cloud.callDataSource({
+            dataSourceName: 'elders',
+            methodName: 'wedaGetRecordsV2',
+            params: {
+              select: {
+                $master: true
+              },
+              orderBy: [{
+                key: 'createdAt',
+                order: 'desc'
+              }],
+              pageSize: 100,
+              pageNumber: 1
+            }
+          });
+          setElders(refreshedResult?.data || result.data);
+        } else {
+          setElders(result.data);
+        }
       } else {
         setElders([]);
         toast({
@@ -223,15 +263,10 @@ export default function AdminElder(props) {
         dataSourceName: 'elders',
         methodName: 'wedaUpdateV2',
         params: {
-          filter: {
-            where: {
-              $and: [{
-                _id: {
-                  $eq: editingElder._id
-                }
-              }]
-            }
-          },
+          where: [{
+            key: '_id',
+            val: editingElder._id
+          }],
           data: updatedElder
         }
       });
@@ -270,15 +305,10 @@ export default function AdminElder(props) {
         dataSourceName: 'elders',
         methodName: 'wedaDeleteV2',
         params: {
-          filter: {
-            where: {
-              $and: [{
-                _id: {
-                  $eq: elderId
-                }
-              }]
-            }
-          }
+          where: [{
+            key: '_id',
+            val: elderId
+          }]
         }
       });
       if (result.success) {
@@ -307,35 +337,25 @@ export default function AdminElder(props) {
   const handleGenerateCode = async elderId => {
     try {
       const newCode = generateVerificationCode();
-      const result = await props.$w.cloud.callFunction({
-        name: 'mcp_readNoSqlDatabaseContent',
-        data: {
-          collectionName: 'elders',
-          action: 'update',
-          query: {
-            _id: elderId
-          },
-          update: {
-            $set: {
-              verificationCode: newCode,
-              updatedAt: Date.now()
-            }
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'elders',
+        methodName: 'wedaUpdateV2',
+        params: {
+          where: [{
+            key: '_id',
+            val: elderId
+          }],
+          data: {
+            verificationCode: newCode,
+            updatedAt: Date.now()
           }
         }
       });
-      if (result.success) {
-        toast({
-          title: '验证码已更新',
-          description: `新的验证码：${newCode}`
-        });
-        loadElders();
-      } else {
-        toast({
-          title: '更新失败',
-          description: '请重试',
-          variant: 'destructive'
-        });
-      }
+      toast({
+        title: '验证码已更新',
+        description: `新的验证码：${newCode}`
+      });
+      loadElders();
     } catch (error) {
       toast({
         title: '更新失败',
@@ -587,13 +607,32 @@ export default function AdminElder(props) {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Key className="w-4 h-4 text-amber-600" />
-                          <span className="text-sm font-medium text-amber-800">今日验证码</span>
-                          <span className="text-lg font-bold text-amber-900">{elder.verificationCode}</span>
+                          <span className="text-sm font-medium text-amber-800">绑定验证码</span>
+                          {elder.verificationCode ? <span className="text-lg font-bold text-amber-900 tracking-widest">{elder.verificationCode}</span> : <span className="text-sm text-amber-500">未生成</span>}
                         </div>
-                        <Button size="sm" variant="outline" onClick={() => handleGenerateCode(elder._id)} className="text-amber-600 border-amber-300 hover:bg-amber-100">
-                          重新生成
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          {elder.verificationCode && <Button size="sm" variant="outline" onClick={() => {
+                        navigator.clipboard.writeText(elder.verificationCode).then(() => {
+                          toast({
+                            title: '已复制',
+                            description: `验证码 ${elder.verificationCode} 已复制到剪贴板`
+                          });
+                        }).catch(() => {
+                          toast({
+                            title: '复制失败',
+                            description: '请手动复制验证码',
+                            variant: 'destructive'
+                          });
+                        });
+                      }} className="text-amber-600 border-amber-300 hover:bg-amber-100">
+                              复制
+                            </Button>}
+                          <Button size="sm" variant="outline" onClick={() => handleGenerateCode(elder._id)} className="text-amber-600 border-amber-300 hover:bg-amber-100">
+                            {elder.verificationCode ? '重新生成' : '生成验证码'}
+                          </Button>
+                        </div>
                       </div>
+                      <p className="text-xs text-amber-600 mt-1">将此验证码发给家属，家属输入后可绑定老人信息</p>
                     </div>
                   </div>
 

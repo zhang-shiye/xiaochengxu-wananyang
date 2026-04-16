@@ -1,40 +1,30 @@
 {
   "name": "family_members",
-  "title": "家属信息",
+  "title": "家属成员",
   "schemas": [
     {
-      "name": "name",
-      "title": "家属姓名",
-      "type": "String"
-    },
-    {
-      "name": "phone",
-      "title": "联系电话",
-      "type": "String"
-    },
-    {
-      "name": "relationship",
-      "title": "与老人关系",
-      "type": "String"
-    },
-    {
       "name": "elderId",
-      "title": "绑定老人ID",
+      "title": "长者ID",
       "type": "String"
     },
     {
       "name": "elderName",
-      "title": "绑定老人姓名",
+      "title": "长者姓名",
       "type": "String"
     },
     {
-      "name": "verificationCode",
-      "title": "验证码",
+      "name": "familyId",
+      "title": "家属ID",
+      "type": "String"
+    },
+    {
+      "name": "relationship",
+      "title": "关系",
       "type": "String"
     },
     {
       "name": "status",
-      "title": "绑定状态",
+      "title": "状态",
       "type": "String"
     }
   ]
