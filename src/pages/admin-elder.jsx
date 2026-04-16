@@ -324,19 +324,11 @@ export default function AdminElder(props) {
           }
         }
       });
-      if (result.success) {
-        toast({
-          title: '删除成功',
-          description: '老人信息已删除'
-        });
-        loadElders();
-      } else {
-        toast({
-          title: '删除失败',
-          description: '请重试',
-          variant: 'destructive'
-        });
-      }
+      toast({
+        title: '删除成功',
+        description: '老人信息已删除'
+      });
+      loadElders();
     } catch (error) {
       toast({
         title: '删除失败',

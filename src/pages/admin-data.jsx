@@ -219,9 +219,10 @@ export default function AdminDataImport(props) {
                   emergencyContact: record.emergencyContact,
                   emergencyPhone: record.emergencyPhone,
                   primaryNurse: record.primaryNurse,
+                  verificationCode: String(Math.floor(100000 + Math.random() * 900000)),
                   status: 'active',
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
+                  createdAt: Date.now(),
+                  updatedAt: Date.now()
                 }
               }
             });
@@ -337,8 +338,8 @@ export default function AdminDataImport(props) {
                   mood: record.mood,
                   notes: record.notes || '',
                   status: 'pending',
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
+                  createdAt: Date.now(),
+                  updatedAt: Date.now()
                 }
               }
             });

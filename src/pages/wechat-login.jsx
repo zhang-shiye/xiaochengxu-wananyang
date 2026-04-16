@@ -123,7 +123,7 @@ export default function WechatLogin(props) {
               avatar: avatar,
               role: isAdmin ? '管理员' : '家属',
               status: '在职',
-              updatedAt: new Date().toISOString()
+              updatedAt: Date.now()
             }
           }
         });
@@ -141,8 +141,8 @@ export default function WechatLogin(props) {
                 avatar: avatar,
                 role: isAdmin ? '管理员' : '家属',
                 status: '在职',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                createdAt: Date.now(),
+                updatedAt: Date.now()
               }
             }
           });

@@ -202,7 +202,7 @@ export default function AdminLeave(props) {
           },
           data: {
             status: 'approved',
-            updatedAt: new Date().toISOString()
+            updatedAt: Date.now()
           }
         }
       });
@@ -239,12 +239,25 @@ export default function AdminLeave(props) {
       return;
     }
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      await db.collection('leave_requests').doc(selectedRequest?._id || '').update({
-        status: 'rejected',
-        reviewComment: rejectReason,
-        updatedAt: new Date().getTime()
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'leave_requests',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: selectedRequest?._id || ''
+                }
+              }]
+            }
+          },
+          data: {
+            status: 'rejected',
+            reviewComment: rejectReason,
+            updatedAt: Date.now()
+          }
+        }
       });
       toast({
         title: '已驳回',

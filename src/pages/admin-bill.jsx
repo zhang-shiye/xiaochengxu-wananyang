@@ -214,7 +214,7 @@ export default function AdminBill(props) {
           },
           data: {
             status: 'approved',
-            updatedAt: new Date().toISOString()
+            updatedAt: Date.now()
           }
         }
       });
@@ -252,7 +252,7 @@ export default function AdminBill(props) {
           data: {
             status: 'rejected',
             reviewComment: reason,
-            updatedAt: new Date().toISOString()
+            updatedAt: Date.now()
           }
         }
       });
@@ -274,12 +274,25 @@ export default function AdminBill(props) {
   const handleSaveEdit = async () => {
     const totalAmount = selectedBill.items.reduce((sum, item) => sum + parseFloat(item.amount), 0);
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      await db.collection('bills').doc(selectedBill._id).update({
-        items: selectedBill.items,
-        totalAmount: totalAmount,
-        updatedAt: new Date().getTime()
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'bills',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: selectedBill._id
+                }
+              }]
+            }
+          },
+          data: {
+            items: selectedBill.items,
+            totalAmount: totalAmount,
+            updatedAt: Date.now()
+          }
+        }
       });
       toast({
         title: '保存成功',

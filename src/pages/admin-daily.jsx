@@ -209,7 +209,7 @@ export default function AdminDaily(props) {
           },
           data: {
             status: 'completed',
-            updatedAt: new Date().toISOString()
+            updatedAt: Date.now()
           }
         }
       });
@@ -247,7 +247,7 @@ export default function AdminDaily(props) {
           data: {
             status: 'rejected',
             reviewComment: reason,
-            updatedAt: new Date().toISOString()
+            updatedAt: Date.now()
           }
         }
       });
@@ -268,16 +268,29 @@ export default function AdminDaily(props) {
   };
   const handleSaveEdit = async () => {
     try {
-      const tcb = await props.$w.cloud.getCloudInstance();
-      const db = tcb.database();
-      await db.collection('daily_reports').doc(selectedReport._id).update({
-        breakfast: selectedReport.breakfast,
-        lunch: selectedReport.lunch,
-        dinner: selectedReport.dinner,
-        activities: selectedReport.activities,
-        notes: selectedReport.notes,
-        images: selectedReport.images,
-        updatedAt: new Date().getTime()
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'daily_reports',
+        methodName: 'wedaUpdateV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _id: {
+                  $eq: selectedReport._id
+                }
+              }]
+            }
+          },
+          data: {
+            breakfast: selectedReport.breakfast,
+            lunch: selectedReport.lunch,
+            dinner: selectedReport.dinner,
+            activities: selectedReport.activities,
+            notes: selectedReport.notes,
+            images: selectedReport.images,
+            updatedAt: Date.now()
+          }
+        }
       });
       toast({
         title: '保存成功',
