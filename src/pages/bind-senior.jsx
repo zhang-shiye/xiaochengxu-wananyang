@@ -80,15 +80,10 @@ export default function BindSenior(props) {
         dataSourceName: 'elders',
         methodName: 'wedaGetRecordsV2',
         params: {
-          filter: {
-            where: {
-              $and: [{
-                name: {
-                  $eq: data.elderName
-                }
-              }]
-            }
-          },
+          where: [{
+            key: 'name',
+            val: data.elderName
+          }],
           select: {
             $master: true
           },

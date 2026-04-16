@@ -62,46 +62,193 @@ export default function CareHome(props) {
         </Card>
       </div>;
   }
-  const [elderInfo, setElderInfo] = useState({
-    name: '王奶奶',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face',
-    age: 78,
-    admissionDate: '2023-03-15',
-    roomNumber: 'A栋 301室',
-    careLevel: '二级护理',
-    primaryNurse: '张护士',
-    nursePhone: '138-0000-1234',
-    emergencyContact: '张院长',
-    emergencyPhone: '0551-8888-6666',
-    healthStatus: '良好',
-    moodStatus: '愉快',
-    lastUpdate: '2024-04-05 14:30'
+  // 状态管理
+  const [elderInfo, setElderInfo] = useState(null);
+  const [latestInfo, setLatestInfo] = useState({
+    dailyReport: null,
+    leaveRequest: null,
+    bill: null
   });
+  const [loading, setLoading] = useState(true);
+
+  // 加载绑定老人和最新数据
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // 1. 获取当前用户绑定的老人
+        const user = props.$w.auth.currentUser;
+        const familyId = isDemo ? 'family_001' : user?.userId || 'demo_user';
+
+        // 查询绑定关系
+        const bindingResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'elder_family_bindings',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: 'familyId',
+              val: familyId
+            }, {
+              key: 'status',
+              val: 'active'
+            }],
+            select: {
+              $master: true
+            },
+            pageSize: 10,
+            pageNumber: 1
+          }
+        });
+        const bindings = bindingResult?.data || [];
+        if (bindings.length === 0) {
+          setLoading(false);
+          return;
+        }
+        const binding = bindings[0];
+        const elderId = binding.elderId;
+
+        // 2. 获取老人详细信息
+        const elderResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'elders',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: '_id',
+              val: elderId
+            }],
+            select: {
+              $master: true
+            },
+            pageSize: 1,
+            pageNumber: 1
+          }
+        });
+        const elder = elderResult?.data?.[0];
+        if (elder) {
+          setElderInfo({
+            name: elder.name,
+            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face',
+            age: elder.age,
+            admissionDate: elder.admissionDate,
+            roomNumber: elder.roomNumber,
+            careLevel: elder.careLevel,
+            primaryNurse: elder.primaryNurse,
+            nursePhone: elder.emergencyPhone,
+            emergencyContact: elder.emergencyContact,
+            emergencyPhone: elder.emergencyPhone,
+            healthStatus: elder.healthStatus,
+            moodStatus: '愉快',
+            lastUpdate: new Date().toLocaleString('zh-CN')
+          });
+        }
+
+        // 3. 获取最新护理日报
+        const dailyResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'daily_reports',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: 'elderId',
+              val: elderId
+            }],
+            select: {
+              $master: true
+            },
+            orderBy: [{
+              field: 'date',
+              order: 'desc'
+            }],
+            pageSize: 1,
+            pageNumber: 1
+          }
+        });
+        const dailyReport = dailyResult?.data?.[0];
+
+        // 4. 获取最新请假申请
+        const leaveResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'leave_requests',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: 'elderId',
+              val: elderId
+            }],
+            select: {
+              $master: true
+            },
+            orderBy: [{
+              field: 'createdAt',
+              order: 'desc'
+            }],
+            pageSize: 1,
+            pageNumber: 1
+          }
+        });
+        const leaveRequest = leaveResult?.data?.[0];
+
+        // 5. 获取最新账单
+        const billResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'bills',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: 'elderId',
+              val: elderId
+            }],
+            select: {
+              $master: true
+            },
+            orderBy: [{
+              field: 'createdAt',
+              order: 'desc'
+            }],
+            pageSize: 1,
+            pageNumber: 1
+          }
+        });
+        const bill = billResult?.data?.[0];
+        setLatestInfo({
+          dailyReport: dailyReport ? {
+            date: dailyReport.date,
+            meal: `午餐：${dailyReport.lunch}`,
+            mood: dailyReport.mood,
+            time: '12:00'
+          } : null,
+          leaveRequest: leaveRequest ? {
+            status: leaveRequest.status === 'pending' ? '待审批' : leaveRequest.status === 'approved' ? '已批准' : '已拒绝',
+            type: '外出请假',
+            date: leaveRequest.startDate,
+            time: new Date(leaveRequest.createdAt).toLocaleTimeString('zh-CN', {
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          } : null,
+          bill: bill ? {
+            month: bill.month,
+            amount: `¥${bill.totalAmount}`,
+            status: bill.status === 'unpaid' ? '待缴费' : '已缴费',
+            dueDate: bill.dueDate
+          } : null
+        });
+      } catch (error) {
+        console.error('加载数据失败:', error);
+        toast({
+          title: '加载失败',
+          description: '获取数据时出错，请稍后重试',
+          variant: 'destructive'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [isDemo]);
 
   // 将老人信息存储到全局，供其他页面使用
   useEffect(() => {
-    window.currentElderInfo = elderInfo;
-  }, [elderInfo]);
-  const [latestInfo, setLatestInfo] = useState({
-    dailyReport: {
-      date: '2024-04-05',
-      meal: '午餐：米饭、清蒸鱼、炒时蔬',
-      mood: '愉快',
-      time: '12:00'
-    },
-    leaveRequest: {
-      status: '待审批',
-      type: '外出请假',
-      date: '2024-04-08',
-      time: '14:30'
-    },
-    bill: {
-      month: '2024年4月',
-      amount: '¥3,580',
-      status: '待缴费',
-      dueDate: '2024-04-10'
+    if (elderInfo) {
+      window.currentElderInfo = elderInfo;
     }
-  });
+  }, [elderInfo]);
   const handleNavigateToDaily = () => {
     props.$w.utils.navigateTo({
       pageId: 'care',

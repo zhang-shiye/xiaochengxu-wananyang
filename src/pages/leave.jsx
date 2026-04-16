@@ -62,6 +62,9 @@ export default function Leave(props) {
   }
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [elderInfo, setElderInfo] = useState(null);
+
   // 常用请假事由选项
   const reasonOptions = [{
     value: 'family_visit',
@@ -93,26 +96,92 @@ export default function Leave(props) {
 
   // 监听请假事由选择变化
   const selectedReason = form.watch('reason');
+
+  // 加载请假记录
   useEffect(() => {
-    // 模拟获取历史请假记录
-    setLeaveRequests([{
-      id: 1,
-      reason: '家庭聚餐',
-      startDate: '2026-04-10',
-      endDate: '2026-04-10',
-      status: 'approved',
-      submitTime: '2026-04-08 14:30',
-      approvalTime: '2026-04-08 16:45'
-    }, {
-      id: 2,
-      reason: '医院检查',
-      startDate: '2026-04-15',
-      endDate: '2026-04-15',
-      status: 'pending',
-      submitTime: '2026-04-05 10:20',
-      approvalTime: null
-    }]);
-  }, []);
+    const loadData = async () => {
+      try {
+        // 1. 获取当前用户绑定的老人
+        const user = props.$w.auth.currentUser;
+        const familyId = isDemo ? 'family_001' : user?.userId || 'demo_user';
+
+        // 查询绑定关系
+        const bindingResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'elder_family_bindings',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: 'familyId',
+              val: familyId
+            }, {
+              key: 'status',
+              val: 'active'
+            }],
+            select: {
+              $master: true
+            },
+            pageSize: 10,
+            pageNumber: 1
+          }
+        });
+        const bindings = bindingResult?.data || [];
+        if (bindings.length === 0) {
+          setLoading(false);
+          return;
+        }
+        const binding = bindings[0];
+        const elderId = binding.elderId;
+        const elderName = binding.elderName;
+        setElderInfo({
+          elderId,
+          elderName
+        });
+
+        // 2. 获取该老人的请假记录
+        const leaveResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'leave_requests',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: 'elderId',
+              val: elderId
+            }],
+            select: {
+              $master: true
+            },
+            orderBy: [{
+              field: 'createdAt',
+              order: 'desc'
+            }],
+            pageSize: 20,
+            pageNumber: 1
+          }
+        });
+        const requests = leaveResult?.data || [];
+        const formattedRequests = requests.map(req => ({
+          id: req._id,
+          reason: req.reason,
+          startDate: req.startDate,
+          endDate: req.endDate,
+          status: req.status,
+          submitTime: new Date(req.createdAt).toLocaleString('zh-CN'),
+          approvalTime: req.approvedAt ? new Date(req.approvedAt).toLocaleString('zh-CN') : null,
+          approvedBy: req.approvedBy || ''
+        }));
+        setLeaveRequests(formattedRequests);
+      } catch (error) {
+        console.error('加载请假记录失败:', error);
+        toast({
+          title: '加载失败',
+          description: '获取请假记录时出错',
+          variant: 'destructive'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [isDemo]);
   const onSubmit = async data => {
     // 表单验证
     const isValid = await form.trigger();
@@ -135,18 +204,61 @@ export default function Leave(props) {
     }
     setIsSubmitting(true);
     try {
-      // 模拟提交请假申请
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const newRequest = {
-        id: Date.now(),
-        reason: reasonText,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        status: 'pending',
-        submitTime: new Date().toLocaleString('zh-CN'),
-        approvalTime: null
-      };
-      setLeaveRequests([newRequest, ...leaveRequests]);
+      // 获取用户信息
+      const user = props.$w.auth.currentUser;
+      const familyId = isDemo ? 'family_001' : user?.userId || 'demo_user';
+      const familyName = isDemo ? '演示用户' : user?.name || '家属';
+
+      // 提交请假申请到数据库
+      await props.$w.cloud.callDataSource({
+        dataSourceName: 'leave_requests',
+        methodName: 'wedaAddV2',
+        params: {
+          elderId: elderInfo?.elderId,
+          elderName: elderInfo?.elderName,
+          familyId: familyId,
+          familyName: familyName,
+          reason: reasonText,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          status: 'pending',
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        }
+      });
+
+      // 重新加载请假记录
+      const leaveResult = await props.$w.cloud.callDataSource({
+        dataSourceName: 'leave_requests',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          where: [{
+            key: 'elderId',
+            val: elderInfo?.elderId
+          }],
+          select: {
+            $master: true
+          },
+          orderBy: [{
+            field: 'createdAt',
+            order: 'desc'
+          }],
+          pageSize: 20,
+          pageNumber: 1
+        }
+      });
+      const requests = leaveResult?.data || [];
+      const formattedRequests = requests.map(req => ({
+        id: req._id,
+        reason: req.reason,
+        startDate: req.startDate,
+        endDate: req.endDate,
+        status: req.status,
+        submitTime: new Date(req.createdAt).toLocaleString('zh-CN'),
+        approvalTime: req.approvedAt ? new Date(req.approvedAt).toLocaleString('zh-CN') : null,
+        approvedBy: req.approvedBy || ''
+      }));
+      setLeaveRequests(formattedRequests);
       toast({
         title: '提交成功',
         description: '请假申请已提交，请等待院长审批'

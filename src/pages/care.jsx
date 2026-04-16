@@ -64,104 +64,123 @@ export default function Home(props) {
   const [dailyReports, setDailyReports] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  // 加载护理日报数据
   useEffect(() => {
-    // 从home页面获取老人信息，保持一致性
-    const elderInfo = window.currentElderInfo || {
-      name: '王奶奶',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face'
+    const loadData = async () => {
+      try {
+        // 1. 获取当前用户绑定的老人
+        const user = props.$w.auth.currentUser;
+        const familyId = isDemo ? 'family_001' : user?.userId || 'demo_user';
+
+        // 查询绑定关系
+        const bindingResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'elder_family_bindings',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: 'familyId',
+              val: familyId
+            }, {
+              key: 'status',
+              val: 'active'
+            }],
+            select: {
+              $master: true
+            },
+            pageSize: 10,
+            pageNumber: 1
+          }
+        });
+        const bindings = bindingResult?.data || [];
+        if (bindings.length === 0) {
+          setLoading(false);
+          return;
+        }
+        const binding = bindings[0];
+        const elderId = binding.elderId;
+        const elderName = binding.elderName;
+
+        // 设置当前老人信息
+        setCurrentUser({
+          name: elderName,
+          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face'
+        });
+
+        // 2. 获取该老人的所有护理日报
+        const dailyResult = await props.$w.cloud.callDataSource({
+          dataSourceName: 'daily_reports',
+          methodName: 'wedaGetRecordsV2',
+          params: {
+            where: [{
+              key: 'elderId',
+              val: elderId
+            }],
+            select: {
+              $master: true
+            },
+            orderBy: [{
+              field: 'date',
+              order: 'desc'
+            }],
+            pageSize: 30,
+            pageNumber: 1
+          }
+        });
+        const reports = dailyResult?.data || [];
+        const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+        // 转换数据格式
+        const formattedReports = reports.map((report, index) => {
+          const date = new Date(report.date);
+          return {
+            id: report._id || index + 1,
+            date: report.date,
+            dayOfWeek: weekDays[date.getDay()],
+            meals: [{
+              time: '早餐',
+              food: report.breakfast || '暂无记录'
+            }, {
+              time: '午餐',
+              food: report.lunch || '暂无记录'
+            }, {
+              time: '晚餐',
+              food: report.dinner || '暂无记录'
+            }],
+            medications: report.medications ? report.medications.split(',').map((med, i) => ({
+              name: med.trim(),
+              time: '按医嘱',
+              status: '已服用'
+            })) : [],
+            activities: report.activities ? report.activities.split('、').map((act, i) => ({
+              name: act.trim(),
+              time: '全天'
+            })) : [],
+            mood: report.mood || '未知',
+            health: report.healthStatus || '未知',
+            notes: report.notes || ''
+          };
+        });
+        setDailyReports(formattedReports);
+
+        // 设置默认日期
+        if (formattedReports.length > 0) {
+          setSelectedDate(formattedReports[0].date);
+        }
+      } catch (error) {
+        console.error('加载护理日报失败:', error);
+        toast({
+          title: '加载失败',
+          description: '获取护理日报时出错',
+          variant: 'destructive'
+        });
+      } finally {
+        setLoading(false);
+      }
     };
-    setCurrentUser(elderInfo);
-
-    // 生成最近15天的日报数据
-    const today = new Date('2026-04-13'); // 当前日期
-    const reports = [];
-    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    for (let i = 0; i < 15; i++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      const dayOfWeek = weekDays[date.getDay()];
-      const dayNum = date.getDate();
-
-      // 根据天数生成不同的数据，增加多样性
-      const mealOptions = [{
-        breakfast: ['小米粥、鸡蛋、青菜', '豆浆、包子、咸菜', '馒头、稀饭、鸡蛋', '牛奶、面包、水果', '面条、鸡蛋、青菜'],
-        lunch: ['红烧鱼、米饭、冬瓜汤', '鸡肉、米饭、紫菜汤', '排骨、米饭、青菜汤', '牛肉、面条、萝卜汤', '虾仁、米饭、蛋花汤'],
-        dinner: ['面条、青菜、豆腐', '粥、馒头、青菜', '饺子、拌黄瓜', '粥、咸菜、鸡蛋', '面条、西红柿、鸡蛋']
-      }, {
-        breakfast: ['稀饭、馒头、咸菜', '牛奶、三明治、水果', '豆浆、油条、咸菜', '小米粥、包子、鸡蛋', '燕麦粥、面包、牛奶'],
-        lunch: ['鱼香肉丝、米饭、青菜汤', '宫保鸡丁、米饭、蛋花汤', '红烧茄子、面条、黄瓜汤', '糖醋排骨、米饭、紫菜汤', '麻婆豆腐、米饭、冬瓜汤'],
-        dinner: ['饺子、拌黄瓜', '粥、馒头、咸菜', '面条、西红柿、鸡蛋', '粥、咸菜、鸡蛋', '馒头、粥、咸菜']
-      }, {
-        breakfast: ['八宝粥、鸡蛋、水果', '牛奶、面包、香蕉', '豆浆、包子、鸡蛋', '小米粥、馒头、咸菜', '燕麦片、牛奶、水果'],
-        lunch: ['清蒸鱼、米饭、青菜', '糖醋里脊、面条、萝卜汤', '红烧鸡翅、米饭、紫菜汤', '青椒肉丝、米饭、蛋花汤', '番茄鸡蛋、米饭、冬瓜汤'],
-        dinner: ['粥、馒头、咸菜', '饺子、凉拌菜', '面条、青菜、豆腐', '馒头、稀饭、咸菜', '粥、鸡蛋、咸菜']
-      }];
-      const activityOptions = [[{
-        name: '晨练太极',
-        time: '7:00',
-        image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=200&fit=crop'
-      }, {
-        name: '书法练习',
-        time: '14:00',
-        image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=200&fit=crop'
-      }], [{
-        name: '园艺活动',
-        time: '10:00',
-        image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=200&fit=crop'
-      }], [{
-        name: '散步休息',
-        time: '15:00'
-      }], [{
-        name: '唱歌活动',
-        time: '14:00',
-        image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=200&fit=crop'
-      }], [{
-        name: '太极拳',
-        time: '7:00'
-      }, {
-        name: '手工制作',
-        time: '10:00',
-        image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=300&h=200&fit=crop'
-      }]];
-      const mealOption = mealOptions[i % 3];
-      const activityOption = activityOptions[i % 5];
-      const moodOptions = ['愉快', '平静', '愉快', '愉快', '平静', '一般', '愉快', '愉快', '平静', '愉快', '愉快', '愉快', '平静', '愉快', '愉快'];
-      reports.push({
-        id: i + 1,
-        date: dateStr,
-        dayOfWeek: dayOfWeek,
-        meals: [{
-          time: '早餐',
-          food: mealOption.breakfast[i % 5]
-        }, {
-          time: '午餐',
-          food: mealOption.lunch[i % 5]
-        }, {
-          time: '晚餐',
-          food: mealOption.dinner[i % 5]
-        }],
-        medications: [{
-          name: '降压药',
-          time: '8:00',
-          status: '已服用'
-        }, {
-          name: '维生素',
-          time: '12:00',
-          status: '已服用'
-        }],
-        activities: activityOption,
-        mood: moodOptions[i],
-        health: '良好'
-      });
-    }
-    setDailyReports(reports);
-
-    // 设置默认日期：如果当天有数据就显示当天，否则显示最新一天
-    const todayStr = today.toISOString().split('T')[0];
-    const hasTodayData = reports.some(report => report.date === todayStr);
-    setSelectedDate(hasTodayData ? todayStr : reports[0].date);
-  }, []);
+    loadData();
+  }, [isDemo]);
 
   // 根据选择的日期过滤日报
   const getFilteredReports = () => {
