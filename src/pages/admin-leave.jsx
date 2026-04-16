@@ -103,9 +103,8 @@ export default function AdminLeave(props) {
           select: {
             $master: true
           },
-          sort: [{
-            key: 'createdAt',
-            direction: -1
+          orderBy: [{
+            createdAt: 'desc'
           }],
           pageSize: 100,
           pageNumber: 1

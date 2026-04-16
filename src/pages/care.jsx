@@ -78,7 +78,7 @@ export default function Home(props) {
 
         // 查询绑定关系
         const bindingResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'elder_family_bindings',
+          dataSourceName: 'family_members',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {

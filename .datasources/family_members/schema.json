@@ -18,6 +18,11 @@
       "type": "String"
     },
     {
+      "name": "familyName",
+      "title": "家属姓名",
+      "type": "String"
+    },
+    {
       "name": "relationship",
       "title": "关系",
       "type": "String"

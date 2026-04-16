@@ -269,13 +269,17 @@ export default function AdminDataImport(props) {
                 data: {
                   elderId: elderId,
                   elderName: record.name,
-                  type: record.type,
-                  amount: parseFloat(record.amount),
-                  billDate: record.billDate,
-                  dueDate: record.dueDate,
-                  status: record.status || 'pending',
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
+                  month: record.billDate ? record.billDate.substring(0, 7) : new Date().toISOString().substring(0, 7),
+                  items: [{
+                    name: record.type || '基础费用',
+                    amount: parseFloat(record.amount),
+                    unit: '月'
+                  }],
+                  totalAmount: parseFloat(record.amount),
+                  dueDate: record.dueDate || '',
+                  status: record.status || 'unpaid',
+                  createdAt: Date.now(),
+                  updatedAt: Date.now()
                 }
               }
             });
@@ -382,14 +386,14 @@ export default function AdminDataImport(props) {
                 data: {
                   elderId: elderId,
                   elderName: record.name,
-                  applicationDate: record.applicationDate,
+                  familyId: record.applicant || '',
+                  familyName: record.applicant || '',
                   startDate: record.startDate,
                   endDate: record.endDate,
                   reason: record.reason,
-                  applicant: record.applicant,
                   status: record.status || 'pending',
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
+                  createdAt: Date.now(),
+                  updatedAt: Date.now()
                 }
               }
             });
