@@ -128,7 +128,7 @@ export default function AdminHome(props) {
         }
       });
 
-      // 统计待审核账单
+      // 统计待缴费账单
       const billResult = await props.$w.cloud.callDataSource({
         dataSourceName: 'bills',
         methodName: 'wedaGetRecordsV2',
@@ -137,7 +137,7 @@ export default function AdminHome(props) {
             where: {
               $and: [{
                 status: {
-                  $eq: 'pending'
+                  $eq: 'unpaid'
                 }
               }]
             }
@@ -253,7 +253,7 @@ export default function AdminHome(props) {
           <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-4 shadow-lg">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-amber-100 text-xs mb-1">待审核总数</p>
+                <p className="text-amber-100 text-xs mb-1">待处理总数</p>
                 <p className="text-3xl font-bold">
                   {pendingCounts.dailyReports + pendingCounts.leaveRequests + pendingCounts.billApprovals}
                 </p>
@@ -313,7 +313,7 @@ export default function AdminHome(props) {
               </div>
             </Card>
 
-            {/* 账单审核 */}
+            {/* 账单管理 */}
             <Card className="bg-white p-4 shadow-md">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -321,8 +321,8 @@ export default function AdminHome(props) {
                     <DollarSign className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800">账单审核</h3>
-                    <p className="text-xs text-gray-500">审核缴费账单明细</p>
+                    <h3 className="font-semibold text-gray-800">账单管理</h3>
+                    <p className="text-xs text-gray-500">管理缴费账单明细</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

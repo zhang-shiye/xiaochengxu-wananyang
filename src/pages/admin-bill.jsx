@@ -213,21 +213,22 @@ export default function AdminBill(props) {
             }
           },
           data: {
-            status: 'approved',
+            status: 'paid',
+            paymentDate: new Date().toISOString().split('T')[0],
             updatedAt: Date.now()
           }
         }
       });
       toast({
-        title: '发布成功',
-        description: '缴费账单已发布，家属端可见'
+        title: '确认缴费成功',
+        description: '账单已标记为已缴费'
       });
       setIsDetailView(false);
       loadBills();
     } catch (error) {
-      console.error('发布失败:', error);
+      console.error('确认缴费失败:', error);
       toast({
-        title: '发布失败',
+        title: '确认缴费失败',
         description: error.message,
         variant: 'destructive'
       });
@@ -235,7 +236,7 @@ export default function AdminBill(props) {
   };
   const handleReject = async reason => {
     try {
-      // 使用数据模型 API 更新账单状态为驳回
+      // 使用数据模型 API 更新账单状态为退回
       await props.$w.cloud.callDataSource({
         dataSourceName: 'bills',
         methodName: 'wedaUpdateV2',
@@ -250,7 +251,7 @@ export default function AdminBill(props) {
             }
           },
           data: {
-            status: 'rejected',
+            status: 'unpaid',
             reviewComment: reason,
             updatedAt: Date.now()
           }
@@ -348,16 +349,12 @@ export default function AdminBill(props) {
   };
   const getStatusBadge = status => {
     switch (status) {
-      case 'pending':
-        return <Badge className="bg-amber-100 text-amber-800">待审核</Badge>;
-      case 'approved':
-        return <Badge className="bg-green-100 text-green-800">已发布</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-100 text-red-800">已退回</Badge>;
       case 'unpaid':
-        return <Badge className="bg-blue-100 text-blue-800">待缴费</Badge>;
+        return <Badge className="bg-amber-100 text-amber-800">待缴费</Badge>;
       case 'paid':
-        return <Badge className="bg-gray-100 text-gray-800">已缴费</Badge>;
+        return <Badge className="bg-green-100 text-green-800">已缴费</Badge>;
+      case 'overdue':
+        return <Badge className="bg-red-100 text-red-800">已逾期</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -373,9 +370,9 @@ export default function AdminBill(props) {
       {/* 头部 */}
       <div className="bg-white/80 backdrop-blur-sm px-4 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold font-['Ma_Shan_Zheng'] text-gray-800">缴费审核</h1>
+          <h1 className="text-xl font-bold font-['Ma_Shan_Zheng'] text-gray-800">账单管理</h1>
           <Badge variant="outline" className="text-amber-600 border-amber-600">
-            {filteredBills.filter(b => b.status === 'pending').length} 待审核
+            {filteredBills.filter(b => b.status === 'unpaid').length} 待缴费
           </Badge>
         </div>
       </div>
@@ -392,9 +389,9 @@ export default function AdminBill(props) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">全部状态</SelectItem>
-            <SelectItem value="pending">待审核</SelectItem>
-            <SelectItem value="approved">已发布</SelectItem>
-            <SelectItem value="rejected">已退回</SelectItem>
+            <SelectItem value="unpaid">待缴费</SelectItem>
+            <SelectItem value="paid">已缴费</SelectItem>
+            <SelectItem value="overdue">已逾期</SelectItem>
             <SelectItem value="unpaid">待缴费</SelectItem>
             <SelectItem value="paid">已缴费</SelectItem>
           </SelectContent>
@@ -412,7 +409,7 @@ export default function AdminBill(props) {
               <ArrowLeft className="w-4 h-4 mr-1" />
               返回
             </Button>
-            {getStatusBadge(selectedBill?.status || 'pending')}
+            {getStatusBadge(selectedBill?.status || 'unpaid')}
           </div>
 
           <Card className="bg-white p-4 shadow-md">
@@ -523,7 +520,7 @@ export default function AdminBill(props) {
               <p className="text-sm text-gray-600">{selectedBill.notes || '无'}</p>
             </div>
 
-            {/* 审核按钮 */}
+            {/* 操作按钮 */}
             {isEditMode ? <div className="flex gap-2 pt-4">
                 <Button onClick={handleSaveEdit} className="flex-1 bg-blue-600 hover:bg-blue-700">
                   保存修改
@@ -531,10 +528,10 @@ export default function AdminBill(props) {
                 <Button variant="outline" onClick={() => setIsEditMode(false)}>
                   取消
                 </Button>
-              </div> : selectedBill.status === 'pending' ? <div className="flex gap-2 pt-4">
+              </div> : selectedBill.status === 'unpaid' ? <div className="flex gap-2 pt-4">
                 <Button onClick={handleApprove} className="flex-1 bg-green-600 hover:bg-green-700">
                   <Receipt className="w-4 h-4 mr-1" />
-                  确认发布
+                  确认缴费
                 </Button>
                 <Button variant="destructive" onClick={() => {
             const reason = prompt('请输入退回理由：');
