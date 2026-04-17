@@ -31,5 +31,60 @@
     "relationship": "儿媳",
     "status": "active",
     "updatedAt": 1713292800000
+  },
+  {
+    "_id": "family_004",
+    "createdAt": 1713380000000,
+    "elderId": "elder_004",
+    "elderName": "陈国强",
+    "familyId": "family_004",
+    "familyName": "陈刚",
+    "relationship": "儿子",
+    "status": "active",
+    "updatedAt": 1713380000000
+  },
+  {
+    "_id": "family_005_a",
+    "createdAt": 1713460000000,
+    "elderId": "elder_001",
+    "elderName": "王秀兰",
+    "familyId": "family_005",
+    "familyName": "王丽华",
+    "relationship": "女儿",
+    "status": "active",
+    "updatedAt": 1713460000000
+  },
+  {
+    "_id": "family_005_b",
+    "createdAt": 1713460000000,
+    "elderId": "elder_005",
+    "elderName": "刘淑珍",
+    "familyId": "family_005",
+    "familyName": "王丽华",
+    "relationship": "儿媳",
+    "status": "active",
+    "updatedAt": 1713460000000
+  },
+  {
+    "_id": "family_006",
+    "createdAt": 1713540000000,
+    "elderId": "elder_002",
+    "elderName": "李德福",
+    "familyId": "family_006",
+    "familyName": "李秀英",
+    "relationship": "妹妹",
+    "status": "pending",
+    "updatedAt": 1713540000000
+  },
+  {
+    "_id": "family_007",
+    "createdAt": 1713620000000,
+    "elderId": "",
+    "elderName": "",
+    "familyId": "family_007",
+    "familyName": "赵敏",
+    "relationship": "",
+    "status": "unbound",
+    "updatedAt": 1713620000000
   }
 ]

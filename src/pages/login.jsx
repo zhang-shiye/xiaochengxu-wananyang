@@ -1,19 +1,93 @@
 // @ts-ignore;
 import React, { useState, useEffect } from 'react';
 // @ts-ignore;
-import { Button, Card, useToast } from '@/components/ui';
+import { Button, Card, useToast, Spinner } from '@/components/ui';
 // @ts-ignore;
-import { MessageCircle, Shield, Eye, ArrowRight } from 'lucide-react';
+import { MessageCircle, Shield, Eye, ArrowRight, AlertCircle, WifiOff, UserX } from 'lucide-react';
 
 import { NursingHomeBrand } from '@/components/NursingHomeBrand';
+
+// 日志记录工具
+const LoginLogger = {
+  info: (message, data) => {
+    console.log(`[Login] ${message}`, data || '');
+  },
+  error: (message, error) => {
+    console.error(`[Login Error] ${message}`, error);
+  },
+  warn: (message, data) => {
+    console.warn(`[Login Warning] ${message}`, data || '');
+  }
+};
+
+// 错误类型定义
+const ErrorTypes = {
+  NETWORK_ERROR: 'network_error',
+  PERMISSION_DENIED: 'permission_denied',
+  USER_NOT_FOUND: 'user_not_found',
+  UNKNOWN_ERROR: 'unknown_error',
+  TIMEOUT: 'timeout'
+};
+
+// 错误处理工具
+const ErrorHandler = {
+  handle: (error, toast) => {
+    LoginLogger.error('处理错误', error);
+    let errorInfo = {
+      type: ErrorTypes.UNKNOWN_ERROR,
+      title: '操作失败',
+      description: error.message || '请稍后重试',
+      icon: AlertCircle
+    };
+
+    // 网络错误
+    if (error.message?.includes('network') || error.message?.includes('timeout') || error.message?.includes('ECONNREFUSED') || !navigator.onLine) {
+      errorInfo = {
+        type: ErrorTypes.NETWORK_ERROR,
+        title: '网络连接失败',
+        description: '请检查网络连接后重试',
+        icon: WifiOff
+      };
+    }
+    // 权限错误
+    else if (error.message?.includes('permission') || error.message?.includes('unauthorized') || error.message?.includes('forbidden')) {
+      errorInfo = {
+        type: ErrorTypes.PERMISSION_DENIED,
+        title: '权限不足',
+        description: '您没有访问该功能的权限',
+        icon: UserX
+      };
+    }
+    // 用户不存在
+    else if (error.message?.includes('not found') || error.message?.includes('不存在')) {
+      errorInfo = {
+        type: ErrorTypes.USER_NOT_FOUND,
+        title: '用户不存在',
+        description: '请联系管理员确认账号信息',
+        icon: UserX
+      };
+    }
+    toast({
+      title: errorInfo.title,
+      description: errorInfo.description,
+      variant: 'destructive'
+    });
+    return errorInfo;
+  }
+};
 export default function Login(props) {
   const {
     toast
   } = useToast();
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('');
+  const [loginError, setLoginError] = useState(null);
 
   // 检查用户是否已绑定长者
   const checkUserBinding = async userId => {
+    LoginLogger.info('检查用户绑定状态', {
+      userId
+    });
     try {
       const result = await props.$w.cloud.callDataSource({
         dataSourceName: 'family_members',
@@ -31,15 +105,24 @@ export default function Login(props) {
           getCount: true
         }
       });
-      return result.total > 0 || result.records && result.records.length > 0;
+      const hasBinding = result.total > 0 || result.records && result.records.length > 0;
+      LoginLogger.info('绑定状态检查结果', {
+        userId,
+        hasBinding,
+        count: result.total || result.records?.length
+      });
+      return hasBinding;
     } catch (error) {
-      console.error('检查绑定状态失败:', error);
-      return false;
+      LoginLogger.error('检查绑定状态失败', error);
+      throw new Error('检查绑定状态失败: ' + (error.message || '未知错误'));
     }
   };
 
   // 检查用户是否为员工（管理员/护工/文员）
   const checkUserIsEmployee = async userId => {
+    LoginLogger.info('检查员工身份', {
+      userId
+    });
     try {
       const result = await props.$w.cloud.callDataSource({
         dataSourceName: 'employee',
@@ -57,17 +140,33 @@ export default function Login(props) {
           getCount: true
         }
       });
-      return result.total > 0 || result.records && result.records.length > 0;
+      const isEmployee = result.total > 0 || result.records && result.records.length > 0;
+      LoginLogger.info('员工身份检查结果', {
+        userId,
+        isEmployee,
+        count: result.total || result.records?.length
+      });
+      return isEmployee;
     } catch (error) {
-      console.error('检查员工身份失败:', error);
-      return false;
+      LoginLogger.error('检查员工身份失败', error);
+      throw new Error('检查员工身份失败: ' + (error.message || '未知错误'));
     }
   };
 
   // 家属端登录 - 调用托管登录页
   const handleFamilyLogin = async () => {
+    LoginLogger.info('家属端登录开始');
+    setIsLoading(true);
+    setLoadingText('正在准备登录...');
+    setLoginError(null);
     try {
+      // 检查网络状态
+      if (!navigator.onLine) {
+        throw new Error('network_error: 网络连接不可用');
+      }
       const tcb = await props.$w.cloud.getCloudInstance();
+      LoginLogger.info('获取云实例成功');
+
       // 登录成功后返回当前页，由页面自动处理后续跳转
       tcb.auth().toDefaultLoginPage({
         config_version: "env",
@@ -77,20 +176,28 @@ export default function Login(props) {
           role: 'family'
         }
       });
+      LoginLogger.info('已跳转到托管登录页');
     } catch (error) {
-      console.error('登录失败:', error);
-      toast({
-        title: '登录失败',
-        description: error.message || '请重试',
-        variant: 'destructive'
-      });
+      LoginLogger.error('家属端登录失败', error);
+      setIsLoading(false);
+      setLoginError(error);
+      ErrorHandler.handle(error, toast);
     }
   };
 
   // 管理端登录 - 调用托管登录页
   const handleAdminLogin = async () => {
+    LoginLogger.info('管理端登录开始');
+    setIsLoading(true);
+    setLoadingText('正在准备登录...');
+    setLoginError(null);
     try {
+      // 检查网络状态
+      if (!navigator.onLine) {
+        throw new Error('network_error: 网络连接不可用');
+      }
       const tcb = await props.$w.cloud.getCloudInstance();
+      LoginLogger.info('获取云实例成功');
       tcb.auth().toDefaultLoginPage({
         config_version: "env",
         redirect_uri: window.location.origin + '/pages/login',
@@ -99,60 +206,89 @@ export default function Login(props) {
           role: 'admin'
         }
       });
+      LoginLogger.info('已跳转到托管登录页');
     } catch (error) {
-      console.error('登录失败:', error);
-      toast({
-        title: '登录失败',
-        description: error.message || '请重试',
-        variant: 'destructive'
-      });
+      LoginLogger.error('管理端登录失败', error);
+      setIsLoading(false);
+      setLoginError(error);
+      ErrorHandler.handle(error, toast);
     }
   };
 
   // 页面加载时检查登录状态并自动跳转
   useEffect(() => {
     const checkLoginAndRedirect = async () => {
+      LoginLogger.info('开始检查登录状态');
+      setIsLoading(true);
+      setLoadingText('正在检查登录状态...');
       try {
+        // 检查网络状态
+        if (!navigator.onLine) {
+          LoginLogger.warn('网络离线，跳过自动登录检查');
+          setIsLoading(false);
+          return;
+        }
         await props.$w.auth.getUserInfo({
           force: true
         });
         const user = props.$w.auth.currentUser;
         const role = props.$w.page.dataset.params.role;
-        if (user?.userId) {
+        LoginLogger.info('获取用户信息成功', {
+          userId: user?.userId,
+          role
+        });
+        if (user?.userId && role) {
           // 已登录，根据角色跳转
           if (role === 'admin') {
+            setLoadingText('正在验证管理权限...');
             // 验证是否为员工
             const isEmployee = await checkUserIsEmployee(user.userId);
             if (isEmployee) {
+              LoginLogger.info('验证通过，跳转到管理后台');
               props.$w.utils.redirectTo({
                 pageId: 'admin-home',
                 params: {}
               });
             } else {
+              setIsLoading(false);
+              LoginLogger.warn('用户非员工，拒绝访问管理端', {
+                userId: user.userId
+              });
               toast({
                 title: '权限不足',
-                description: '您没有管理端访问权限',
+                description: '您没有管理端访问权限，请联系管理员',
                 variant: 'destructive'
               });
             }
           } else if (role === 'family') {
+            setLoadingText('正在检查绑定状态...');
             // 家属端：检查是否已绑定
             const hasBinding = await checkUserBinding(user.userId);
             if (hasBinding) {
+              LoginLogger.info('已绑定长者，跳转到首页');
               props.$w.utils.redirectTo({
                 pageId: 'home',
                 params: {}
               });
             } else {
+              LoginLogger.info('未绑定长者，跳转到绑定页面');
               props.$w.utils.redirectTo({
                 pageId: 'bind-senior',
                 params: {}
               });
             }
           }
+        } else {
+          setIsLoading(false);
+          LoginLogger.info('用户未登录或无需自动跳转');
         }
       } catch (error) {
-        console.error('检查登录状态失败:', error);
+        setIsLoading(false);
+        LoginLogger.error('检查登录状态失败', error);
+        // 只在非网络错误时显示提示
+        if (navigator.onLine) {
+          ErrorHandler.handle(error, toast);
+        }
       }
     };
     checkLoginAndRedirect();
@@ -186,6 +322,14 @@ export default function Login(props) {
     });
   };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex flex-col relative overflow-hidden">
+      {/* 加载遮罩 */}
+      {isLoading && <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-2xl">
+            <Spinner className="w-10 h-10 text-amber-600" />
+            <p className="text-gray-700 font-medium">{loadingText}</p>
+          </div>
+        </div>}
+
       {/* 背景装饰 */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
       <div className="absolute bottom-0 right-0 w-64 h-64 bg-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{
