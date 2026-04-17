@@ -17,22 +17,50 @@ export default function AdminLeave(props) {
   const demoMode = props.$w.page.dataset.params.demo;
   const isDemo = demoMode === 'admin';
 
-  // 检查用户角色权限（演示模式跳过权限检查）
+  // 检查用户登录状态和角色权限（演示模式跳过）
   useEffect(() => {
     if (isDemo) return;
-    const user = props.$w.auth.currentUser;
-    const allowedTypes = ['nurse', 'staff', 'admin'];
-    if (user?.type && !allowedTypes.includes(user.type)) {
-      toast({
-        title: '权限限制',
-        description: '此页面仅管理员、护工、文员可以访问',
-        variant: 'destructive'
-      });
-      props.$w.utils.redirectTo({
-        pageId: 'login',
-        params: {}
-      });
-    }
+    const checkAuth = async () => {
+      try {
+        await props.$w.auth.getUserInfo({
+          force: true
+        });
+        const user = props.$w.auth.currentUser;
+        const allowedTypes = ['nurse', 'staff', 'admin'];
+        // 未登录跳转到登录页
+        if (!user?.userId) {
+          toast({
+            title: '请先登录',
+            description: '需要登录后才能访问',
+            variant: 'destructive'
+          });
+          props.$w.utils.redirectTo({
+            pageId: 'login',
+            params: {}
+          });
+          return;
+        }
+        // 检查角色权限
+        if (user.type && !allowedTypes.includes(user.type)) {
+          toast({
+            title: '权限限制',
+            description: '此页面仅管理员、护工、文员可以访问',
+            variant: 'destructive'
+          });
+          props.$w.utils.redirectTo({
+            pageId: 'login',
+            params: {}
+          });
+        }
+      } catch (error) {
+        console.error('权限检查失败:', error);
+        props.$w.utils.redirectTo({
+          pageId: 'login',
+          params: {}
+        });
+      }
+    };
+    checkAuth();
   }, []);
 
   // 如果非演示模式且用户未登录或角色不匹配，显示提示

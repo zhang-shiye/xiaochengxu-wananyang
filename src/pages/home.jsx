@@ -17,33 +17,59 @@ export default function CareHome(props) {
   const demoMode = props.$w.page.dataset.params.demo;
   const isDemo = demoMode === 'family';
 
-  // 检查用户角色权限（演示模式跳过权限检查）
+  // 检查用户登录状态和角色权限（演示模式跳过）
   useEffect(() => {
     if (isDemo) return;
-    const user = props.$w.auth.currentUser;
-    if (user?.type && user.type !== 'family') {
-      toast({
-        title: '权限限制',
-        description: '此页面仅家属用户可以访问',
-        variant: 'destructive'
-      });
-      props.$w.utils.redirectTo({
-        pageId: 'login',
-        params: {}
-      });
-    }
+    const checkAuth = async () => {
+      try {
+        await props.$w.auth.getUserInfo({
+          force: true
+        });
+        const user = props.$w.auth.currentUser;
+        // 未登录跳转到登录页
+        if (!user?.userId) {
+          toast({
+            title: '请先登录',
+            description: '需要登录后才能访问',
+            variant: 'destructive'
+          });
+          props.$w.utils.redirectTo({
+            pageId: 'login',
+            params: {}
+          });
+          return;
+        }
+        // 检查角色权限
+        if (user.type && user.type !== 'family') {
+          toast({
+            title: '权限限制',
+            description: '此页面仅家属用户可以访问',
+            variant: 'destructive'
+          });
+          props.$w.utils.redirectTo({
+            pageId: 'login',
+            params: {}
+          });
+        }
+      } catch (error) {
+        console.error('权限检查失败:', error);
+        props.$w.utils.redirectTo({
+          pageId: 'login',
+          params: {}
+        });
+      }
+    };
+    checkAuth();
   }, []);
 
   // 拦截返回事件，防止返回到登录/绑定页面
   useEffect(() => {
-    const handlePopState = e => {
-      // 阻止默认返回行为，保持在当前页面
-      e.preventDefault();
+    // 添加历史记录，确保首页是历史栈的起点
+    window.history.pushState(null, '', window.location.href);
+    const handlePopState = () => {
+      // 用户点击返回时，再次压入当前页，保持在首页
       window.history.pushState(null, '', window.location.href);
     };
-
-    // 添加历史记录，防止直接返回
-    window.history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);

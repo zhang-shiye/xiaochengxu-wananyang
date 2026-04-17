@@ -38,6 +38,32 @@ export default function Login(props) {
     }
   };
 
+  // 检查用户是否为员工（管理员/护工/文员）
+  const checkUserIsEmployee = async userId => {
+    try {
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'employee',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                _openid: {
+                  $eq: userId
+                }
+              }]
+            }
+          },
+          getCount: true
+        }
+      });
+      return result.total > 0 || result.records && result.records.length > 0;
+    } catch (error) {
+      console.error('检查员工身份失败:', error);
+      return false;
+    }
+  };
+
   // 家属端登录 - 调用托管登录页
   const handleFamilyLogin = async () => {
     try {
@@ -92,14 +118,24 @@ export default function Login(props) {
         });
         const user = props.$w.auth.currentUser;
         const role = props.$w.page.dataset.params.role;
-        if (user?.userId && role) {
+        if (user?.userId) {
           // 已登录，根据角色跳转
           if (role === 'admin') {
-            props.$w.utils.redirectTo({
-              pageId: 'admin-home',
-              params: {}
-            });
-          } else {
+            // 验证是否为员工
+            const isEmployee = await checkUserIsEmployee(user.userId);
+            if (isEmployee) {
+              props.$w.utils.redirectTo({
+                pageId: 'admin-home',
+                params: {}
+              });
+            } else {
+              toast({
+                title: '权限不足',
+                description: '您没有管理端访问权限',
+                variant: 'destructive'
+              });
+            }
+          } else if (role === 'family') {
             // 家属端：检查是否已绑定
             const hasBinding = await checkUserBinding(user.userId);
             if (hasBinding) {
