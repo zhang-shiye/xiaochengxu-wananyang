@@ -1,0 +1,60 @@
+[
+  {
+    "_id": "demo_branding_001",
+    "brandName": "康乐养老",
+    "fullName": "康乐养老服务（北京）有限公司",
+    "slogan": "用心呵护，让爱延续",
+    "description": "康乐养老院成立于2018年，是一家集养老护理、康复医疗、文化娱乐为一体的综合性养老机构。我们拥有专业的护理团队和先进的设施设备，致力于为长者提供安全、舒适、有尊严的晚年生活。院内环境优美，绿树成荫，设有单人间、双人间和多人间，满足不同长者的需求。",
+    "logo": "https://api.dicebear.com/7.x/initials/svg?seed=KL&backgroundColor=3B82F6",
+    "favicon": "https://api.dicebear.com/7.x/initials/svg?seed=KL&backgroundColor=3B82F6",
+    "primaryColor": "#3B82F6",
+    "secondaryColor": "#10B981",
+    "address": "北京市朝阳区康乐路88号",
+    "phone": "400-888-9999",
+    "email": "contact@kangle.com",
+    "website": "https://www.kangle.com",
+    "wechat": "康乐养老服务中心",
+    "businessHours": "周一至周日 08:00-20:00",
+    "establishedYear": 2018,
+    "licenseNo": "91110105MA009XXXXX",
+    "capacity": 200,
+    "staffCount": 45,
+    "features": [
+      "24小时专业护理",
+      "医养结合服务",
+      "个性化康复方案",
+      "丰富的文娱活动",
+      "营养膳食定制",
+      "智慧养老系统"
+    ],
+    "certifications": [
+      "五星级养老机构",
+      "医保定点单位",
+      "ISO9001质量管理体系认证",
+      "全国养老服务示范单位"
+    ],
+    "gallery": [
+      "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1581579186913-45ac3e6e3dd2?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&h=600&fit=crop"
+    ],
+    "contactPerson": "陈院长",
+    "contactPosition": "院长",
+    "mapLocation": "116.4814,39.9896",
+    "qrCode": "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://kangle.com/miniapp",
+    "socialMedia": {
+      "weibo": "康乐养老官方微博",
+      "douyin": "康乐养老",
+      "xiaohongshu": "康乐养老生活"
+    },
+    "seoKeywords": "养老院,敬老院,老年护理,康复养老,医养结合,北京养老院",
+    "seoDescription": "康乐养老是北京地区专业的五星级养老机构，提供24小时专业护理、医养结合服务、个性化康复方案，让长者享受安全、舒适、有尊严的晚年生活。",
+    "footerText": "© 2026 康乐养老服务（北京）有限公司 版权所有",
+    "icp": "京ICP备XXXXXXXX号-1",
+    "isActive": true,
+    "version": "1.0.0",
+    "createdAt": 1744848000000,
+    "updatedAt": 1744848000000
+  }
+]

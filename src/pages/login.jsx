@@ -6,6 +6,7 @@ import { Button, Card, useToast, Spinner } from '@/components/ui';
 import { MessageCircle, Shield, Eye, ArrowRight, AlertCircle, WifiOff, UserX } from 'lucide-react';
 
 import { NursingHomeBrand } from '@/components/NursingHomeBrand';
+import { DemoResetUtil } from '@/components/DemoBanner';
 
 // 日志记录工具
 const LoginLogger = {
@@ -295,33 +296,85 @@ export default function Login(props) {
   }, []);
 
   // 演示模式 - 家属端
-  const handleDemoFamily = () => {
-    toast({
-      title: '进入演示模式',
-      description: '您正在以家属身份浏览演示数据',
-      duration: 500
-    });
-    props.$w.utils.redirectTo({
-      pageId: 'home',
-      params: {
-        demo: 'family'
+  const handleDemoFamily = async () => {
+    setIsLoading(true);
+    setLoadingText('正在初始化演示环境...');
+    try {
+      // 初始化演示模式（检查并重置数据）
+      const cloud = await props.$w.cloud.getCloudInstance();
+      const resetResult = await DemoResetUtil.initDemoMode(cloud);
+      if (resetResult.success) {
+        console.log('[Demo] 演示模式初始化成功:', resetResult.message);
       }
-    });
+      setIsLoading(false);
+      toast({
+        title: '进入演示模式',
+        description: '您正在以家属身份浏览演示数据',
+        duration: 500
+      });
+      props.$w.utils.redirectTo({
+        pageId: 'home',
+        params: {
+          demo: 'family'
+        }
+      });
+    } catch (error) {
+      setIsLoading(false);
+      console.error('[Demo] 演示模式初始化失败:', error);
+      // 即使初始化失败也允许进入演示模式
+      toast({
+        title: '进入演示模式',
+        description: '您正在以家属身份浏览演示数据',
+        duration: 500
+      });
+      props.$w.utils.redirectTo({
+        pageId: 'home',
+        params: {
+          demo: 'family'
+        }
+      });
+    }
   };
 
   // 演示模式 - 管理端
-  const handleDemoAdmin = () => {
-    toast({
-      title: '进入演示模式',
-      description: '您正在以管理员身份浏览演示数据',
-      duration: 500
-    });
-    props.$w.utils.redirectTo({
-      pageId: 'admin-home',
-      params: {
-        demo: 'admin'
+  const handleDemoAdmin = async () => {
+    setIsLoading(true);
+    setLoadingText('正在初始化演示环境...');
+    try {
+      // 初始化演示模式（检查并重置数据）
+      const cloud = await props.$w.cloud.getCloudInstance();
+      const resetResult = await DemoResetUtil.initDemoMode(cloud);
+      if (resetResult.success) {
+        console.log('[Demo] 演示模式初始化成功:', resetResult.message);
       }
-    });
+      setIsLoading(false);
+      toast({
+        title: '进入演示模式',
+        description: '您正在以管理员身份浏览演示数据',
+        duration: 500
+      });
+      props.$w.utils.redirectTo({
+        pageId: 'admin-home',
+        params: {
+          demo: 'admin'
+        }
+      });
+    } catch (error) {
+      setIsLoading(false);
+      console.error('[Demo] 演示模式初始化失败:', error);
+      // 即使初始化失败也允许进入演示模式
+      toast({
+        title: '进入演示模式',
+        description: '您正在以管理员身份浏览演示数据',
+        duration: 500
+      });
+      props.$w.utils.redirectTo({
+        pageId: 'admin-home',
+        params: {
+          demo: 'admin'
+        }
+      });
+    }
   };
   return <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex flex-col relative overflow-hidden">
       {/* 加载遮罩 */}

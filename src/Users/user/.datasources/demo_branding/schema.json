@@ -1,0 +1,166 @@
+{
+  "name": "demo_branding",
+  "title": "演示品牌配置",
+  "schemas": [
+    {
+      "name": "brandName",
+      "title": "品牌名称",
+      "type": "String"
+    },
+    {
+      "name": "fullName",
+      "title": "机构全称",
+      "type": "String"
+    },
+    {
+      "name": "slogan",
+      "title": "品牌标语",
+      "type": "String"
+    },
+    {
+      "name": "description",
+      "title": "机构简介",
+      "type": "MultiLineString"
+    },
+    {
+      "name": "logo",
+      "title": "Logo",
+      "type": "Image"
+    },
+    {
+      "name": "favicon",
+      "title": "网站图标",
+      "type": "Image"
+    },
+    {
+      "name": "primaryColor",
+      "title": "主色调",
+      "type": "String"
+    },
+    {
+      "name": "secondaryColor",
+      "title": "辅助色",
+      "type": "String"
+    },
+    {
+      "name": "address",
+      "title": "机构地址",
+      "type": "String"
+    },
+    {
+      "name": "phone",
+      "title": "联系电话",
+      "type": "String"
+    },
+    {
+      "name": "email",
+      "title": "联系邮箱",
+      "type": "Email"
+    },
+    {
+      "name": "website",
+      "title": "官方网站",
+      "type": "Url"
+    },
+    {
+      "name": "wechat",
+      "title": "微信公众号",
+      "type": "String"
+    },
+    {
+      "name": "businessHours",
+      "title": "营业时间",
+      "type": "String"
+    },
+    {
+      "name": "establishedYear",
+      "title": "成立年份",
+      "type": "Number"
+    },
+    {
+      "name": "licenseNo",
+      "title": "营业执照编号",
+      "type": "String"
+    },
+    {
+      "name": "capacity",
+      "title": "床位数",
+      "type": "Number"
+    },
+    {
+      "name": "staffCount",
+      "title": "员工人数",
+      "type": "Number"
+    },
+    {
+      "name": "features",
+      "title": "服务特色",
+      "type": "Array"
+    },
+    {
+      "name": "certifications",
+      "title": "资质认证",
+      "type": "Array"
+    },
+    {
+      "name": "gallery",
+      "title": "环境图片",
+      "type": "Array"
+    },
+    {
+      "name": "contactPerson",
+      "title": "联系人",
+      "type": "String"
+    },
+    {
+      "name": "contactPosition",
+      "title": "联系人职位",
+      "type": "String"
+    },
+    {
+      "name": "mapLocation",
+      "title": "地图坐标",
+      "type": "String"
+    },
+    {
+      "name": "qrCode",
+      "title": "小程序二维码",
+      "type": "Image"
+    },
+    {
+      "name": "socialMedia",
+      "title": "社交媒体",
+      "type": "Object"
+    },
+    {
+      "name": "seoKeywords",
+      "title": "SEO关键词",
+      "type": "String"
+    },
+    {
+      "name": "seoDescription",
+      "title": "SEO描述",
+      "type": "String"
+    },
+    {
+      "name": "footerText",
+      "title": "页脚信息",
+      "type": "String"
+    },
+    {
+      "name": "icp",
+      "title": "ICP备案号",
+      "type": "String"
+    },
+    {
+      "name": "isActive",
+      "title": "是否启用",
+      "type": "Boolean"
+    },
+    {
+      "name": "version",
+      "title": "配置版本",
+      "type": "String"
+    }
+  ]
+}
