@@ -1,0 +1,81 @@
+{
+  "name": "demo_family_members",
+  "title": "演示家属成员",
+  "schemas": [
+    {
+      "name": "familyId",
+      "title": "家属ID",
+      "type": "String"
+    },
+    {
+      "name": "familyName",
+      "title": "家属姓名",
+      "type": "String"
+    },
+    {
+      "name": "phone",
+      "title": "手机号",
+      "type": "String"
+    },
+    {
+      "name": "elderId",
+      "title": "绑定长者ID",
+      "type": "String"
+    },
+    {
+      "name": "elderName",
+      "title": "长者姓名",
+      "type": "String"
+    },
+    {
+      "name": "relationship",
+      "title": "与长者关系",
+      "type": "String"
+    },
+    {
+      "name": "status",
+      "title": "账号状态",
+      "type": "String"
+    },
+    {
+      "name": "registerDate",
+      "title": "注册时间",
+      "type": "String"
+    },
+    {
+      "name": "lastLoginTime",
+      "title": "最后登录时间",
+      "type": "String"
+    },
+    {
+      "name": "avatar",
+      "title": "头像",
+      "type": "Image"
+    },
+    {
+      "name": "email",
+      "title": "邮箱",
+      "type": "Email"
+    },
+    {
+      "name": "address",
+      "title": "家庭住址",
+      "type": "String"
+    },
+    {
+      "name": "isPrimaryContact",
+      "title": "是否主要联系人",
+      "type": "Boolean"
+    },
+    {
+      "name": "notificationEnabled",
+      "title": "是否开启通知",
+      "type": "Boolean"
+    },
+    {
+      "name": "remarks",
+      "title": "备注",
+      "type": "String"
+    }
+  ]
+}

@@ -112,7 +112,7 @@ export default function AdminHome(props) {
     try {
       // 统计待审核日报
       const dailyResult = await props.$w.cloud.callDataSource({
-        dataSourceName: 'daily_reports',
+        dataSourceName: isDemo ? 'demo_care_records' : 'daily_reports',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
@@ -135,7 +135,7 @@ export default function AdminHome(props) {
 
       // 统计待审核请假
       const leaveResult = await props.$w.cloud.callDataSource({
-        dataSourceName: 'leave_requests',
+        dataSourceName: isDemo ? 'demo_leave_records' : 'leave_requests',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
@@ -158,7 +158,7 @@ export default function AdminHome(props) {
 
       // 统计待缴费账单
       const billResult = await props.$w.cloud.callDataSource({
-        dataSourceName: 'bills',
+        dataSourceName: isDemo ? 'demo_bills' : 'bills',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
@@ -181,7 +181,7 @@ export default function AdminHome(props) {
 
       // 统计老人数量
       const elderResult = await props.$w.cloud.callDataSource({
-        dataSourceName: 'elders',
+        dataSourceName: isDemo ? 'demo_elders' : 'elders',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {

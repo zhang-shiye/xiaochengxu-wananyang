@@ -1,0 +1,106 @@
+{
+  "name": "demo_employee",
+  "title": "演示员工管理",
+  "schemas": [
+    {
+      "name": "employeeId",
+      "title": "工号",
+      "type": "String"
+    },
+    {
+      "name": "name",
+      "title": "姓名",
+      "type": "String"
+    },
+    {
+      "name": "role",
+      "title": "权限角色",
+      "type": "String"
+    },
+    {
+      "name": "position",
+      "title": "职位",
+      "type": "String"
+    },
+    {
+      "name": "department",
+      "title": "部门",
+      "type": "String"
+    },
+    {
+      "name": "phone",
+      "title": "手机号",
+      "type": "String"
+    },
+    {
+      "name": "email",
+      "title": "邮箱",
+      "type": "Email"
+    },
+    {
+      "name": "avatar",
+      "title": "头像",
+      "type": "Image"
+    },
+    {
+      "name": "hireDate",
+      "title": "入职日期",
+      "type": "String"
+    },
+    {
+      "name": "status",
+      "title": "账号状态",
+      "type": "String"
+    },
+    {
+      "name": "gender",
+      "title": "性别",
+      "type": "String"
+    },
+    {
+      "name": "birthDate",
+      "title": "出生日期",
+      "type": "String"
+    },
+    {
+      "name": "idCard",
+      "title": "身份证号",
+      "type": "String"
+    },
+    {
+      "name": "address",
+      "title": "家庭住址",
+      "type": "String"
+    },
+    {
+      "name": "emergencyContact",
+      "title": "紧急联系人",
+      "type": "String"
+    },
+    {
+      "name": "emergencyPhone",
+      "title": "紧急联系电话",
+      "type": "String"
+    },
+    {
+      "name": "qualification",
+      "title": "资质证书",
+      "type": "String"
+    },
+    {
+      "name": "workShift",
+      "title": "工作班次",
+      "type": "String"
+    },
+    {
+      "name": "managedElders",
+      "title": "负责长者数量",
+      "type": "Number"
+    },
+    {
+      "name": "remarks",
+      "title": "备注",
+      "type": "String"
+    }
+  ]
+}

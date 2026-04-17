@@ -1,0 +1,136 @@
+{
+  "name": "demo_care_records",
+  "title": "演示护理记录",
+  "schemas": [
+    {
+      "name": "recordNo",
+      "title": "记录编号",
+      "type": "String"
+    },
+    {
+      "name": "elderId",
+      "title": "长者ID",
+      "type": "String"
+    },
+    {
+      "name": "elderName",
+      "title": "长者姓名",
+      "type": "String"
+    },
+    {
+      "name": "elderRoom",
+      "title": "长者房间号",
+      "type": "String"
+    },
+    {
+      "name": "date",
+      "title": "护理日期",
+      "type": "String"
+    },
+    {
+      "name": "breakfast",
+      "title": "早餐内容",
+      "type": "String"
+    },
+    {
+      "name": "lunch",
+      "title": "午餐内容",
+      "type": "String"
+    },
+    {
+      "name": "dinner",
+      "title": "晚餐内容",
+      "type": "String"
+    },
+    {
+      "name": "medications",
+      "title": "用药记录",
+      "type": "String"
+    },
+    {
+      "name": "activities",
+      "title": "活动记录",
+      "type": "String"
+    },
+    {
+      "name": "mood",
+      "title": "心情状态",
+      "type": "String"
+    },
+    {
+      "name": "healthStatus",
+      "title": "健康状况",
+      "type": "String"
+    },
+    {
+      "name": "temperature",
+      "title": "体温",
+      "type": "String"
+    },
+    {
+      "name": "bloodPressure",
+      "title": "血压",
+      "type": "String"
+    },
+    {
+      "name": "heartRate",
+      "title": "心率",
+      "type": "String"
+    },
+    {
+      "name": "bloodSugar",
+      "title": "血糖",
+      "type": "String"
+    },
+    {
+      "name": "weight",
+      "title": "体重",
+      "type": "String"
+    },
+    {
+      "name": "sleepQuality",
+      "title": "睡眠质量",
+      "type": "String"
+    },
+    {
+      "name": "specialNotes",
+      "title": "特殊情况记录",
+      "type": "String"
+    },
+    {
+      "name": "nurseId",
+      "title": "护理人员ID",
+      "type": "String"
+    },
+    {
+      "name": "nurseName",
+      "title": "护理人员姓名",
+      "type": "String"
+    },
+    {
+      "name": "status",
+      "title": "审核状态",
+      "type": "String"
+    },
+    {
+      "name": "reviewComment",
+      "title": "审核意见",
+      "type": "String"
+    },
+    {
+      "name": "approvedBy",
+      "title": "审核人",
+      "type": "String"
+    },
+    {
+      "name": "approvedAt",
+      "title": "审核时间",
+      "type": "Number"
+    },
+    {
+      "name": "notes",
+      "title": "备注",
+      "type": "String"
+    }
+  ]
+}

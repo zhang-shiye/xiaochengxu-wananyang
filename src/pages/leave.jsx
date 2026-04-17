@@ -137,7 +137,7 @@ export default function Leave(props) {
 
         // 查询绑定关系
         const bindingResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'family_members',
+          dataSourceName: isDemo ? 'demo_family_members' : 'family_members',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -173,9 +173,9 @@ export default function Leave(props) {
           elderName
         });
 
-        // 2. 获取该老人的请假记录
+        // 2. 获取该老人的请假记录（演示模式使用demo数据源）
         const leaveResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'leave_requests',
+          dataSourceName: isDemo ? 'demo_leave_records' : 'leave_requests',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -269,9 +269,9 @@ export default function Leave(props) {
         }
       });
 
-      // 重新加载请假记录
+      // 重新加载请假记录（演示模式使用demo数据源）
       const leaveResult = await props.$w.cloud.callDataSource({
-        dataSourceName: 'leave_requests',
+        dataSourceName: isDemo ? 'demo_leave_records' : 'leave_requests',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {

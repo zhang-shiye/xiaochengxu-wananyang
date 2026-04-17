@@ -140,7 +140,7 @@ export default function AdminElder(props) {
   const loadElders = async () => {
     try {
       const result = await props.$w.cloud.callDataSource({
-        dataSourceName: 'elders',
+        dataSourceName: isDemo ? 'demo_elders' : 'elders',
         methodName: 'wedaGetRecordsV2',
         params: {
           select: {
@@ -160,7 +160,7 @@ export default function AdminElder(props) {
           for (const elder of eldersWithoutCode) {
             try {
               await props.$w.cloud.callDataSource({
-                dataSourceName: 'elders',
+                dataSourceName: isDemo ? 'demo_elders' : 'elders',
                 methodName: 'wedaUpdateV2',
                 params: {
                   filter: {
@@ -184,7 +184,7 @@ export default function AdminElder(props) {
           }
           // 重新加载以获取更新后的验证码
           const refreshedResult = await props.$w.cloud.callDataSource({
-            dataSourceName: 'elders',
+            dataSourceName: isDemo ? 'demo_elders' : 'elders',
             methodName: 'wedaGetRecordsV2',
             params: {
               select: {
@@ -244,7 +244,7 @@ export default function AdminElder(props) {
         updatedAt: Date.now()
       };
       const result = await props.$w.cloud.callDataSource({
-        dataSourceName: 'elders',
+        dataSourceName: isDemo ? 'demo_elders' : 'elders',
         methodName: 'wedaCreateV2',
         params: {
           data: newElder
@@ -291,7 +291,7 @@ export default function AdminElder(props) {
         updatedAt: Date.now()
       };
       const result = await props.$w.cloud.callDataSource({
-        dataSourceName: 'elders',
+        dataSourceName: isDemo ? 'demo_elders' : 'elders',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {
@@ -338,7 +338,7 @@ export default function AdminElder(props) {
     }
     try {
       const result = await props.$w.cloud.callDataSource({
-        dataSourceName: 'elders',
+        dataSourceName: isDemo ? 'demo_elders' : 'elders',
         methodName: 'wedaDeleteV2',
         params: {
           filter: {
@@ -371,7 +371,7 @@ export default function AdminElder(props) {
     try {
       const newCode = generateVerificationCode();
       const result = await props.$w.cloud.callDataSource({
-        dataSourceName: 'elders',
+        dataSourceName: isDemo ? 'demo_elders' : 'elders',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {

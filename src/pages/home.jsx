@@ -121,9 +121,9 @@ export default function CareHome(props) {
         const user = props.$w.auth.currentUser;
         const familyId = isDemo ? 'family_001' : user?.userId || 'demo_user';
 
-        // 查询绑定关系
+        // 查询绑定关系（演示模式使用demo数据源）
         const bindingResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'family_members',
+          dataSourceName: isDemo ? 'demo_family_members' : 'family_members',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -154,9 +154,9 @@ export default function CareHome(props) {
         const binding = bindings[0];
         const elderId = binding.elderId;
 
-        // 2. 获取老人详细信息
+        // 2. 获取老人详细信息（演示模式使用demo数据源）
         const elderResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'elders',
+          dataSourceName: isDemo ? 'demo_elders' : 'elders',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -196,7 +196,7 @@ export default function CareHome(props) {
 
         // 3. 获取最新护理日报
         const dailyResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'daily_reports',
+          dataSourceName: isDemo ? 'demo_care_records' : 'daily_reports',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -222,7 +222,7 @@ export default function CareHome(props) {
 
         // 4. 获取最新请假申请
         const leaveResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'leave_requests',
+          dataSourceName: isDemo ? 'demo_leave_records' : 'leave_requests',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -248,7 +248,7 @@ export default function CareHome(props) {
 
         // 5. 获取最新账单
         const billResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'bills',
+          dataSourceName: isDemo ? 'demo_bills' : 'bills',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {

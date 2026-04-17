@@ -128,7 +128,7 @@ export default function AdminBill(props) {
 
       // 使用数据模型 API 查询账单
       const result = await props.$w.cloud.callDataSource({
-        dataSourceName: 'bills',
+        dataSourceName: isDemo ? 'demo_bills' : 'bills',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
@@ -156,7 +156,7 @@ export default function AdminBill(props) {
       const elderIds = bills.map(bill => bill.elderId);
       if (elderIds.length > 0) {
         const elderResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'elders',
+          dataSourceName: isDemo ? 'demo_elders' : 'elders',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -228,7 +228,7 @@ export default function AdminBill(props) {
     try {
       // 使用数据模型 API 更新账单状态
       await props.$w.cloud.callDataSource({
-        dataSourceName: 'bills',
+        dataSourceName: isDemo ? 'demo_bills' : 'bills',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {
@@ -266,7 +266,7 @@ export default function AdminBill(props) {
     try {
       // 使用数据模型 API 更新账单状态为退回
       await props.$w.cloud.callDataSource({
-        dataSourceName: 'bills',
+        dataSourceName: isDemo ? 'demo_bills' : 'bills',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {
@@ -304,7 +304,7 @@ export default function AdminBill(props) {
     const totalAmount = selectedBill.items.reduce((sum, item) => sum + parseFloat(item.amount), 0);
     try {
       await props.$w.cloud.callDataSource({
-        dataSourceName: 'bills',
+        dataSourceName: isDemo ? 'demo_bills' : 'bills',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {

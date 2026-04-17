@@ -1,0 +1,116 @@
+{
+  "name": "demo_leave_records",
+  "title": "演示请假记录",
+  "schemas": [
+    {
+      "name": "leaveNo",
+      "title": "请假编号",
+      "type": "String"
+    },
+    {
+      "name": "elderId",
+      "title": "长者ID",
+      "type": "String"
+    },
+    {
+      "name": "elderName",
+      "title": "长者姓名",
+      "type": "String"
+    },
+    {
+      "name": "elderRoom",
+      "title": "长者房间号",
+      "type": "String"
+    },
+    {
+      "name": "familyId",
+      "title": "家属ID",
+      "type": "String"
+    },
+    {
+      "name": "familyName",
+      "title": "家属姓名",
+      "type": "String"
+    },
+    {
+      "name": "applicantName",
+      "title": "申请人姓名",
+      "type": "String"
+    },
+    {
+      "name": "relationship",
+      "title": "与长者关系",
+      "type": "String"
+    },
+    {
+      "name": "leaveType",
+      "title": "请假类型",
+      "type": "String"
+    },
+    {
+      "name": "reason",
+      "title": "请假原因",
+      "type": "String"
+    },
+    {
+      "name": "startDate",
+      "title": "开始日期",
+      "type": "String"
+    },
+    {
+      "name": "endDate",
+      "title": "结束日期",
+      "type": "String"
+    },
+    {
+      "name": "days",
+      "title": "请假天数",
+      "type": "Number"
+    },
+    {
+      "name": "urgency",
+      "title": "紧急程度",
+      "type": "String"
+    },
+    {
+      "name": "status",
+      "title": "审批状态",
+      "type": "String"
+    },
+    {
+      "name": "approvedBy",
+      "title": "审批人",
+      "type": "String"
+    },
+    {
+      "name": "approvedAt",
+      "title": "审批时间",
+      "type": "Number"
+    },
+    {
+      "name": "reviewComment",
+      "title": "审核意见",
+      "type": "String"
+    },
+    {
+      "name": "destination",
+      "title": "外出目的地",
+      "type": "String"
+    },
+    {
+      "name": "contactPhone",
+      "title": "外出联系电话",
+      "type": "String"
+    },
+    {
+      "name": "accompanyPerson",
+      "title": "陪同人员",
+      "type": "String"
+    },
+    {
+      "name": "remarks",
+      "title": "备注",
+      "type": "String"
+    }
+  ]
+}

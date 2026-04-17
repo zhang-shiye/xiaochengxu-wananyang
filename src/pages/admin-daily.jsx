@@ -123,7 +123,7 @@ export default function AdminDaily(props) {
 
       // 使用数据模型 API 查询日报
       const result = await props.$w.cloud.callDataSource({
-        dataSourceName: 'daily_reports',
+        dataSourceName: isDemo ? 'demo_care_records' : 'daily_reports',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
@@ -151,7 +151,7 @@ export default function AdminDaily(props) {
       const elderIds = dailyReports.map(report => report.elderId);
       if (elderIds.length > 0) {
         const elderResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'elders',
+          dataSourceName: isDemo ? 'demo_elders' : 'elders',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -223,7 +223,7 @@ export default function AdminDaily(props) {
     try {
       // 使用数据模型 API 更新日报状态
       await props.$w.cloud.callDataSource({
-        dataSourceName: 'daily_reports',
+        dataSourceName: isDemo ? 'demo_care_records' : 'daily_reports',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {
@@ -260,7 +260,7 @@ export default function AdminDaily(props) {
     try {
       // 使用数据模型 API 更新日报状态为驳回
       await props.$w.cloud.callDataSource({
-        dataSourceName: 'daily_reports',
+        dataSourceName: isDemo ? 'demo_care_records' : 'daily_reports',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {
@@ -297,7 +297,7 @@ export default function AdminDaily(props) {
   const handleSaveEdit = async () => {
     try {
       await props.$w.cloud.callDataSource({
-        dataSourceName: 'daily_reports',
+        dataSourceName: isDemo ? 'demo_care_records' : 'daily_reports',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {

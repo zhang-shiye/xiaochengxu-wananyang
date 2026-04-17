@@ -129,7 +129,7 @@ export default function Bill(props) {
 
         // 查询绑定关系
         const bindingResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'family_members',
+          dataSourceName: isDemo ? 'demo_family_members' : 'family_members',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -162,7 +162,7 @@ export default function Bill(props) {
 
         // 2. 获取该老人的账单
         const billResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'bills',
+          dataSourceName: isDemo ? 'demo_bills' : 'bills',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {

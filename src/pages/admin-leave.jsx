@@ -122,7 +122,7 @@ export default function AdminLeave(props) {
       }
       // 使用数据模型 API 查询请假申请
       const result = await props.$w.cloud.callDataSource({
-        dataSourceName: 'leave_requests',
+        dataSourceName: isDemo ? 'demo_leave_records' : 'leave_requests',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
@@ -144,7 +144,7 @@ export default function AdminLeave(props) {
       const elderIds = leaveRequests.map(request => request.elderId);
       if (elderIds.length > 0) {
         const elderResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'elders',
+          dataSourceName: isDemo ? 'demo_elders' : 'elders',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -216,7 +216,7 @@ export default function AdminLeave(props) {
     try {
       // 使用数据模型 API 更新请假状态
       await props.$w.cloud.callDataSource({
-        dataSourceName: 'leave_requests',
+        dataSourceName: isDemo ? 'demo_leave_records' : 'leave_requests',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {
@@ -268,7 +268,7 @@ export default function AdminLeave(props) {
     }
     try {
       await props.$w.cloud.callDataSource({
-        dataSourceName: 'leave_requests',
+        dataSourceName: isDemo ? 'demo_leave_records' : 'leave_requests',
         methodName: 'wedaUpdateV2',
         params: {
           filter: {

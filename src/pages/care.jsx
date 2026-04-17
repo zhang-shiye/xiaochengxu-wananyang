@@ -105,7 +105,7 @@ export default function Home(props) {
 
         // 查询绑定关系
         const bindingResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'family_members',
+          dataSourceName: isDemo ? 'demo_family_members' : 'family_members',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
@@ -145,7 +145,7 @@ export default function Home(props) {
 
         // 2. 获取该老人的所有护理日报
         const dailyResult = await props.$w.cloud.callDataSource({
-          dataSourceName: 'daily_reports',
+          dataSourceName: isDemo ? 'demo_care_records' : 'daily_reports',
           methodName: 'wedaGetRecordsV2',
           params: {
             filter: {
