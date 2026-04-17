@@ -34,6 +34,21 @@ export default function CareHome(props) {
     }
   }, []);
 
+  // 拦截返回事件，防止返回到绑定页面
+  useEffect(() => {
+    const handlePopState = () => {
+      // 如果尝试返回，保持在当前页面
+      window.history.pushState(null, '', window.location.href);
+    };
+
+    // 添加历史记录，防止直接返回
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   // 如果非演示模式且用户未登录或角色不匹配，显示提示
   const user = props.$w.auth.currentUser;
   if (!isDemo && (!user?.userId || user?.type && user.type !== 'family')) {

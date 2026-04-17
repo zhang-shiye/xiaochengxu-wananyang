@@ -22,6 +22,32 @@ export default function WechatLogin(props) {
   useEffect(() => {
     checkLoginAndRedirect();
   }, []);
+
+  // 检查用户是否已绑定长者
+  const checkUserBinding = async userId => {
+    try {
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'family_members',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                familyId: {
+                  $eq: userId
+                }
+              }]
+            }
+          },
+          getCount: true
+        }
+      });
+      return result.total > 0 || result.records && result.records.length > 0;
+    } catch (error) {
+      console.error('检查绑定状态失败:', error);
+      return false;
+    }
+  };
   const checkLoginAndRedirect = async () => {
     try {
       // 强制刷新用户信息，确保获取最新的登录状态
@@ -35,17 +61,28 @@ export default function WechatLogin(props) {
       if (user?.userId) {
         setIsNavigating(true);
         await saveUserInfo(user);
-        setTimeout(() => {
+        setTimeout(async () => {
           if (isAdmin) {
             props.$w.utils.navigateTo({
               pageId: 'admin-home',
               params: {}
             });
           } else {
-            props.$w.utils.navigateTo({
-              pageId: 'bind-senior',
-              params: {}
-            });
+            // 检查是否已绑定长者
+            const hasBinding = await checkUserBinding(user.userId);
+            if (hasBinding) {
+              // 已绑定，直接跳转到首页
+              props.$w.utils.redirectTo({
+                pageId: 'home',
+                params: {}
+              });
+            } else {
+              // 未绑定，跳转到绑定页面
+              props.$w.utils.navigateTo({
+                pageId: 'bind-senior',
+                params: {}
+              });
+            }
           }
         }, 1000);
       }
