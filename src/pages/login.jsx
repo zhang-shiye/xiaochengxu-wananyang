@@ -298,7 +298,8 @@ export default function Login(props) {
   const handleDemoFamily = () => {
     toast({
       title: '进入演示模式',
-      description: '您正在以家属身份浏览演示数据'
+      description: '您正在以家属身份浏览演示数据',
+      duration: 500
     });
     props.$w.utils.redirectTo({
       pageId: 'home',
@@ -312,7 +313,8 @@ export default function Login(props) {
   const handleDemoAdmin = () => {
     toast({
       title: '进入演示模式',
-      description: '您正在以管理员身份浏览演示数据'
+      description: '您正在以管理员身份浏览演示数据',
+      duration: 500
     });
     props.$w.utils.redirectTo({
       pageId: 'admin-home',
