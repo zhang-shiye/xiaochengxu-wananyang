@@ -1,5 +1,5 @@
 // @ts-ignore;
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // @ts-ignore;
 import { Button, Card, useToast } from '@/components/ui';
 // @ts-ignore;
@@ -12,23 +12,115 @@ export default function Login(props) {
   } = useToast();
   const [selectedRole, setSelectedRole] = useState(null);
 
-  // 家属端登录 - 跳转微信授权
-  const handleFamilyLogin = () => {
-    props.$w.utils.navigateTo({
-      pageId: 'wechat-login',
-      params: {}
-    });
+  // 检查用户是否已绑定长者
+  const checkUserBinding = async userId => {
+    try {
+      const result = await props.$w.cloud.callDataSource({
+        dataSourceName: 'family_members',
+        methodName: 'wedaGetRecordsV2',
+        params: {
+          filter: {
+            where: {
+              $and: [{
+                familyId: {
+                  $eq: userId
+                }
+              }]
+            }
+          },
+          getCount: true
+        }
+      });
+      return result.total > 0 || result.records && result.records.length > 0;
+    } catch (error) {
+      console.error('检查绑定状态失败:', error);
+      return false;
+    }
   };
 
-  // 管理端登录 - 跳转微信授权（管理端角色）
-  const handleAdminLogin = () => {
-    props.$w.utils.navigateTo({
-      pageId: 'wechat-login',
-      params: {
-        role: 'admin'
-      }
-    });
+  // 家属端登录 - 调用托管登录页
+  const handleFamilyLogin = async () => {
+    try {
+      const tcb = await props.$w.cloud.getCloudInstance();
+      // 登录成功后返回当前页，由页面自动处理后续跳转
+      tcb.auth().toDefaultLoginPage({
+        config_version: "env",
+        redirect_uri: window.location.origin + '/pages/login',
+        query: {
+          s_domain: window.location.hostname,
+          role: 'family'
+        }
+      });
+    } catch (error) {
+      console.error('登录失败:', error);
+      toast({
+        title: '登录失败',
+        description: error.message || '请重试',
+        variant: 'destructive'
+      });
+    }
   };
+
+  // 管理端登录 - 调用托管登录页
+  const handleAdminLogin = async () => {
+    try {
+      const tcb = await props.$w.cloud.getCloudInstance();
+      tcb.auth().toDefaultLoginPage({
+        config_version: "env",
+        redirect_uri: window.location.origin + '/pages/login',
+        query: {
+          s_domain: window.location.hostname,
+          role: 'admin'
+        }
+      });
+    } catch (error) {
+      console.error('登录失败:', error);
+      toast({
+        title: '登录失败',
+        description: error.message || '请重试',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // 页面加载时检查登录状态并自动跳转
+  useEffect(() => {
+    const checkLoginAndRedirect = async () => {
+      try {
+        await props.$w.auth.getUserInfo({
+          force: true
+        });
+        const user = props.$w.auth.currentUser;
+        const role = props.$w.page.dataset.params.role;
+        if (user?.userId && role) {
+          // 已登录，根据角色跳转
+          if (role === 'admin') {
+            props.$w.utils.redirectTo({
+              pageId: 'admin-home',
+              params: {}
+            });
+          } else {
+            // 家属端：检查是否已绑定
+            const hasBinding = await checkUserBinding(user.userId);
+            if (hasBinding) {
+              props.$w.utils.redirectTo({
+                pageId: 'home',
+                params: {}
+              });
+            } else {
+              props.$w.utils.redirectTo({
+                pageId: 'bind-senior',
+                params: {}
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('检查登录状态失败:', error);
+      }
+    };
+    checkLoginAndRedirect();
+  }, []);
 
   // 演示模式 - 家属端
   const handleDemoFamily = () => {

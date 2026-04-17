@@ -171,9 +171,9 @@ export default function BindSenior(props) {
       // 显示成功弹窗
       setShowSuccessDialog(true);
 
-      // 2秒后跳转到家属首页
+      // 2秒后跳转到家属首页（使用 redirectTo 清除历史栈）
       setTimeout(() => {
-        props.$w.utils.navigateTo({
+        props.$w.utils.redirectTo({
           pageId: 'home',
           params: isDemo ? {
             demo: 'family'

@@ -34,10 +34,11 @@ export default function CareHome(props) {
     }
   }, []);
 
-  // 拦截返回事件，防止返回到绑定页面
+  // 拦截返回事件，防止返回到登录/绑定页面
   useEffect(() => {
-    const handlePopState = () => {
-      // 如果尝试返回，保持在当前页面
+    const handlePopState = e => {
+      // 阻止默认返回行为，保持在当前页面
+      e.preventDefault();
       window.history.pushState(null, '', window.location.href);
     };
 
