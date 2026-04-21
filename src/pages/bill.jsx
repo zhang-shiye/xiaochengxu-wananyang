@@ -299,7 +299,7 @@ export default function Bill(props) {
           </select>
         </div>
 
-        {currentBill && <>
+        {currentBill && <React.Fragment>
             {/* 账单汇总 */}
             <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg rounded-2xl mb-6">
               <div className="p-6">
@@ -406,7 +406,7 @@ export default function Bill(props) {
                 </div>
               </div>
             </Card>
-          </>}
+          </React.Fragment>}
       </div>
 
       {/* 底部导航 */}

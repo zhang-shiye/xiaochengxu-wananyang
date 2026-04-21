@@ -499,10 +499,10 @@ export default function CareHome(props) {
                 </div>
                 <Badge className="bg-green-100 text-green-800">最新</Badge>
               </div>
-              {latestInfo.dailyReport ? <>
+              {latestInfo.dailyReport ? <React.Fragment>
                 <p className="text-gray-600 mb-2">{latestInfo.dailyReport.meal}</p>
                 <p className="text-sm text-gray-500 mb-3">心情: {latestInfo.dailyReport.mood} · {latestInfo.dailyReport.time}</p>
-              </> : <p className="text-gray-400 mb-3">暂无护理日报数据</p>}
+              </React.Fragment> : <p className="text-gray-400 mb-3">暂无护理日报数据</p>}
               <Button size="sm" onClick={handleNavigateToDaily} className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full">
                 查看详细日报
                 <ChevronRight className="w-4 h-4 ml-1" />
@@ -520,10 +520,10 @@ export default function CareHome(props) {
                 </div>
                 <Badge className="bg-yellow-100 text-yellow-800">{latestInfo.leaveRequest ? latestInfo.leaveRequest.status : '暂无'}</Badge>
               </div>
-              {latestInfo.leaveRequest ? <>
+              {latestInfo.leaveRequest ? <React.Fragment>
                 <p className="text-gray-600 mb-1">{latestInfo.leaveRequest.type}</p>
                 <p className="text-sm text-gray-500 mb-3">{latestInfo.leaveRequest.date} {latestInfo.leaveRequest.time}</p>
-              </> : <p className="text-gray-400 mb-3">暂无请假申请</p>}
+              </React.Fragment> : <p className="text-gray-400 mb-3">暂无请假申请</p>}
               <Button size="sm" onClick={handleNavigateToLeave} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full">
                 查看申请进度
                 <ChevronRight className="w-4 h-4 ml-1" />
@@ -541,11 +541,11 @@ export default function CareHome(props) {
                 </div>
                 <Badge className="bg-orange-100 text-orange-800">{latestInfo.bill ? latestInfo.bill.status : '暂无'}</Badge>
               </div>
-              {latestInfo.bill ? <>
+              {latestInfo.bill ? <React.Fragment>
                 <p className="text-gray-600 mb-1">{latestInfo.bill.month}</p>
                 <p className="text-lg font-bold text-orange-600 mb-3">{latestInfo.bill.amount}</p>
                 <p className="text-sm text-gray-500 mb-3">截止日期: {latestInfo.bill.dueDate}</p>
-              </> : <p className="text-gray-400 mb-3">暂无账单数据</p>}
+              </React.Fragment> : <p className="text-gray-400 mb-3">暂无账单数据</p>}
               <Button size="sm" onClick={handleNavigateToBill} className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full">
                 查看账单详情
                 <ChevronRight className="w-4 h-4 ml-1" />

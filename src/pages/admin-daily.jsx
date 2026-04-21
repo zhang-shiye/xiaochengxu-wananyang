@@ -435,7 +435,7 @@ export default function AdminDaily(props) {
 
             {/* 餐饮记录 */}
             <div className="space-y-3">
-              {isEditMode ? <>
+              {isEditMode ? <React.Fragment>
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">早餐</p>
                     <textarea className="w-full p-2 border rounded-lg text-sm" value={selectedReport.breakfast || ''} onChange={e => setSelectedReport({
@@ -457,7 +457,7 @@ export default function AdminDaily(props) {
                 dinner: e.target.value
               })} rows={2} />
                   </div>
-                </> : <>
+                </React.Fragment> : <React.Fragment>
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">早餐</p>
                     <p className="text-sm text-gray-600">{selectedReport?.breakfast || '未记录'}</p>
@@ -470,7 +470,7 @@ export default function AdminDaily(props) {
                     <p className="text-sm font-semibold text-gray-700 mb-1">晚餐</p>
                     <p className="text-sm text-gray-600">{selectedReport?.dinner || '未记录'}</p>
                   </div>
-                </>}
+                </React.Fragment>}
 
               {/* 活动 */}
               <div>

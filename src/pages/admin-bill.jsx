@@ -470,7 +470,7 @@ export default function AdminBill(props) {
               <p className="text-sm font-semibold text-gray-700 mb-3">费用明细</p>
               <div className="space-y-3">
                 {selectedBill.items && selectedBill.items.map((item, index) => <div key={index} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-                    {isEditMode ? <>
+                    {isEditMode ? <React.Fragment>
                         <div className="flex-1 space-y-2">
                           <Input value={item.name} onChange={e => {
                     const newItems = [...selectedBill.items];
@@ -500,13 +500,13 @@ export default function AdminBill(props) {
                             </Button>
                           </div>
                         </div>
-                      </> : <>
+                      </React.Fragment> : <React.Fragment>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-800">{item.name}</p>
                           <p className="text-xs text-gray-500">{item.unit}</p>
                         </div>
                         <p className="text-sm font-bold text-amber-600">¥{item.amount.toFixed(2)}</p>
-                      </>}
+                      </React.Fragment>}
                   </div>)}
               </div>
             </div>
