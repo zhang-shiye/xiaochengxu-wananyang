@@ -22,6 +22,9 @@ export default function Home(props) {
     if (isDemo) return;
     const checkAuth = async () => {
       try {
+        await props.$w.auth.getUserInfo({
+          force: true
+        });
         const user = props.$w.auth.currentUser;
         // 未登录跳转到登录页
         if (!user?.userId) {
@@ -98,7 +101,7 @@ export default function Home(props) {
       try {
         // 1. 获取当前用户绑定的老人
         const user = props.$w.auth.currentUser;
-        const familyId = isDemo ? 'family_001' : user?.userId || 'demo_user';
+        const familyId = isDemo ? 'demo_family_001' : user?.userId || 'demo_user';
 
         // 查询绑定关系
         const bindingResult = await props.$w.cloud.callDataSource({

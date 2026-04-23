@@ -21,6 +21,9 @@ export default function AdminHome(props) {
     if (isDemo) return;
     const checkAuth = async () => {
       try {
+        await props.$w.auth.getUserInfo({
+          force: true
+        });
         const user = props.$w.auth.currentUser;
         const allowedTypes = ['nurse', 'staff', 'admin'];
         // 未登录跳转到登录页

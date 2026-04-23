@@ -23,6 +23,9 @@ export default function BindSenior(props) {
     if (isDemo) return;
     const checkAuth = async () => {
       try {
+        await props.$w.auth.getUserInfo({
+          force: true
+        });
         const user = props.$w.auth.currentUser;
         // 未登录跳转到登录页
         if (!user?.userId) {
@@ -102,7 +105,7 @@ export default function BindSenior(props) {
     try {
       // 查询长者信息验证验证码
       const elderResult = await props.$w.cloud.callDataSource({
-        dataSourceName: isDemo ? 'demo_elders' : 'elders',
+        dataSourceName: 'elders',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
@@ -143,7 +146,7 @@ export default function BindSenior(props) {
 
       // 检查是否已经绑定过
       const existingRelation = await props.$w.cloud.callDataSource({
-        dataSourceName: isDemo ? 'demo_family_members' : 'family_members',
+        dataSourceName: 'family_members',
         methodName: 'wedaGetRecordsV2',
         params: {
           filter: {
@@ -177,7 +180,7 @@ export default function BindSenior(props) {
 
       // 建立家属-长者关联
       await props.$w.cloud.callDataSource({
-        dataSourceName: isDemo ? 'demo_family_members' : 'family_members',
+        dataSourceName: 'family_members',
         methodName: 'wedaCreateV2',
         params: {
           data: {

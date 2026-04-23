@@ -228,6 +228,9 @@ export default function Login(props) {
           setIsLoading(false);
           return;
         }
+        await props.$w.auth.getUserInfo({
+          force: true
+        });
         const user = props.$w.auth.currentUser;
         const role = props.$w.page.dataset.params.role;
         LoginLogger.info('获取用户信息成功', {
