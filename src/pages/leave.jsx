@@ -22,9 +22,6 @@ export default function Leave(props) {
     if (isDemo) return;
     const checkAuth = async () => {
       try {
-        await props.$w.auth.getUserInfo({
-          force: true
-        });
         const user = props.$w.auth.currentUser;
         // 未登录跳转到登录页
         if (!user?.userId) {
